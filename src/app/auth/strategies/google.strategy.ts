@@ -6,8 +6,8 @@ import { Strategy, Profile, VerifyCallback } from 'passport-google-oauth20';
 import { CreateUserDto } from '../../users/users.dto';
 
 interface JsonProfile {
-  given_name: string;
-  family_name?: string;
+  givenName: string;
+  familyName: string;
 }
 
 @Injectable()
@@ -21,15 +21,20 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-  async validate(a: string, r: string, profile: Profile, cb: VerifyCallback): Promise<void> {
-    cb(null, {
-      name: profile.displayName || this.getName(profile._json),
+  async validate(
+    a: string,
+    r: string,
+    profile: Profile,
+    verifyCallback: VerifyCallback
+  ): Promise<void> {
+    verifyCallback(null, {
+      name: profile.displayName || this.getName(profile.name),
       email: profile.emails[0].value,
       googleId: profile.id
     } as CreateUserDto);
   }
 
   private getName(json: JsonProfile): string {
-    return `${json.given_name || ''} ${json.family_name || ''}`.trim();
+    return [json.givenName || '', json.familyName || ''].join(' ').trim();
   }
 }

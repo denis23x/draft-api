@@ -12,7 +12,7 @@ const bootstrap = async () => {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: {
-      origin: process.env.APP_SITE_ORIGIN.split(','),
+      origin: [process.env.APP_SITE_ORIGIN].concat(process.env.APP_SITE_ORIGIN_CORS.split(',')),
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       preflightContinue: false,
       optionsSuccessStatus: 204,

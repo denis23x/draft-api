@@ -8,8 +8,8 @@ import { CreateUserDto } from '../../users/users.dto';
 type VerifyCallback = (err: any, user: any, info?: any) => void;
 
 interface JsonProfile {
-  first_name: string;
-  last_name: string;
+  familyName: string;
+  givenName: string;
 }
 
 @Injectable()
@@ -24,15 +24,20 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     });
   }
 
-  async validate(a: string, r: string, profile: Profile, cb: VerifyCallback): Promise<any> {
-    cb(null, {
-      name: profile.displayName || this.getName(profile._json),
+  async validate(
+    a: string,
+    r: string,
+    profile: Profile,
+    verifyCallback: VerifyCallback
+  ): Promise<any> {
+    verifyCallback(null, {
+      name: profile.displayName || this.getName(profile.name),
       email: profile.emails[0].value,
       facebookId: profile.id
     } as CreateUserDto);
   }
 
   private getName(json: JsonProfile): string {
-    return `${json.first_name || ''} ${json.last_name || ''}`.trim();
+    return [json.givenName || '', json.familyName || ''].join(' ').trim();
   }
 }
