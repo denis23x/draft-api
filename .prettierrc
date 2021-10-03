@@ -1,4 +1,16 @@
 {
-  "singleQuote": true,
-  "trailingComma": "all"
+  "semi": false,
+  "overrides": [
+    {
+      "files": "*.ts",
+      "options": {
+        "printWidth": 100,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "none",
+        "arrowParens": "avoid",
+        "insertPragma": true
+      }
+    }
+  ]
 }
