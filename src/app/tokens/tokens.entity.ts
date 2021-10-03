@@ -2,7 +2,7 @@
 
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: 'Tokens' })
+@Entity({ name: 'tokens' })
 export class Token {
   @PrimaryGeneratedColumn()
   id: number;

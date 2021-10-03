@@ -13,7 +13,7 @@ import { Exclude } from 'class-transformer';
 import { Post } from '../posts/posts.entity';
 import { Category } from '../categories/categories.entity';
 
-@Entity({ name: 'Users' })
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -71,9 +71,9 @@ export class User {
   })
   deletedAt: Date;
 
-  @OneToMany('Post', 'user')
+  @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
-  @OneToMany('Category', 'user')
+  @OneToMany(() => Category, category => category.user)
   categories: Category[];
 }

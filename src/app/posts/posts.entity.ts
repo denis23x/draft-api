@@ -13,7 +13,7 @@ import { Exclude } from 'class-transformer';
 import { User } from '../users/users.entity';
 import { Category } from '../categories/categories.entity';
 
-@Entity({ name: 'Posts' })
+@Entity({ name: 'posts' })
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
@@ -43,9 +43,9 @@ export class Post {
   })
   deletedAt: Date;
 
-  @ManyToOne('User', 'posts')
+  @ManyToOne(() => User, user => user.posts)
   user: User;
 
-  @ManyToOne('Category', 'categories')
+  @ManyToOne(() => Category, category => category.posts)
   category: Category;
 }

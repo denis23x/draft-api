@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'bcrypt';
 import { User } from './users.entity';
 import { CreateUserDto } from './users.dto';
+import { Post } from '../posts/posts.entity';
 
 @Injectable()
 export class UsersRepository {
@@ -37,19 +38,19 @@ export class UsersRepository {
 
   async findAll(page: number, size: number, name?: string): Promise<User[]> {
     let query = getRepository(User)
-      .createQueryBuilder('User')
-      .orderBy('User.id', 'DESC')
+      .createQueryBuilder('user')
+      .orderBy('user.id', 'DESC')
       .select([
-        'User.id',
-        'User.name',
-        'User.avatar',
-        'User.biography',
-        'User.createdAt',
-        'User.updatedAt'
+        'user.id',
+        'user.name',
+        'user.avatar',
+        'user.biography',
+        'user.createdAt',
+        'user.updatedAt'
       ]);
 
     if (name) {
-      query = query.where('User.name like :name', { name: '%' + name + '%' });
+      query = query.where('user.name like :name', { name: '%' + name + '%' });
     }
 
     if (page && size) {
@@ -60,24 +61,48 @@ export class UsersRepository {
   }
 
   async findOneById(id: number): Promise<User> {
-    return this.repository.findOne(id);
+    const query = getRepository(User)
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .select([
+        'user.id',
+        'user.name',
+        'user.avatar',
+        'user.biography',
+        'user.createdAt',
+        'user.updatedAt',
+        'post.id',
+        'post.title',
+        'post.body',
+        'post.image',
+        'post.createdAt',
+        'post.updatedAt',
+        'category.id',
+        'category.title',
+        'category.createdAt',
+        'category.updatedAt'
+      ])
+      .leftJoin('user.posts', 'post')
+      .leftJoin('user.categories', 'category');
+
+    return await query.getOne();
   }
 
   async findOneByEmail(email: string): Promise<User> {
     return getRepository(User)
-      .createQueryBuilder('User')
-      .where('User.email = :email', { email })
-      .addSelect('User.email')
+      .createQueryBuilder('user')
+      .where('user.email = :email', { email })
+      .addSelect('user.email')
       .getOne();
   }
 
   async findOneCredentials(id: number): Promise<User> {
     return getRepository(User)
-      .createQueryBuilder('User')
-      .where('User.id = :id', { id })
-      .addSelect('User.password')
-      .addSelect('User.googleId')
-      .addSelect('User.facebookId')
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .addSelect('user.password')
+      .addSelect('user.googleId')
+      .addSelect('user.facebookId')
       .getOne();
   }
 

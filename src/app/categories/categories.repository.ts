@@ -14,27 +14,27 @@ export class CategoriesRepository {
 
   async findAll(page: number, size: number, title?: string, userId?: number): Promise<Category[]> {
     let query = getRepository(Category)
-      .createQueryBuilder('Category')
-      .orderBy('Category.id', 'DESC')
+      .createQueryBuilder('category')
+      .orderBy('category.id', 'DESC')
       .select([
-        'Category.id',
-        'Category.title',
-        'Category.createdAt',
-        'Category.updatedAt',
-        'User.id',
-        'User.name',
-        'User.avatar',
-        'User.createdAt',
-        'User.updatedAt'
+        'category.id',
+        'category.title',
+        'category.createdAt',
+        'category.updatedAt',
+        'user.id',
+        'user.name',
+        'user.avatar',
+        'user.createdAt',
+        'user.updatedAt'
       ])
-      .leftJoin('Category.user', 'User');
+      .leftJoin('category.user', 'user');
 
     if (title) {
-      query = query.where('Category.title like :title', { title: '%' + title + '%' });
+      query = query.where('category.title like :title', { title: '%' + title + '%' });
     }
 
     if (userId) {
-      query = query[title ? 'andWhere' : 'where']('Category.userId like :userId', { userId });
+      query = query[title ? 'andWhere' : 'where']('category.userId like :userId', { userId });
     }
 
     if (page && size) {
@@ -46,26 +46,26 @@ export class CategoriesRepository {
 
   async findOneById(id: number): Promise<Category> {
     const query = getRepository(Category)
-      .createQueryBuilder('Category')
-      .where('Category.id = :id', { id })
+      .createQueryBuilder('category')
+      .where('category.id = :id', { id })
       .select([
-        'Category.id',
-        'Category.title',
-        'Category.createdAt',
-        'Category.updatedAt',
-        'User.id',
-        'User.name',
-        'User.avatar',
-        'User.createdAt',
-        'User.updatedAt',
-        'Post.id',
-        'Post.title',
-        'Post.image',
-        'Post.createdAt',
-        'Post.updatedAt'
+        'category.id',
+        'category.title',
+        'category.createdAt',
+        'category.updatedAt',
+        'user.id',
+        'user.name',
+        'user.avatar',
+        'user.createdAt',
+        'user.updatedAt',
+        'post.id',
+        'post.title',
+        'post.image',
+        'post.createdAt',
+        'post.updatedAt'
       ])
-      .leftJoin('Category.user', 'User')
-      .leftJoin('Category.posts', 'Post');
+      .leftJoin('category.user', 'user')
+      .leftJoin('category.posts', 'post');
 
     return await query.getOne();
   }

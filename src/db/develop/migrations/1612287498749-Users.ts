@@ -21,12 +21,12 @@ export class Users1612284757306 implements MigrationInterface {
     });
 
     await queryRunner.query(
-      'INSERT INTO Users (googleId, facebookId, name, biography, avatar, email, password) VALUES ?',
+      'INSERT INTO users (googleId, facebookId, name, biography, avatar, email, password) VALUES ?',
       [values]
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DELETE FROM Users');
+    await queryRunner.query('DELETE FROM users');
   }
 }

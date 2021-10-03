@@ -5,7 +5,7 @@ import * as faker from 'faker';
 
 export class Posts1617536481160 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const selectCategories = await queryRunner.query('SELECT id, userId FROM Categories');
+    const selectCategories = await queryRunner.query('SELECT id, userId FROM categories');
     const categories = selectCategories.map(category => ({
       userId: category.userId,
       categoryId: category.id
@@ -25,12 +25,12 @@ export class Posts1617536481160 implements MigrationInterface {
       ];
     });
 
-    await queryRunner.query('INSERT INTO Posts (title, body, image, userId, categoryId) VALUES ?', [
+    await queryRunner.query('INSERT INTO posts (title, body, image, userId, categoryId) VALUES ?', [
       values
     ]);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DELETE FROM Posts');
+    await queryRunner.query('DELETE FROM posts');
   }
 }

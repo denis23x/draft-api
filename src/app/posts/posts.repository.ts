@@ -20,37 +20,37 @@ export class PostsRepository {
     categoryId?: number
   ): Promise<Post[]> {
     let query = getRepository(Post)
-      .createQueryBuilder('Post')
-      .orderBy('Post.id', 'DESC')
+      .createQueryBuilder('post')
+      .orderBy('post.id', 'DESC')
       .select([
-        'Post.id',
-        'Post.title',
-        'Post.image',
-        'Post.createdAt',
-        'Post.updatedAt',
-        'User.id',
-        'User.name',
-        'User.avatar',
-        'User.createdAt',
-        'User.updatedAt',
-        'Category.id',
-        'Category.title',
-        'Category.createdAt',
-        'Category.updatedAt'
+        'post.id',
+        'post.title',
+        'post.image',
+        'post.createdAt',
+        'post.updatedAt',
+        'user.id',
+        'user.name',
+        'user.avatar',
+        'user.createdAt',
+        'user.updatedAt',
+        'category.id',
+        'category.title',
+        'category.createdAt',
+        'category.updatedAt'
       ])
-      .leftJoin('Post.user', 'User')
-      .leftJoin('Post.category', 'Category');
+      .leftJoin('post.user', 'user')
+      .leftJoin('post.category', 'category');
 
     if (title) {
-      query = query.where('Post.title like :title', { title: '%' + title + '%' });
+      query = query.where('post.title like :title', { title: '%' + title + '%' });
     }
 
     if (userId) {
-      query = query[title ? 'andWhere' : 'where']('Post.userId like :userId', { userId });
+      query = query[title ? 'andWhere' : 'where']('post.userId like :userId', { userId });
     }
 
     if (categoryId) {
-      query = query[title || userId ? 'andWhere' : 'where']('Post.categoryId like :categoryId', {
+      query = query[title || userId ? 'andWhere' : 'where']('post.categoryId like :categoryId', {
         categoryId
       });
     }
@@ -64,27 +64,27 @@ export class PostsRepository {
 
   async findOneById(id: number): Promise<Post> {
     const query = getRepository(Post)
-      .createQueryBuilder('Post')
-      .where('Post.id = :id', { id })
+      .createQueryBuilder('post')
+      .where('post.id = :id', { id })
       .select([
-        'Post.id',
-        'Post.title',
-        'Post.body',
-        'Post.image',
-        'Post.createdAt',
-        'Post.updatedAt',
-        'User.id',
-        'User.name',
-        'User.avatar',
-        'User.createdAt',
-        'User.updatedAt',
-        'Category.id',
-        'Category.title',
-        'Category.createdAt',
-        'Category.updatedAt'
+        'post.id',
+        'post.title',
+        'post.body',
+        'post.image',
+        'post.createdAt',
+        'post.updatedAt',
+        'user.id',
+        'user.name',
+        'user.avatar',
+        'user.createdAt',
+        'user.updatedAt',
+        'category.id',
+        'category.title',
+        'category.createdAt',
+        'category.updatedAt'
       ])
-      .leftJoin('Post.user', 'User')
-      .leftJoin('Post.category', 'Category');
+      .leftJoin('post.user', 'user')
+      .leftJoin('post.category', 'category');
 
     return await query.getOne();
   }
