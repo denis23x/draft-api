@@ -5,15 +5,20 @@ import * as faker from 'faker';
 
 export class Users1612284757306 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const values = [...Array(5)].map(() => [
-      null,
-      null,
-      faker.name.findName(),
-      faker.name.jobTitle(),
-      faker.random.boolean() ? faker.random.number({ min: 0, max: 667 }) + '.jpg' : null,
-      faker.internet.email(),
-      null
-    ]);
+    const imagePath = process.env.APP_STORAGE + '/images/';
+    const imageFile = faker.random.number({ min: 0, max: 667 }) + '.jpg';
+
+    const values = [...Array(5)].map(() => {
+      return [
+        null,
+        null,
+        faker.name.findName(),
+        faker.name.jobTitle(),
+        faker.random.boolean() ? imagePath + imageFile : null,
+        faker.internet.email(),
+        null
+      ];
+    });
 
     await queryRunner.query(
       'INSERT INTO Users (googleId, facebookId, name, biography, avatar, email, password) VALUES ?',

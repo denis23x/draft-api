@@ -11,7 +11,7 @@ import { FindAllUsersDto, CreateUserDto, DeleteUserDto, FindOneUserDto } from '.
 import { UsersRepository } from './users.repository';
 import { AuthService } from '../auth/auth.service';
 import { UpdateResult } from 'typeorm';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -50,8 +50,7 @@ export class UsersService {
     return isExist;
   }
 
-  // TODO: fix Request
-  async findMe(request: any): Promise<User> {
+  async findMe(request: Request): Promise<User> {
     const user = request['user'] as User;
     const isExist = await this.usersRepository.findOneById(Number(user.id));
 
@@ -62,8 +61,7 @@ export class UsersService {
     return isExist;
   }
 
-  // TODO: fix Request
-  async delete(deleteUserDto: DeleteUserDto, request: any): Promise<UpdateResult> {
+  async delete(deleteUserDto: DeleteUserDto, request: Request): Promise<UpdateResult> {
     const user = request['user'] as User;
     const isExist = await this.usersRepository.findOneById(Number(deleteUserDto.id));
 
