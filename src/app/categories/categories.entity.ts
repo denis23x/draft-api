@@ -20,7 +20,7 @@ export class Category {
   id: number;
 
   @Column()
-  title: string;
+  name: string;
 
   @CreateDateColumn()
   createdAt: Date;

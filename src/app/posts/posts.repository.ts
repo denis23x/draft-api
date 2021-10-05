@@ -34,7 +34,7 @@ export class PostsRepository {
         'user.createdAt',
         'user.updatedAt',
         'category.id',
-        'category.title',
+        'category.name',
         'category.createdAt',
         'category.updatedAt'
       ])
@@ -79,7 +79,7 @@ export class PostsRepository {
         'user.createdAt',
         'user.updatedAt',
         'category.id',
-        'category.title',
+        'category.name',
         'category.createdAt',
         'category.updatedAt'
       ])

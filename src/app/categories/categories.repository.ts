@@ -12,13 +12,13 @@ export class CategoriesRepository {
     private readonly repository: Repository<Category>
   ) {}
 
-  async findAll(page: number, size: number, title?: string, userId?: number): Promise<Category[]> {
+  async findAll(page: number, size: number, name?: string, userId?: number): Promise<Category[]> {
     let query = getRepository(Category)
       .createQueryBuilder('category')
       .orderBy('category.id', 'DESC')
       .select([
         'category.id',
-        'category.title',
+        'category.name',
         'category.createdAt',
         'category.updatedAt',
         'user.id',
@@ -29,12 +29,12 @@ export class CategoriesRepository {
       ])
       .leftJoin('category.user', 'user');
 
-    if (title) {
-      query = query.where('category.title like :title', { title: '%' + title + '%' });
+    if (name) {
+      query = query.where('category.name like :name', { name: '%' + name + '%' });
     }
 
     if (userId) {
-      query = query[title ? 'andWhere' : 'where']('category.userId like :userId', { userId });
+      query = query[name ? 'andWhere' : 'where']('category.userId like :userId', { userId });
     }
 
     if (page && size) {
@@ -50,7 +50,7 @@ export class CategoriesRepository {
       .where('category.id = :id', { id })
       .select([
         'category.id',
-        'category.title',
+        'category.name',
         'category.createdAt',
         'category.updatedAt',
         'user.id',

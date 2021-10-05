@@ -13,7 +13,7 @@ export class CategoriesService {
     return this.categoriesRepository.findAll(
       findAllCategoriesDto.page,
       findAllCategoriesDto.size,
-      findAllCategoriesDto.title,
+      findAllCategoriesDto.name,
       findAllCategoriesDto.userId
     );
   }

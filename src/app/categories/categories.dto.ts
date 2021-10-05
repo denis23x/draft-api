@@ -14,7 +14,7 @@ export class FindAllCategoriesDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly title?: string;
+  readonly name?: string;
 
   @IsOptional()
   @IsNumber()

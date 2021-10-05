@@ -78,7 +78,7 @@ export class UsersRepository {
         'post.createdAt',
         'post.updatedAt',
         'category.id',
-        'category.title',
+        'category.name',
         'category.createdAt',
         'category.updatedAt'
       ])
