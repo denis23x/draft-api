@@ -42,7 +42,8 @@ export class UsersService {
   }
 
   async findMe(request: Request): Promise<User> {
-    const isExist = await this.usersRepository.findOneById(request.user as FindOneByIdDto);
+    const user = request.user as User;
+    const isExist = await this.usersRepository.findOneById(user as FindOneByIdDto);
 
     if (!isExist) {
       throw new NotFoundException();
@@ -52,7 +53,8 @@ export class UsersService {
   }
 
   async delete(request: Request): Promise<UpdateResult> {
-    const isExist = await this.usersRepository.findOneById(request.user as FindOneByIdDto);
+    const user = request.user as User;
+    const isExist = await this.usersRepository.findOneById(user as FindOneByIdDto);
 
     if (!isExist) {
       throw new NotFoundException();
