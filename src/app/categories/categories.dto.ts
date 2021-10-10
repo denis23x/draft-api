@@ -10,6 +10,16 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export class CreateCategoryDto {
+  @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(24)
+  readonly name: string;
+
+  @IsOptional()
+  readonly isPrivate?: string;
+}
+
 export class FindAllCategoriesDto {
   @IsOptional()
   @MinLength(4)
