@@ -17,7 +17,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
-import { FindAllUsersDto, CreateUserDto, DeleteUserDto, FindOneUserDto } from './users.dto';
+import { FindAllDto, CreateDto, FindOneByIdDto } from './users.dto';
 import { UpdateResult } from 'typeorm';
 import { Request, Response } from 'express';
 
@@ -29,18 +29,23 @@ const responseOptions = {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
-  async findAll(@Query() findAllUsersDto: FindAllUsersDto): Promise<User[]> {
-    return this.usersService.findAll(findAllUsersDto);
-  }
-
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
   async create(
-    @Body() createUserDto: CreateUserDto,
+    @Body() createDto: CreateDto,
     @Res(responseOptions) response: Response
   ): Promise<User> {
-    return this.usersService.create(createUserDto, response);
+    return this.usersService.create(createDto, response);
+  }
+
+  @Get()
+  async findAll(@Query() findAllDto: FindAllDto): Promise<User[]> {
+    return this.usersService.findAll(findAllDto);
+  }
+
+  @Get(':id')
+  async findOneById(@Param() findOneByIdDto: FindOneByIdDto): Promise<User> {
+    return this.usersService.findOneById(findOneByIdDto);
   }
 
   @Get('me')
@@ -50,17 +55,9 @@ export class UsersController {
     return this.usersService.findMe(request);
   }
 
-  @Get(':id')
-  async findOne(@Param() findOneUserDto: FindOneUserDto): Promise<User> {
-    return this.usersService.findOne(findOneUserDto);
-  }
-
-  @Delete(':id')
+  @Delete()
   @UseGuards(AuthGuard('jwt'))
-  async delete(
-    @Param() deleteUserDto: DeleteUserDto,
-    @Req() request: Request
-  ): Promise<UpdateResult> {
-    return this.usersService.delete(deleteUserDto, request);
+  async delete(@Req() request: Request): Promise<UpdateResult> {
+    return this.usersService.delete(request);
   }
 }

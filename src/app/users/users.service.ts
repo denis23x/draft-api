@@ -1,13 +1,8 @@
 /** @format */
 
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './users.entity';
-import { FindAllUsersDto, CreateUserDto, DeleteUserDto, FindOneUserDto } from './users.dto';
+import { FindAllDto, CreateDto, FindOneByIdDto, DeleteDto } from './users.dto';
 import { UsersRepository } from './users.repository';
 import { AuthService } from '../auth/auth.service';
 import { UpdateResult } from 'typeorm';
@@ -20,28 +15,24 @@ export class UsersService {
     private readonly usersRepository: UsersRepository
   ) {}
 
-  async findAll(findAllUsersDto: FindAllUsersDto): Promise<User[]> {
-    return this.usersRepository.findAll(
-      findAllUsersDto.page,
-      findAllUsersDto.size,
-      findAllUsersDto.name
-    );
-  }
-
-  async create(createUserDto: CreateUserDto, response: Response): Promise<User> {
-    const isExist = await this.usersRepository.findOneByEmail(createUserDto.email);
+  async create(createDto: CreateDto, response: Response): Promise<User> {
+    const isExist = await this.usersRepository.findOneByEmail(createDto);
 
     if (isExist) {
-      throw new BadRequestException('entry with email ' + isExist.email + ' already exists');
+      throw new BadRequestException(isExist.email + ' already exists');
     }
 
-    const user = await this.usersRepository.create(createUserDto);
+    const user = await this.usersRepository.create(createDto);
 
     return this.authService.getSharedResponse(user, response);
   }
 
-  async findOne(findOneUserDto: FindOneUserDto): Promise<User> {
-    const isExist = await this.usersRepository.findOneById(Number(findOneUserDto.id));
+  async findAll(findAllDto: FindAllDto): Promise<User[]> {
+    return this.usersRepository.findAll(findAllDto);
+  }
+
+  async findOneById(findOneByIdDto: FindOneByIdDto): Promise<User> {
+    const isExist = await this.usersRepository.findOneById(findOneByIdDto);
 
     if (!isExist) {
       throw new NotFoundException();
@@ -51,8 +42,7 @@ export class UsersService {
   }
 
   async findMe(request: Request): Promise<User> {
-    const user = request['user'] as User;
-    const isExist = await this.usersRepository.findOneById(Number(user.id));
+    const isExist = await this.usersRepository.findOneById(request.user as FindOneByIdDto);
 
     if (!isExist) {
       throw new NotFoundException();
@@ -61,18 +51,17 @@ export class UsersService {
     return isExist;
   }
 
-  async delete(deleteUserDto: DeleteUserDto, request: Request): Promise<UpdateResult> {
-    const user = request['user'] as User;
-    const isExist = await this.usersRepository.findOneById(Number(deleteUserDto.id));
+  async delete(request: Request): Promise<UpdateResult> {
+    const isExist = await this.usersRepository.findOneById(request.user as FindOneByIdDto);
 
     if (!isExist) {
       throw new NotFoundException();
     }
 
-    if (user.id !== isExist.id) {
-      throw new UnauthorizedException();
-    }
+    const deleteDto: DeleteDto = {
+      id: isExist.id
+    };
 
-    return this.usersRepository.delete(isExist.id);
+    return this.usersRepository.delete(deleteDto);
   }
 }

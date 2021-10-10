@@ -7,6 +7,7 @@ import { User } from '../users/users.entity';
 import { TokensRepository } from './tokens.repository';
 import { UsersRepository } from '../users/users.repository';
 import { JwtDecodedPayload } from '../auth/auth.interface';
+import { FindOneByIdDto } from '../users/users.dto';
 
 @Injectable()
 export class TokensService {
@@ -47,7 +48,11 @@ export class TokensService {
       throw new UnprocessableEntityException('Refresh token not found');
     }
 
-    return this.usersRepository.findOneById(Number(payload.sub));
+    const findOneByIdDto: FindOneByIdDto = {
+      id: Number(payload.sub)
+    };
+
+    return this.usersRepository.findOneById(findOneByIdDto);
   }
 
   private getJwtBaseOptions(): SignOptions {

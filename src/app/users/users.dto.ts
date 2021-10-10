@@ -12,7 +12,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateUserDto {
+export class CreateDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(24)
@@ -36,7 +36,7 @@ export class CreateUserDto {
   facebookId?: string;
 }
 
-export class FindAllUsersDto {
+export class FindAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
@@ -55,7 +55,7 @@ export class FindAllUsersDto {
   readonly size?: number;
 }
 
-export class FindOneUserDto {
+export class FindOneByIdDto {
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()
@@ -63,7 +63,7 @@ export class FindOneUserDto {
   readonly id: number;
 }
 
-export class DeleteUserDto {
+export class DeleteDto {
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()

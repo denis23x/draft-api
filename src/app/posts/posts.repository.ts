@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './posts.entity';
+import { FindAllDto, FindOneDto } from './posts.dto';
 
 @Injectable()
 export class PostsRepository {
@@ -12,13 +13,7 @@ export class PostsRepository {
     private readonly repository: Repository<Post>
   ) {}
 
-  async findAll(
-    page: number,
-    size: number,
-    title?: string,
-    userId?: number,
-    categoryId?: number
-  ): Promise<Post[]> {
+  async findAll(findAllDto: FindAllDto): Promise<Post[]> {
     let query = getRepository(Post)
       .createQueryBuilder('post')
       .orderBy('post.id', 'DESC')
@@ -41,31 +36,36 @@ export class PostsRepository {
       .leftJoin('post.user', 'user')
       .leftJoin('post.category', 'category');
 
-    if (title) {
-      query = query.where('post.title like :title', { title: '%' + title + '%' });
+    if (findAllDto.title) {
+      query = query.where('post.title like :title', { title: '%' + findAllDto.title + '%' });
     }
 
-    if (userId) {
-      query = query[title ? 'andWhere' : 'where']('post.userId like :userId', { userId });
-    }
-
-    if (categoryId) {
-      query = query[title || userId ? 'andWhere' : 'where']('post.categoryId like :categoryId', {
-        categoryId
+    if (findAllDto.userId) {
+      query = query[findAllDto.title ? 'andWhere' : 'where']('post.userId like :userId', {
+        userId: findAllDto.userId
       });
     }
 
-    if (page && size) {
-      query = query.skip((page - 1) * size).take(size);
+    if (findAllDto.categoryId) {
+      query = query[findAllDto.title || findAllDto.userId ? 'andWhere' : 'where'](
+        'post.categoryId like :categoryId',
+        {
+          categoryId: findAllDto.categoryId
+        }
+      );
+    }
+
+    if (findAllDto.page && findAllDto.size) {
+      query = query.skip((findAllDto.page - 1) * findAllDto.size).take(findAllDto.size);
     }
 
     return await query.getMany();
   }
 
-  async findOneById(id: number): Promise<Post> {
+  async findOneById(findOneDto: FindOneDto): Promise<Post> {
     const query = getRepository(Post)
       .createQueryBuilder('post')
-      .where('post.id = :id', { id })
+      .where('post.id = :id', { id: findOneDto.id })
       .select([
         'post.id',
         'post.title',

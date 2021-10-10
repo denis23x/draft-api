@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class FindAllPostsDto {
+export class FindAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
@@ -41,7 +41,7 @@ export class FindAllPostsDto {
   readonly size?: number;
 }
 
-export class FindOnePostDto {
+export class FindOneDto {
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()

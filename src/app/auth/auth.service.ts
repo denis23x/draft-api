@@ -10,7 +10,7 @@ import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
 import { User } from '../users/users.entity';
 import { LoginDto } from './auth.dto';
-import { CreateUserDto } from '../users/users.dto';
+import { CreateDto, FindOneByIdDto } from '../users/users.dto';
 import { UsersRepository } from '../users/users.repository';
 import { TokensService } from '../tokens/tokens.service';
 import * as url from 'url';
@@ -23,13 +23,15 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto, response: Response): Promise<User> {
-    const isExist = await this.usersRepository.findOneByEmail(loginDto.email);
+    const isExist = await this.usersRepository.findOneByEmail(loginDto);
 
     if (!isExist) {
       throw new NotFoundException();
     }
 
-    const existCredentials = await this.usersRepository.findOneCredentials(isExist.id);
+    const existCredentials = await this.usersRepository.findOneByIdCredentials(
+      isExist as FindOneByIdDto
+    );
 
     if (loginDto.password) {
       const isValid = await compare(loginDto.password, existCredentials.password);
@@ -50,7 +52,7 @@ export class AuthService {
   }
 
   async refresh(request: Request, response: Response): Promise<User> {
-    const refreshToken = request.signedCookies['refreshToken'];
+    const refreshToken = request.signedCookies.refreshToken;
 
     if (!refreshToken) {
       throw new ForbiddenException();
@@ -66,21 +68,21 @@ export class AuthService {
   }
 
   async social(request: Request, response: Response, socialId: string): Promise<void> {
-    const createUserDto = request['user'] as CreateUserDto;
+    const createDto = request.user as CreateDto;
 
-    if (!createUserDto) {
+    if (!createDto) {
       throw new UnauthorizedException();
     }
 
-    const isExist = await this.usersRepository.findOneByEmail(createUserDto.email);
+    const isExist = await this.usersRepository.findOneByEmail(createDto);
 
     if (isExist) {
-      const exist = { ...isExist, [socialId]: createUserDto[socialId] };
+      const exist = { ...isExist, [socialId]: createDto[socialId] };
 
       return this.getSharedRedirect(exist, response, socialId);
     }
 
-    const user = await this.usersRepository.create(createUserDto);
+    const user = await this.usersRepository.create(createDto);
 
     return this.getSharedRedirect(user, response, socialId);
   }
@@ -89,14 +91,15 @@ export class AuthService {
     const refreshToken = await this.tokensService.generateRefreshToken(user);
 
     // TODO: enable secure and sameSite (need HTTPS)
+    // secure: true,
+    // sameSite: 'none'
+
     response.cookie('refreshToken', refreshToken, {
       domain: process.env.APP_COOKIE_DOMAIN,
       path: '/api/auth/refresh',
       signed: true,
       httpOnly: true,
       maxAge: Number(process.env.JWT_REFRESH_TTL)
-      // secure: true,
-      // sameSite: 'none'
     });
 
     return Object.assign(user, {

@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
-import { CreateUserDto } from '../../users/users.dto';
+import { CreateDto } from '../../users/users.dto';
 
 type VerifyCallback = (err: any, user: any, info?: any) => void;
 
@@ -34,7 +34,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       name: profile.displayName || this.getName(profile.name),
       email: profile.emails[0].value,
       facebookId: profile.id
-    } as CreateUserDto);
+    } as CreateDto);
   }
 
   private getName(json: JsonProfile): string {

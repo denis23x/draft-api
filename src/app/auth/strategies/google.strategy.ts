@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile, VerifyCallback } from 'passport-google-oauth20';
-import { CreateUserDto } from '../../users/users.dto';
+import { CreateDto } from '../../users/users.dto';
 
 interface JsonProfile {
   givenName: string;
@@ -31,7 +31,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       name: profile.displayName || this.getName(profile.name),
       email: profile.emails[0].value,
       googleId: profile.id
-    } as CreateUserDto);
+    } as CreateDto);
   }
 
   private getName(json: JsonProfile): string {

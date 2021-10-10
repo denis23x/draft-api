@@ -12,7 +12,7 @@ import {
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
-import { CreateCategoryDto, FindAllCategoriesDto, FindOneCategoryDto } from './categories.dto';
+import { CreateDto, FindAllDto, FindOneDto } from './categories.dto';
 import { Category } from './categories.entity';
 import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -25,20 +25,17 @@ export class CategoriesController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async create(
-    @Body() createCategoryDto: CreateCategoryDto,
-    @Req() request: Request
-  ): Promise<Category> {
-    return this.categoriesService.create(createCategoryDto, request);
+  async create(@Body() createDto: CreateDto, @Req() request: Request): Promise<Category> {
+    return this.categoriesService.create(createDto, request);
   }
 
   @Get()
-  async findAll(@Query() findAllCategoriesDto: FindAllCategoriesDto): Promise<Category[]> {
-    return this.categoriesService.findAll(findAllCategoriesDto);
+  async findAll(@Query() findAllDto: FindAllDto): Promise<Category[]> {
+    return this.categoriesService.findAll(findAllDto);
   }
 
   @Get(':id')
-  async findOne(@Param() findOneCategoryDto: FindOneCategoryDto): Promise<Category> {
-    return this.categoriesService.findOne(findOneCategoryDto);
+  async findOne(@Param() findOneDto: FindOneDto): Promise<Category> {
+    return this.categoriesService.findOne(findOneDto);
   }
 }

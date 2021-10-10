@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateCategoryDto {
+export class CreateDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(24)
@@ -20,7 +20,7 @@ export class CreateCategoryDto {
   readonly isPrivate?: string;
 }
 
-export class FindAllCategoriesDto {
+export class FindAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
@@ -45,7 +45,7 @@ export class FindAllCategoriesDto {
   readonly size?: number;
 }
 
-export class FindOneCategoryDto {
+export class FindOneDto {
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()

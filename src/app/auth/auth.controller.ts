@@ -39,7 +39,8 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async google(@Req() request: Request): Promise<void> {}
+  // eslint-disable-next-line
+  async google(): Promise<void> {}
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
@@ -50,7 +51,8 @@ export class AuthController {
 
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
-  async facebook(@Req() request: Request): Promise<void> {}
+  // eslint-disable-next-line
+  async facebook(): Promise<void> {}
 
   @Get('facebook/redirect')
   @UseGuards(AuthGuard('facebook'))
