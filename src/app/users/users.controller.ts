@@ -38,6 +38,13 @@ export class UsersController {
     return this.usersService.create(createDto, response);
   }
 
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(ClassSerializerInterceptor)
+  async findMe(@Req() request: Request): Promise<User> {
+    return this.usersService.findMe(request);
+  }
+
   @Get()
   async findAll(@Query() findAllDto: FindAllDto): Promise<User[]> {
     return this.usersService.findAll(findAllDto);
@@ -46,13 +53,6 @@ export class UsersController {
   @Get(':id')
   async findOneById(@Param() findOneByIdDto: FindOneByIdDto): Promise<User> {
     return this.usersService.findOneById(findOneByIdDto);
-  }
-
-  @Get('me')
-  @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor)
-  async findMe(@Req() request: Request): Promise<User> {
-    return this.usersService.findMe(request);
   }
 
   @Delete()

@@ -45,10 +45,12 @@ export class FindAllDto {
   readonly size?: number;
 }
 
-export class FindOneDto {
-  @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  readonly id: number;
+export class UpdateDto {
+  @IsOptional()
+  @MinLength(4)
+  @MaxLength(24)
+  readonly name?: string;
+
+  @IsOptional()
+  readonly isPrivate?: string;
 }

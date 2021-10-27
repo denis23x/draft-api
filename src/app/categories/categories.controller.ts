@@ -4,19 +4,22 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
-import { CreateDto, FindAllDto, FindOneDto } from './categories.dto';
+import { CreateDto, FindAllDto, UpdateDto } from './categories.dto';
 import { Category } from './categories.entity';
 import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+import { IdentifierDto } from '../core';
 
 @Controller('categories')
 export class CategoriesController {
@@ -35,7 +38,27 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  async findOne(@Param() findOneDto: FindOneDto): Promise<Category> {
-    return this.categoriesService.findOne(findOneDto);
+  async findOne(@Param() identifierDto: IdentifierDto): Promise<Category> {
+    return this.categoriesService.findOne(identifierDto);
+  }
+
+  @Put(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(ClassSerializerInterceptor)
+  async updateOne(
+    @Param() identifierDto: IdentifierDto,
+    @Body() updateDto: UpdateDto,
+    @Req() request: Request
+  ): Promise<Category> {
+    return this.categoriesService.updateOne(identifierDto, updateDto, request);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteOne(
+    @Param() identifierDto: IdentifierDto,
+    @Req() request: Request
+  ): Promise<Category> {
+    return this.categoriesService.deleteOne(identifierDto, request);
   }
 }
