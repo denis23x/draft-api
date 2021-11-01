@@ -23,11 +23,11 @@ export class TokensService {
       subject: String(user.id)
     };
 
-    return this.jwtService.signAsync({}, opts);
+    return await this.jwtService.signAsync({}, opts);
   }
 
   async generateRefreshToken(user: User): Promise<string> {
-    const token = await this.tokensRepository.create(user);
+    const token = await this.tokensRepository.createOne(user);
 
     const opts: SignOptions = {
       ...this.getJwtBaseOptions(),
@@ -36,23 +36,27 @@ export class TokensService {
       jwtid: String(token.id)
     };
 
-    return this.jwtService.signAsync({}, opts);
+    return await this.jwtService.signAsync({}, opts);
   }
 
   async resolveRefreshToken(refreshToken: string): Promise<User> {
     const payload = await this.decodeRefreshToken(refreshToken);
 
-    const isDelete = await this.tokensRepository.delete(Number(payload.jti));
+    const jtiIdentifierDto: IdentifierDto = {
+      id: Number(payload.jti)
+    };
+
+    const isDelete = await this.tokensRepository.deleteOne(jtiIdentifierDto);
 
     if (!isDelete) {
       throw new UnprocessableEntityException('Refresh token not found');
     }
 
-    const identifierDto: IdentifierDto = {
+    const subIdentifierDto: IdentifierDto = {
       id: Number(payload.sub)
     };
 
-    return this.usersRepository.getOneById(identifierDto);
+    return await this.usersRepository.getOneById(subIdentifierDto);
   }
 
   private getJwtBaseOptions(): SignOptions {
@@ -64,7 +68,7 @@ export class TokensService {
 
   private async decodeRefreshToken(token: string): Promise<JwtDecodedPayload> {
     try {
-      return this.jwtService.verifyAsync(token);
+      return await this.jwtService.verifyAsync(token);
     } catch (e) {
       if (e instanceof TokenExpiredError) {
         throw new UnprocessableEntityException('Refresh token expired');

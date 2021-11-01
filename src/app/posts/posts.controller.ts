@@ -1,21 +1,22 @@
 /** @format */
 
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { FindAllDto, FindOneDto } from './posts.dto';
+import { FindAllDto } from './posts.dto';
 import { Post } from './posts.entity';
 import { PostsService } from './posts.service';
+import { IdentifierDto } from '../core';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  async findAll(@Query() findAllDto: FindAllDto): Promise<Post[]> {
-    return this.postsService.findAll(findAllDto);
+  async getAll(@Query() findAllDto: FindAllDto): Promise<Post[]> {
+    return await this.postsService.getAll(findAllDto);
   }
 
   @Get(':id')
-  async findOne(@Param() findOneDto: FindOneDto): Promise<Post> {
-    return this.postsService.findOne(findOneDto);
+  async getOne(@Param() identifierDto: IdentifierDto): Promise<Post> {
+    return await this.postsService.getOne(identifierDto);
   }
 }

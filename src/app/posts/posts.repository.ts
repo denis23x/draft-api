@@ -4,7 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { Repository, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './posts.entity';
-import { FindAllDto, FindOneDto } from './posts.dto';
+import { FindAllDto } from './posts.dto';
+import { IdentifierDto } from '../core';
 
 @Injectable()
 export class PostsRepository {
@@ -13,7 +14,7 @@ export class PostsRepository {
     private readonly repository: Repository<Post>
   ) {}
 
-  async findAll(findAllDto: FindAllDto): Promise<Post[]> {
+  async getAll(findAllDto: FindAllDto): Promise<Post[]> {
     let query = getRepository(Post)
       .createQueryBuilder('post')
       .orderBy('post.id', 'DESC')
@@ -62,10 +63,10 @@ export class PostsRepository {
     return await query.getMany();
   }
 
-  async findOneById(findOneDto: FindOneDto): Promise<Post> {
+  async getOneById(identifierDto: IdentifierDto): Promise<Post> {
     const query = getRepository(Post)
       .createQueryBuilder('post')
-      .where('post.id = :id', { id: findOneDto.id })
+      .where('post.id = :id', { id: identifierDto.id })
       .select([
         'post.id',
         'post.title',

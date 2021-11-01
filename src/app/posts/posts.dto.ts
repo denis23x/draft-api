@@ -1,13 +1,6 @@
 /** @format */
 
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsPositive,
-  MaxLength,
-  MinLength
-} from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, MaxLength, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class FindAllDto {
@@ -39,12 +32,4 @@ export class FindAllDto {
   @IsPositive()
   @Type(() => Number)
   readonly size?: number;
-}
-
-export class FindOneDto {
-  @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  readonly id: number;
 }

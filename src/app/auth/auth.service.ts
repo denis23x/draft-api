@@ -38,7 +38,7 @@ export class AuthService {
       const isValid = await compare(loginDto.password, existCredentials.password);
 
       if (isValid) {
-        return this.getSharedResponse(isExist, response);
+        return await this.getSharedResponse(isExist, response);
       }
     }
 
@@ -46,7 +46,7 @@ export class AuthService {
     const isFacebook = loginDto.facebookId && loginDto.facebookId === existCredentials.facebookId;
 
     if (isGoogle || isFacebook) {
-      return this.getSharedResponse(isExist, response);
+      return await this.getSharedResponse(isExist, response);
     }
 
     throw new UnauthorizedException();
@@ -65,10 +65,10 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    return this.getSharedResponse(isExist, response);
+    return await this.getSharedResponse(isExist, response);
   }
 
-  async social(request: Request, response: Response, socialId: string): Promise<void> {
+  async getSocial(request: Request, response: Response, socialId: string): Promise<void> {
     const createDto = request.user as CreateDto;
 
     if (!createDto) {
@@ -80,12 +80,12 @@ export class AuthService {
     if (isExist) {
       const exist = { ...isExist, [socialId]: createDto[socialId] };
 
-      return this.getSharedRedirect(exist, response, socialId);
+      return await this.getSharedRedirect(exist, response, socialId);
     }
 
     const user = await this.usersRepository.createOne(createDto);
 
-    return this.getSharedRedirect(user, response, socialId);
+    return await this.getSharedRedirect(user, response, socialId);
   }
 
   async getSharedResponse(user: User, response: Response): Promise<User> {
@@ -109,7 +109,7 @@ export class AuthService {
   }
 
   async getSharedRedirect(user: User, response: Response, socialId: string): Promise<void> {
-    response.redirect(
+    return response.redirect(
       url.format({
         pathname: process.env.APP_SITE_ORIGIN + '/auth/login',
         query: {
