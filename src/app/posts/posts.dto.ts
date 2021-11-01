@@ -1,9 +1,17 @@
 /** @format */
 
-import { IsNumber, IsOptional, IsPositive, MaxLength, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  MaxLength,
+  MinLength
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class FindAllDto {
+export class GetAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
@@ -32,4 +40,20 @@ export class FindAllDto {
   @IsPositive()
   @Type(() => Number)
   readonly size?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsIn(['user', 'category'], {
+    each: true
+  })
+  readonly scope: string[];
+}
+
+export class GetOneDto {
+  @IsOptional()
+  @IsArray()
+  @IsIn(['user', 'category'], {
+    each: true
+  })
+  readonly scope: string[];
 }

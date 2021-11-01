@@ -1,6 +1,10 @@
 /** @format */
 
 import {
+  ArrayContains,
+  IsArray,
+  IsEnum,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -43,6 +47,22 @@ export class GetAllDto {
   @IsPositive()
   @Type(() => Number)
   readonly size?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsIn(['user', 'posts'], {
+    each: true
+  })
+  readonly scope: string[];
+}
+
+export class GetOneDto {
+  @IsOptional()
+  @IsArray()
+  @IsIn(['user', 'posts'], {
+    each: true
+  })
+  readonly scope: string[];
 }
 
 export class UpdateDto {

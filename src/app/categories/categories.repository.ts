@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './categories.entity';
-import { CreateDto, GetAllDto, UpdateDto } from './categories.dto';
+import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './categories.dto';
 import { User } from '../users/users.entity';
 import { IdentifierDto } from '../core';
 
@@ -28,7 +28,7 @@ export class CategoriesRepository {
     return await this.repository.save(entity);
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<Category[]> {
+  async getAll(getAllDto?: GetAllDto): Promise<Category[]> {
     let query = getRepository(Category)
       .createQueryBuilder('category')
       .orderBy('category.id', 'DESC')
@@ -37,14 +37,35 @@ export class CategoriesRepository {
         'category.name',
         'category.isPrivate',
         'category.createdAt',
-        'category.updatedAt',
-        'user.id',
-        'user.name',
-        'user.avatar',
-        'user.createdAt',
-        'user.updatedAt'
-      ])
-      .leftJoin('category.user', 'user');
+        'category.updatedAt'
+      ]);
+
+    if ('scope' in getAllDto) {
+      if (getAllDto.scope.includes('user')) {
+        query = query
+          .addSelect([
+            'user.id',
+            'user.name',
+            'user.avatar',
+            'user.biography',
+            'user.createdAt',
+            'user.updatedAt'
+          ])
+          .leftJoin('category.user', 'user');
+      }
+
+      if (getAllDto.scope.includes('posts')) {
+        query = query
+          .addSelect([
+            'posts.id',
+            'posts.title',
+            'posts.image',
+            'posts.createdAt',
+            'posts.updatedAt'
+          ])
+          .leftJoin('category.posts', 'posts');
+      }
+    }
 
     if ('name' in getAllDto) {
       query = query.where('category.name like :name', {
@@ -58,15 +79,21 @@ export class CategoriesRepository {
       });
     }
 
-    if ('page' in getAllDto && 'size' in getAllDto) {
-      query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
+    if (!('page' in getAllDto) || !('size' in getAllDto)) {
+      getAllDto = {
+        ...getAllDto,
+        page: 1,
+        size: 10
+      };
     }
+
+    query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
 
     return await query.getMany();
   }
 
-  async getOneById(identifierDto: IdentifierDto): Promise<Category> {
-    const query = getRepository(Category)
+  async getOneById(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Category> {
+    let query = getRepository(Category)
       .createQueryBuilder('category')
       .where('category.id = :id', { id: identifierDto.id })
       .select([
@@ -74,20 +101,35 @@ export class CategoriesRepository {
         'category.name',
         'category.isPrivate',
         'category.createdAt',
-        'category.updatedAt',
-        'user.id',
-        'user.name',
-        'user.avatar',
-        'user.createdAt',
-        'user.updatedAt',
-        'post.id',
-        'post.title',
-        'post.image',
-        'post.createdAt',
-        'post.updatedAt'
-      ])
-      .leftJoin('category.user', 'user')
-      .leftJoin('category.posts', 'post');
+        'category.updatedAt'
+      ]);
+
+    if ('scope' in getOneDto) {
+      if (getOneDto.scope.includes('user')) {
+        query = query
+          .addSelect([
+            'user.id',
+            'user.name',
+            'user.avatar',
+            'user.biography',
+            'user.createdAt',
+            'user.updatedAt'
+          ])
+          .leftJoin('category.user', 'user');
+      }
+
+      if (getOneDto.scope.includes('posts')) {
+        query = query
+          .addSelect([
+            'posts.id',
+            'posts.title',
+            'posts.image',
+            'posts.createdAt',
+            'posts.updatedAt'
+          ])
+          .leftJoin('category.posts', 'posts');
+      }
+    }
 
     return await query.getOne();
   }

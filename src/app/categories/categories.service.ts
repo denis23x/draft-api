@@ -2,7 +2,7 @@
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Category } from './categories.entity';
-import { CreateDto, GetAllDto, UpdateDto } from './categories.dto';
+import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './categories.dto';
 import { CategoriesRepository } from './categories.repository';
 import { Request } from 'express';
 import { User } from '../users/users.entity';
@@ -27,8 +27,8 @@ export class CategoriesService {
     return await this.categoriesRepository.getAll(getAllDto);
   }
 
-  async getOne(identifierDto: IdentifierDto): Promise<Category> {
-    const isExist = await this.categoriesRepository.getOneById(identifierDto);
+  async getOne(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<Category> {
+    const isExist = await this.categoriesRepository.getOneById(identifierDto, getOneDto);
 
     if (!isExist) {
       throw new NotFoundException();

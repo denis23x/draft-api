@@ -5,7 +5,7 @@ import { Repository, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'bcrypt';
 import { User } from './users.entity';
-import { CreateDto, GetAllDto, UpdateDto } from './users.dto';
+import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
 import { LoginDto } from '../auth/auth.dto';
 import { IdentifierDto } from '../core';
 
@@ -37,7 +37,7 @@ export class UsersRepository {
     return await this.repository.save(entity);
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<User[]> {
+  async getAll(getAllDto?: GetAllDto): Promise<User[]> {
     let query = getRepository(User)
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC')
@@ -50,19 +50,51 @@ export class UsersRepository {
         'user.updatedAt'
       ]);
 
+    if ('scope' in getAllDto) {
+      if (getAllDto.scope.includes('categories')) {
+        query = query
+          .addSelect([
+            'categories.id',
+            'categories.name',
+            'categories.isPrivate',
+            'categories.createdAt',
+            'categories.updatedAt'
+          ])
+          .leftJoin('user.categories', 'categories');
+      }
+
+      if (getAllDto.scope.includes('posts')) {
+        query = query
+          .addSelect([
+            'posts.id',
+            'posts.title',
+            'posts.image',
+            'posts.createdAt',
+            'posts.updatedAt'
+          ])
+          .leftJoin('user.posts', 'posts');
+      }
+    }
+
     if ('name' in getAllDto) {
       query = query.where('user.name like :name', { name: '%' + getAllDto.name + '%' });
     }
 
-    if ('page' in getAllDto && 'size' in getAllDto) {
-      query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
+    if (!('page' in getAllDto) || !('size' in getAllDto)) {
+      getAllDto = {
+        ...getAllDto,
+        page: 1,
+        size: 10
+      };
     }
+
+    query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
 
     return await query.getMany();
   }
 
-  async getOneById(identifierDto: IdentifierDto): Promise<User> {
-    const query = getRepository(User)
+  async getOneById(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<User> {
+    let query = getRepository(User)
       .createQueryBuilder('user')
       .where('user.id = :id', { id: identifierDto.id })
       .select([
@@ -71,20 +103,34 @@ export class UsersRepository {
         'user.avatar',
         'user.biography',
         'user.createdAt',
-        'user.updatedAt',
-        'post.id',
-        'post.title',
-        'post.body',
-        'post.image',
-        'post.createdAt',
-        'post.updatedAt',
-        'category.id',
-        'category.name',
-        'category.createdAt',
-        'category.updatedAt'
-      ])
-      .leftJoin('user.posts', 'post')
-      .leftJoin('user.categories', 'category');
+        'user.updatedAt'
+      ]);
+
+    if ('scope' in getOneDto) {
+      if (getOneDto.scope.includes('categories')) {
+        query = query
+          .addSelect([
+            'categories.id',
+            'categories.name',
+            'categories.isPrivate',
+            'categories.createdAt',
+            'categories.updatedAt'
+          ])
+          .leftJoin('user.categories', 'categories');
+      }
+
+      if (getOneDto.scope.includes('posts')) {
+        query = query
+          .addSelect([
+            'posts.id',
+            'posts.title',
+            'posts.image',
+            'posts.createdAt',
+            'posts.updatedAt'
+          ])
+          .leftJoin('user.posts', 'posts');
+      }
+    }
 
     return await query.getOne();
   }

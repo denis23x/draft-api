@@ -18,7 +18,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
-import { CreateDto, GetAllDto, UpdateDto } from './users.dto';
+import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
 import { Request, Response } from 'express';
 import { IdentifierDto } from '../core';
 
@@ -52,8 +52,11 @@ export class UsersController {
   }
 
   @Get(':id')
-  async getOne(@Param() identifierDto: IdentifierDto): Promise<User> {
-    return await this.usersService.getOne(identifierDto);
+  async getOne(
+    @Param() identifierDto: IdentifierDto,
+    @Query() getOneDto: GetOneDto
+  ): Promise<User> {
+    return await this.usersService.getOne(identifierDto, getOneDto);
   }
 
   @Put('profile')

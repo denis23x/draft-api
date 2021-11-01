@@ -2,7 +2,7 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Post } from './posts.entity';
-import { FindAllDto } from './posts.dto';
+import { GetAllDto, GetOneDto } from './posts.dto';
 import { PostsRepository } from './posts.repository';
 import { IdentifierDto } from '../core';
 
@@ -10,12 +10,12 @@ import { IdentifierDto } from '../core';
 export class PostsService {
   constructor(private readonly postsRepository: PostsRepository) {}
 
-  async getAll(findAllDto: FindAllDto): Promise<Post[]> {
-    return await this.postsRepository.getAll(findAllDto);
+  async getAll(getAllDto: GetAllDto): Promise<Post[]> {
+    return await this.postsRepository.getAll(getAllDto);
   }
 
-  async getOne(identifierDto: IdentifierDto): Promise<Post> {
-    const isExist = await this.postsRepository.getOneById(identifierDto);
+  async getOne(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<Post> {
+    const isExist = await this.postsRepository.getOneById(identifierDto, getOneDto);
 
     if (!isExist) {
       throw new NotFoundException();

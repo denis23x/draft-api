@@ -14,7 +14,7 @@ import {
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
-import { CreateDto, GetAllDto, UpdateDto } from './categories.dto';
+import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './categories.dto';
 import { Category } from './categories.entity';
 import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -38,8 +38,11 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  async getOne(@Param() identifierDto: IdentifierDto): Promise<Category> {
-    return await this.categoriesService.getOne(identifierDto);
+  async getOne(
+    @Param() identifierDto: IdentifierDto,
+    @Query() getOneDto: GetOneDto
+  ): Promise<Category> {
+    return await this.categoriesService.getOne(identifierDto, getOneDto);
   }
 
   @Put(':id')

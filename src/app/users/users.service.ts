@@ -2,7 +2,7 @@
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './users.entity';
-import { CreateDto, GetAllDto, UpdateDto } from './users.dto';
+import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
 import { UsersRepository } from './users.repository';
 import { AuthService } from '../auth/auth.service';
 import { Request, Response } from 'express';
@@ -42,8 +42,8 @@ export class UsersService {
     return await this.usersRepository.getAll(getAllDto);
   }
 
-  async getOne(identifierDto: IdentifierDto): Promise<User> {
-    const isExist = await this.usersRepository.getOneById(identifierDto);
+  async getOne(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<User> {
+    const isExist = await this.usersRepository.getOneById(identifierDto, getOneDto);
 
     if (!isExist) {
       throw new NotFoundException();
