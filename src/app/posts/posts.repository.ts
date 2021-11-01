@@ -14,7 +14,7 @@ export class PostsRepository {
     private readonly repository: Repository<Post>
   ) {}
 
-  async getAll(getAllDto?: GetAllDto): Promise<Post[]> {
+  async getAll(getAllDto: GetAllDto): Promise<Post[]> {
     let query = getRepository(Post)
       .createQueryBuilder('post')
       .orderBy('post.id', 'DESC')
@@ -79,7 +79,7 @@ export class PostsRepository {
     return await query.getMany();
   }
 
-  async getOneById(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Post> {
+  async getOneById(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<Post> {
     let query = getRepository(Post)
       .createQueryBuilder('post')
       .where('post.id = :id', { id: identifierDto.id })

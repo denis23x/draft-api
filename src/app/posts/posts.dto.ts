@@ -1,14 +1,6 @@
 /** @format */
 
-import {
-  IsArray,
-  IsIn,
-  IsNumber,
-  IsOptional,
-  IsPositive,
-  MaxLength,
-  MinLength
-} from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsPositive, MaxLength, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class GetAllDto {
@@ -42,7 +34,6 @@ export class GetAllDto {
   readonly size?: number;
 
   @IsOptional()
-  @IsArray()
   @IsIn(['user', 'category'], {
     each: true
   })
@@ -51,7 +42,6 @@ export class GetAllDto {
 
 export class GetOneDto {
   @IsOptional()
-  @IsArray()
   @IsIn(['user', 'category'], {
     each: true
   })

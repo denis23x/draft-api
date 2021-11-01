@@ -8,6 +8,7 @@ import { TokensRepository } from './tokens.repository';
 import { UsersRepository } from '../users/users.repository';
 import { JwtDecodedPayload } from '../auth/auth.interface';
 import { IdentifierDto } from '../core';
+import { GetOneDto } from '../users/users.dto';
 
 @Injectable()
 export class TokensService {
@@ -56,7 +57,7 @@ export class TokensService {
       id: Number(payload.sub)
     };
 
-    return await this.usersRepository.getOneById(subIdentifierDto);
+    return await this.usersRepository.getOneById(subIdentifierDto, {} as GetOneDto);
   }
 
   private getJwtBaseOptions(): SignOptions {

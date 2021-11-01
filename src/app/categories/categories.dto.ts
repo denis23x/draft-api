@@ -1,9 +1,6 @@
 /** @format */
 
 import {
-  ArrayContains,
-  IsArray,
-  IsEnum,
   IsIn,
   IsNotEmpty,
   IsNumber,
@@ -49,7 +46,6 @@ export class GetAllDto {
   readonly size?: number;
 
   @IsOptional()
-  @IsArray()
   @IsIn(['user', 'posts'], {
     each: true
   })
@@ -58,7 +54,6 @@ export class GetAllDto {
 
 export class GetOneDto {
   @IsOptional()
-  @IsArray()
   @IsIn(['user', 'posts'], {
     each: true
   })

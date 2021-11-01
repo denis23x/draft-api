@@ -29,7 +29,7 @@ export class UsersService {
 
   async getProfile(request: Request): Promise<User> {
     const user = request.user as User;
-    const isExist = await this.usersRepository.getOneById(user as IdentifierDto);
+    const isExist = await this.usersRepository.getOneById(user as IdentifierDto, {} as GetOneDto);
 
     if (!isExist) {
       throw new NotFoundException();

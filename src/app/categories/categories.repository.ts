@@ -28,7 +28,7 @@ export class CategoriesRepository {
     return await this.repository.save(entity);
   }
 
-  async getAll(getAllDto?: GetAllDto): Promise<Category[]> {
+  async getAll(getAllDto: GetAllDto): Promise<Category[]> {
     let query = getRepository(Category)
       .createQueryBuilder('category')
       .orderBy('category.id', 'DESC')
@@ -92,7 +92,7 @@ export class CategoriesRepository {
     return await query.getMany();
   }
 
-  async getOneById(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Category> {
+  async getOneById(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<Category> {
     let query = getRepository(Category)
       .createQueryBuilder('category')
       .where('category.id = :id', { id: identifierDto.id })
@@ -183,7 +183,7 @@ export class CategoriesRepository {
       id: category.id
     };
 
-    return await this.getOneById(identifierDto);
+    return await this.getOneById(identifierDto, {} as GetOneDto);
   }
 
   async deleteOne(identifierDto: IdentifierDto, category: Category): Promise<Category> {

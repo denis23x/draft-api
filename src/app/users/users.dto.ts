@@ -1,7 +1,6 @@
 /** @format */
 
 import {
-  IsArray,
   IsEmail,
   IsIn,
   IsNotEmpty,
@@ -57,7 +56,6 @@ export class GetAllDto {
   readonly size?: number;
 
   @IsOptional()
-  @IsArray()
   @IsIn(['categories', 'posts'], {
     each: true
   })
@@ -66,7 +64,6 @@ export class GetAllDto {
 
 export class GetOneDto {
   @IsOptional()
-  @IsArray()
   @IsIn(['categories', 'posts'], {
     each: true
   })

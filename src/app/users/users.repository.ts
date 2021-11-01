@@ -37,7 +37,7 @@ export class UsersRepository {
     return await this.repository.save(entity);
   }
 
-  async getAll(getAllDto?: GetAllDto): Promise<User[]> {
+  async getAll(getAllDto: GetAllDto): Promise<User[]> {
     let query = getRepository(User)
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC')
@@ -93,7 +93,7 @@ export class UsersRepository {
     return await query.getMany();
   }
 
-  async getOneById(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<User> {
+  async getOneById(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<User> {
     let query = getRepository(User)
       .createQueryBuilder('user')
       .where('user.id = :id', { id: identifierDto.id })
@@ -172,7 +172,7 @@ export class UsersRepository {
       id: user.id
     };
 
-    return await this.getOneById(identifierDto);
+    return await this.getOneById(identifierDto, {} as GetOneDto);
   }
 
   async deleteProfile(user: User): Promise<User> {
