@@ -1,12 +1,13 @@
 /** @format */
 
 import { Injectable } from '@nestjs/common';
-import { Repository, getRepository, UpdateResult } from 'typeorm';
+import { Repository, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'bcrypt';
 import { User } from './users.entity';
-import { CreateDto, DeleteDto, FindAllDto, FindOneByIdDto } from './users.dto';
+import { CreateDto, GetAllDto, UpdateDto } from './users.dto';
 import { LoginDto } from '../auth/auth.dto';
+import { IdentifierDto } from '../core';
 
 @Injectable()
 export class UsersRepository {
@@ -15,28 +16,28 @@ export class UsersRepository {
     private readonly repository: Repository<User>
   ) {}
 
-  async create(createDto: CreateDto): Promise<User> {
+  async createOne(createDto: CreateDto): Promise<User> {
     const entity = new User();
 
     entity.name = createDto.name;
     entity.email = createDto.email;
 
-    if (createDto.password) {
+    if ('password' in createDto) {
       entity.password = await hash(createDto.password, 10);
     }
 
-    if (createDto.googleId) {
+    if ('googleId' in createDto) {
       entity.googleId = createDto.googleId;
     }
 
-    if (createDto.facebookId) {
+    if ('facebookId' in createDto) {
       entity.facebookId = createDto.facebookId;
     }
 
-    return this.repository.save(entity);
+    return await this.repository.save(entity);
   }
 
-  async findAll(findAllDto: FindAllDto): Promise<User[]> {
+  async getAll(getAllDto: GetAllDto): Promise<User[]> {
     let query = getRepository(User)
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC')
@@ -49,21 +50,21 @@ export class UsersRepository {
         'user.updatedAt'
       ]);
 
-    if (findAllDto.name) {
-      query = query.where('user.name like :name', { name: '%' + findAllDto.name + '%' });
+    if ('name' in getAllDto) {
+      query = query.where('user.name like :name', { name: '%' + getAllDto.name + '%' });
     }
 
-    if (findAllDto.page && findAllDto.size) {
-      query = query.skip((findAllDto.page - 1) * findAllDto.size).take(findAllDto.size);
+    if ('page' in getAllDto && 'size' in getAllDto) {
+      query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
     }
 
     return await query.getMany();
   }
 
-  async findOneById(findOneByIdDto: FindOneByIdDto): Promise<User> {
+  async getOneById(identifierDto: IdentifierDto): Promise<User> {
     const query = getRepository(User)
       .createQueryBuilder('user')
-      .where('user.id = :id', { id: findOneByIdDto.id })
+      .where('user.id = :id', { id: identifierDto.id })
       .select([
         'user.id',
         'user.name',
@@ -88,25 +89,49 @@ export class UsersRepository {
     return await query.getOne();
   }
 
-  async findOneByIdCredentials(findOneByIdDto: FindOneByIdDto): Promise<User> {
-    return getRepository(User)
+  async getOneByIdWithCredentials(identifierDto: IdentifierDto): Promise<User> {
+    const query = getRepository(User)
       .createQueryBuilder('user')
-      .where('user.id = :id', { id: findOneByIdDto.id })
+      .where('user.id = :id', { id: identifierDto.id })
       .addSelect('user.password')
       .addSelect('user.googleId')
-      .addSelect('user.facebookId')
-      .getOne();
+      .addSelect('user.facebookId');
+
+    return await query.getOne();
   }
 
-  async findOneByEmail(createDto: CreateDto | LoginDto): Promise<User> {
-    return getRepository(User)
+  async getOneByEmail(createDto: CreateDto | LoginDto): Promise<User> {
+    const query = getRepository(User)
       .createQueryBuilder('user')
       .where('user.email = :email', { email: createDto.email })
-      .addSelect('user.email')
-      .getOne();
+      .addSelect('user.email');
+
+    return await query.getOne();
   }
 
-  async delete(deleteDto: DeleteDto): Promise<UpdateResult> {
-    return this.repository.softDelete(deleteDto.id);
+  async updateProfile(updateDto: UpdateDto, user: User): Promise<User> {
+    const entity = new User();
+
+    if ('name' in updateDto) {
+      entity.name = updateDto.name;
+    }
+
+    if ('biography' in updateDto) {
+      entity.biography = updateDto.biography;
+    }
+
+    await this.repository.update(user.id, entity);
+
+    const identifierDto: IdentifierDto = {
+      id: user.id
+    };
+
+    return await this.getOneById(identifierDto);
+  }
+
+  async deleteProfile(user: User): Promise<User> {
+    await this.repository.delete(user.id);
+
+    return user;
   }
 }

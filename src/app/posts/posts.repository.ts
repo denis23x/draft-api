@@ -36,17 +36,17 @@ export class PostsRepository {
       .leftJoin('post.user', 'user')
       .leftJoin('post.category', 'category');
 
-    if (findAllDto.title) {
+    if ('title' in findAllDto) {
       query = query.where('post.title like :title', { title: '%' + findAllDto.title + '%' });
     }
 
-    if (findAllDto.userId) {
+    if ('userId' in findAllDto) {
       query = query[findAllDto.title ? 'andWhere' : 'where']('post.userId like :userId', {
         userId: findAllDto.userId
       });
     }
 
-    if (findAllDto.categoryId) {
+    if ('categoryId' in findAllDto) {
       query = query[findAllDto.title || findAllDto.userId ? 'andWhere' : 'where'](
         'post.categoryId like :categoryId',
         {
@@ -55,7 +55,7 @@ export class PostsRepository {
       );
     }
 
-    if (findAllDto.page && findAllDto.size) {
+    if ('page' in findAllDto && 'size' in findAllDto) {
       query = query.skip((findAllDto.page - 1) * findAllDto.size).take(findAllDto.size);
     }
 

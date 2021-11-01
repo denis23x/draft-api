@@ -10,9 +10,10 @@ import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
 import { User } from '../users/users.entity';
 import { LoginDto } from './auth.dto';
-import { CreateDto, FindOneByIdDto } from '../users/users.dto';
+import { CreateDto } from '../users/users.dto';
 import { UsersRepository } from '../users/users.repository';
 import { TokensService } from '../tokens/tokens.service';
+import { IdentifierDto } from '../core';
 import * as url from 'url';
 
 @Injectable()
@@ -23,14 +24,14 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto, response: Response): Promise<User> {
-    const isExist = await this.usersRepository.findOneByEmail(loginDto);
+    const isExist = await this.usersRepository.getOneByEmail(loginDto);
 
     if (!isExist) {
       throw new NotFoundException();
     }
 
-    const existCredentials = await this.usersRepository.findOneByIdCredentials(
-      isExist as FindOneByIdDto
+    const existCredentials = await this.usersRepository.getOneByIdWithCredentials(
+      isExist as IdentifierDto
     );
 
     if (loginDto.password) {
@@ -74,7 +75,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const isExist = await this.usersRepository.findOneByEmail(createDto);
+    const isExist = await this.usersRepository.getOneByEmail(createDto);
 
     if (isExist) {
       const exist = { ...isExist, [socialId]: createDto[socialId] };
@@ -82,7 +83,7 @@ export class AuthService {
       return this.getSharedRedirect(exist, response, socialId);
     }
 
-    const user = await this.usersRepository.create(createDto);
+    const user = await this.usersRepository.createOne(createDto);
 
     return this.getSharedRedirect(user, response, socialId);
   }

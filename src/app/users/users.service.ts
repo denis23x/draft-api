@@ -2,11 +2,11 @@
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './users.entity';
-import { FindAllDto, CreateDto, FindOneByIdDto, DeleteDto } from './users.dto';
+import { CreateDto, GetAllDto, UpdateDto } from './users.dto';
 import { UsersRepository } from './users.repository';
 import { AuthService } from '../auth/auth.service';
-import { UpdateResult } from 'typeorm';
 import { Request, Response } from 'express';
+import { IdentifierDto } from '../core';
 
 @Injectable()
 export class UsersService {
@@ -15,24 +15,21 @@ export class UsersService {
     private readonly usersRepository: UsersRepository
   ) {}
 
-  async create(createDto: CreateDto, response: Response): Promise<User> {
-    const isExist = await this.usersRepository.findOneByEmail(createDto);
+  async createOne(createDto: CreateDto, response: Response): Promise<User> {
+    const isExist = await this.usersRepository.getOneByEmail(createDto);
 
     if (isExist) {
       throw new BadRequestException(isExist.email + ' already exists');
     }
 
-    const user = await this.usersRepository.create(createDto);
+    const user = await this.usersRepository.createOne(createDto);
 
-    return this.authService.getSharedResponse(user, response);
+    return await this.authService.getSharedResponse(user, response);
   }
 
-  async findAll(findAllDto: FindAllDto): Promise<User[]> {
-    return this.usersRepository.findAll(findAllDto);
-  }
-
-  async findOneById(findOneByIdDto: FindOneByIdDto): Promise<User> {
-    const isExist = await this.usersRepository.findOneById(findOneByIdDto);
+  async getProfile(request: Request): Promise<User> {
+    const user = request.user as User;
+    const isExist = await this.usersRepository.getOneById(user as IdentifierDto);
 
     if (!isExist) {
       throw new NotFoundException();
@@ -41,9 +38,12 @@ export class UsersService {
     return isExist;
   }
 
-  async findMe(request: Request): Promise<User> {
-    const user = request.user as User;
-    const isExist = await this.usersRepository.findOneById(user as FindOneByIdDto);
+  async getAll(getAllDto: GetAllDto): Promise<User[]> {
+    return await this.usersRepository.getAll(getAllDto);
+  }
+
+  async getOne(identifierDto: IdentifierDto): Promise<User> {
+    const isExist = await this.usersRepository.getOneById(identifierDto);
 
     if (!isExist) {
       throw new NotFoundException();
@@ -52,18 +52,23 @@ export class UsersService {
     return isExist;
   }
 
-  async delete(request: Request): Promise<UpdateResult> {
-    const user = request.user as User;
-    const isExist = await this.usersRepository.findOneById(user as FindOneByIdDto);
+  async updateProfile(updateDto: UpdateDto, request: Request): Promise<User> {
+    const isExist = await this.getProfile(request);
 
     if (!isExist) {
       throw new NotFoundException();
     }
 
-    const deleteDto: DeleteDto = {
-      id: isExist.id
-    };
+    return await this.usersRepository.updateProfile(updateDto, isExist);
+  }
 
-    return this.usersRepository.delete(deleteDto);
+  async deleteProfile(request: Request): Promise<User> {
+    const isExist = await this.getProfile(request);
+
+    if (!isExist) {
+      throw new NotFoundException();
+    }
+
+    return await this.usersRepository.deleteProfile(isExist);
   }
 }

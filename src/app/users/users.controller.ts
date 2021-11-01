@@ -8,6 +8,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   Req,
   Res,
@@ -17,9 +18,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
-import { FindAllDto, CreateDto, FindOneByIdDto } from './users.dto';
-import { UpdateResult } from 'typeorm';
+import { CreateDto, GetAllDto, UpdateDto } from './users.dto';
 import { Request, Response } from 'express';
+import { IdentifierDto } from '../core';
 
 const responseOptions = {
   passthrough: true
@@ -31,33 +32,40 @@ export class UsersController {
 
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  async create(
+  async createOne(
     @Body() createDto: CreateDto,
     @Res(responseOptions) response: Response
   ): Promise<User> {
-    return this.usersService.create(createDto, response);
+    return await this.usersService.createOne(createDto, response);
   }
 
-  @Get('me')
+  @Get('profile')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async findMe(@Req() request: Request): Promise<User> {
-    return this.usersService.findMe(request);
+  async getProfile(@Req() request: Request): Promise<User> {
+    return await this.usersService.getProfile(request);
   }
 
   @Get()
-  async findAll(@Query() findAllDto: FindAllDto): Promise<User[]> {
-    return this.usersService.findAll(findAllDto);
+  async getAll(@Query() getAllDto: GetAllDto): Promise<User[]> {
+    return await this.usersService.getAll(getAllDto);
   }
 
   @Get(':id')
-  async findOneById(@Param() findOneByIdDto: FindOneByIdDto): Promise<User> {
-    return this.usersService.findOneById(findOneByIdDto);
+  async getOne(@Param() identifierDto: IdentifierDto): Promise<User> {
+    return await this.usersService.getOne(identifierDto);
   }
 
-  @Delete()
+  @Put('profile')
   @UseGuards(AuthGuard('jwt'))
-  async delete(@Req() request: Request): Promise<UpdateResult> {
-    return this.usersService.delete(request);
+  @UseInterceptors(ClassSerializerInterceptor)
+  async updateProfile(@Body() updateDto: UpdateDto, @Req() request: Request): Promise<User> {
+    return await this.usersService.updateProfile(updateDto, request);
+  }
+
+  @Delete('profile')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteProfile(@Req() request: Request): Promise<User> {
+    return await this.usersService.deleteProfile(request);
   }
 }

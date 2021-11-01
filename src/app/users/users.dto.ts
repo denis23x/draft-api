@@ -36,7 +36,7 @@ export class CreateDto {
   facebookId?: string;
 }
 
-export class FindAllDto {
+export class GetAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
@@ -55,18 +55,14 @@ export class FindAllDto {
   readonly size?: number;
 }
 
-export class FindOneByIdDto {
-  @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  readonly id: number;
-}
+export class UpdateDto {
+  @IsOptional()
+  @MinLength(4)
+  @MaxLength(24)
+  readonly name?: string;
 
-export class DeleteDto {
-  @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  readonly id: number;
+  @IsOptional()
+  @MinLength(4)
+  @MaxLength(24)
+  readonly biography?: string;
 }
