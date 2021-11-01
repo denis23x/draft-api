@@ -20,7 +20,7 @@ export class CreateDto {
   readonly isPrivate?: string;
 }
 
-export class FindAllDto {
+export class GetAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)

@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './categories.entity';
-import { CreateDto, FindAllDto, UpdateDto } from './categories.dto';
+import { CreateDto, GetAllDto, UpdateDto } from './categories.dto';
 import { User } from '../users/users.entity';
 import { IdentifierDto } from '../core';
 
@@ -15,7 +15,7 @@ export class CategoriesRepository {
     private readonly repository: Repository<Category>
   ) {}
 
-  async create(createDto: CreateDto, user: User): Promise<Category> {
+  async createOne(createDto: CreateDto, user: User): Promise<Category> {
     const entity = new Category();
 
     entity.name = createDto.name;
@@ -25,10 +25,10 @@ export class CategoriesRepository {
       entity.isPrivate = !!createDto.isPrivate;
     }
 
-    return this.repository.save(entity);
+    return await this.repository.save(entity);
   }
 
-  async findAll(findAllDto: FindAllDto): Promise<Category[]> {
+  async getAll(getAllDto: GetAllDto): Promise<Category[]> {
     let query = getRepository(Category)
       .createQueryBuilder('category')
       .orderBy('category.id', 'DESC')
@@ -46,26 +46,26 @@ export class CategoriesRepository {
       ])
       .leftJoin('category.user', 'user');
 
-    if ('name' in findAllDto) {
+    if ('name' in getAllDto) {
       query = query.where('category.name like :name', {
-        name: '%' + findAllDto.name + '%'
+        name: '%' + getAllDto.name + '%'
       });
     }
 
-    if ('userId' in findAllDto) {
-      query = query[findAllDto.name ? 'andWhere' : 'where']('category.userId like :userId', {
-        userId: findAllDto.userId
+    if ('userId' in getAllDto) {
+      query = query[getAllDto.name ? 'andWhere' : 'where']('category.userId like :userId', {
+        userId: getAllDto.userId
       });
     }
 
-    if ('page' in findAllDto && 'size' in findAllDto) {
-      query = query.skip((findAllDto.page - 1) * findAllDto.size).take(findAllDto.size);
+    if ('page' in getAllDto && 'size' in getAllDto) {
+      query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
     }
 
     return await query.getMany();
   }
 
-  async findOneById(identifierDto: IdentifierDto): Promise<Category> {
+  async getOneById(identifierDto: IdentifierDto): Promise<Category> {
     const query = getRepository(Category)
       .createQueryBuilder('category')
       .where('category.id = :id', { id: identifierDto.id })
@@ -92,7 +92,7 @@ export class CategoriesRepository {
     return await query.getOne();
   }
 
-  async findOneByNameRelatedToUser(createDto: CreateDto, user: User): Promise<Category> {
+  async getOneByNameRelatedToUser(createDto: CreateDto, user: User): Promise<Category> {
     const query = getRepository(Category)
       .createQueryBuilder('category')
       .where('category.name = :name', { name: createDto.name })
@@ -109,7 +109,7 @@ export class CategoriesRepository {
     return await query.getOne();
   }
 
-  async findOneByIdRelatedToUser(identifierDto: IdentifierDto, user: User): Promise<Category> {
+  async getOneByIdRelatedToUser(identifierDto: IdentifierDto, user: User): Promise<Category> {
     const query = getRepository(Category)
       .createQueryBuilder('category')
       .where('category.id = :id', { id: identifierDto.id })
@@ -141,7 +141,7 @@ export class CategoriesRepository {
       id: category.id
     };
 
-    return this.findOneById(identifierDto);
+    return await this.getOneById(identifierDto);
   }
 
   async deleteOne(identifierDto: IdentifierDto, category: Category): Promise<Category> {

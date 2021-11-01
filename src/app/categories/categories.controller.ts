@@ -14,7 +14,7 @@ import {
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
-import { CreateDto, FindAllDto, UpdateDto } from './categories.dto';
+import { CreateDto, GetAllDto, UpdateDto } from './categories.dto';
 import { Category } from './categories.entity';
 import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -28,18 +28,18 @@ export class CategoriesController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async create(@Body() createDto: CreateDto, @Req() request: Request): Promise<Category> {
-    return this.categoriesService.create(createDto, request);
+  async createOne(@Body() createDto: CreateDto, @Req() request: Request): Promise<Category> {
+    return await this.categoriesService.createOne(createDto, request);
   }
 
   @Get()
-  async findAll(@Query() findAllDto: FindAllDto): Promise<Category[]> {
-    return this.categoriesService.findAll(findAllDto);
+  async getAll(@Query() getAllDto: GetAllDto): Promise<Category[]> {
+    return await this.categoriesService.getAll(getAllDto);
   }
 
   @Get(':id')
-  async findOne(@Param() identifierDto: IdentifierDto): Promise<Category> {
-    return this.categoriesService.findOne(identifierDto);
+  async getOne(@Param() identifierDto: IdentifierDto): Promise<Category> {
+    return await this.categoriesService.getOne(identifierDto);
   }
 
   @Put(':id')
@@ -50,7 +50,7 @@ export class CategoriesController {
     @Body() updateDto: UpdateDto,
     @Req() request: Request
   ): Promise<Category> {
-    return this.categoriesService.updateOne(identifierDto, updateDto, request);
+    return await this.categoriesService.updateOne(identifierDto, updateDto, request);
   }
 
   @Delete(':id')
@@ -59,6 +59,6 @@ export class CategoriesController {
     @Param() identifierDto: IdentifierDto,
     @Req() request: Request
   ): Promise<Category> {
-    return this.categoriesService.deleteOne(identifierDto, request);
+    return await this.categoriesService.deleteOne(identifierDto, request);
   }
 }

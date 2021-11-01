@@ -2,7 +2,7 @@
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Category } from './categories.entity';
-import { CreateDto, FindAllDto, UpdateDto } from './categories.dto';
+import { CreateDto, GetAllDto, UpdateDto } from './categories.dto';
 import { CategoriesRepository } from './categories.repository';
 import { Request } from 'express';
 import { User } from '../users/users.entity';
@@ -12,23 +12,23 @@ import { IdentifierDto } from '../core';
 export class CategoriesService {
   constructor(private readonly categoriesRepository: CategoriesRepository) {}
 
-  async create(createDto: CreateDto, request: Request): Promise<Category> {
+  async createOne(createDto: CreateDto, request: Request): Promise<Category> {
     const user = request.user as User;
-    const isExist = await this.categoriesRepository.findOneByNameRelatedToUser(createDto, user);
+    const isExist = await this.categoriesRepository.getOneByNameRelatedToUser(createDto, user);
 
     if (isExist) {
       throw new BadRequestException(isExist.name + ' already exists');
     }
 
-    return await this.categoriesRepository.create(createDto, user);
+    return await this.categoriesRepository.createOne(createDto, user);
   }
 
-  async findAll(findAllDto: FindAllDto): Promise<Category[]> {
-    return this.categoriesRepository.findAll(findAllDto);
+  async getAll(getAllDto: GetAllDto): Promise<Category[]> {
+    return await this.categoriesRepository.getAll(getAllDto);
   }
 
-  async findOne(identifierDto: IdentifierDto): Promise<Category> {
-    const isExist = this.categoriesRepository.findOneById(identifierDto);
+  async getOne(identifierDto: IdentifierDto): Promise<Category> {
+    const isExist = await this.categoriesRepository.getOneById(identifierDto);
 
     if (!isExist) {
       throw new NotFoundException();
@@ -43,7 +43,7 @@ export class CategoriesService {
     request: Request
   ): Promise<Category> {
     const user = request.user as User;
-    const isExist = await this.categoriesRepository.findOneByIdRelatedToUser(identifierDto, user);
+    const isExist = await this.categoriesRepository.getOneByIdRelatedToUser(identifierDto, user);
 
     if (!isExist) {
       throw new NotFoundException();
@@ -54,7 +54,7 @@ export class CategoriesService {
 
   async deleteOne(identifierDto: IdentifierDto, request: Request): Promise<Category> {
     const user = request.user as User;
-    const isExist = await this.categoriesRepository.findOneByIdRelatedToUser(identifierDto, user);
+    const isExist = await this.categoriesRepository.getOneByIdRelatedToUser(identifierDto, user);
 
     if (!isExist) {
       throw new NotFoundException();
