@@ -27,9 +27,9 @@ export class UsersService {
     return await this.authService.getSharedResponse(user, response);
   }
 
-  async getProfile(request: Request): Promise<User> {
+  async getProfile(request: Request, getOneDto?: GetOneDto): Promise<User> {
     const user = request.user as User;
-    const isExist = await this.usersRepository.getOneById(user as IdentifierDto, {} as GetOneDto);
+    const isExist = await this.usersRepository.getOneById(user as IdentifierDto, getOneDto);
 
     if (!isExist) {
       throw new NotFoundException();
@@ -38,8 +38,14 @@ export class UsersService {
     return isExist;
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<User[]> {
-    return await this.usersRepository.getAll(getAllDto);
+  async getAll(getAllDto: GetAllDto): Promise<User | User[]> {
+    const isExist = await this.usersRepository.getAll(getAllDto);
+
+    if (!isExist) {
+      throw new NotFoundException();
+    }
+
+    return isExist;
   }
 
   async getOne(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<User> {

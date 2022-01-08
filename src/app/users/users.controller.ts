@@ -42,12 +42,12 @@ export class UsersController {
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async getProfile(@Req() request: Request): Promise<User> {
-    return await this.usersService.getProfile(request);
+  async getProfile(@Req() request: Request, @Query() getOneDto: GetOneDto): Promise<User> {
+    return await this.usersService.getProfile(request, getOneDto);
   }
 
   @Get()
-  async getAll(@Query() getAllDto: GetAllDto): Promise<User[]> {
+  async getAll(@Query() getAllDto: GetAllDto): Promise<User | User[]> {
     return await this.usersService.getAll(getAllDto);
   }
 

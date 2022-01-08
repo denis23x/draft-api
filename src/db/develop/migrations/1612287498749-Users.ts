@@ -12,7 +12,7 @@ export class Users1612284757306 implements MigrationInterface {
       return [
         null,
         null,
-        faker.name.findName(),
+        faker.internet.userName(),
         faker.name.jobTitle(),
         faker.random.boolean() ? imagePath + imageFile : null,
         faker.internet.email(),

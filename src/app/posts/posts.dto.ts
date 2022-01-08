@@ -1,7 +1,38 @@
 /** @format */
 
-import { IsIn, IsNumber, IsOptional, IsPositive, MaxLength, MinLength } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  MaxLength,
+  MinLength
+} from 'class-validator';
 import { Type } from 'class-transformer';
+
+export class CreateDto {
+  @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(24)
+  readonly title: string;
+
+  @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(6400)
+  readonly body: string;
+
+  @IsOptional()
+  @MinLength(4)
+  @MaxLength(24)
+  readonly image?: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  @Type(() => Number)
+  readonly categoryId: number;
+}
 
 export class GetAllDto {
   @IsOptional()
@@ -46,4 +77,27 @@ export class GetOneDto {
     each: true
   })
   readonly scope: string[];
+}
+
+export class UpdateDto {
+  @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(24)
+  readonly title: string;
+
+  @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(6400)
+  readonly body: string;
+
+  @IsOptional()
+  @MinLength(4)
+  @MaxLength(24)
+  readonly image: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  @Type(() => Number)
+  readonly categoryId?: number;
 }

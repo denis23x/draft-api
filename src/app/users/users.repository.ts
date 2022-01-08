@@ -37,7 +37,7 @@ export class UsersRepository {
     return await this.repository.save(entity);
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<User[]> {
+  async getAll(getAllDto: GetAllDto): Promise<User | User[]> {
     let query = getRepository(User)
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC')
@@ -77,7 +77,13 @@ export class UsersRepository {
     }
 
     if ('name' in getAllDto) {
-      query = query.where('user.name like :name', { name: '%' + getAllDto.name + '%' });
+      if ('exact' in getAllDto && !!getAllDto.exact) {
+        query = query.where('user.name = :name', { name: getAllDto.name });
+
+        return await query.getOne();
+      } else {
+        query = query.where('user.name like :name', { name: '%' + getAllDto.name + '%' });
+      }
     }
 
     if (!('page' in getAllDto) || !('size' in getAllDto)) {

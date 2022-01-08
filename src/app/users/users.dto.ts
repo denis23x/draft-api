@@ -45,6 +45,11 @@ export class GetAllDto {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
+  readonly exact?: number;
+
+  @IsOptional()
+  @IsNumber()
   @IsPositive()
   @Type(() => Number)
   readonly page?: number;
