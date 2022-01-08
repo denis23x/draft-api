@@ -12,15 +12,15 @@ import { User } from '../users/users.entity';
 export class PostsService {
   constructor(private readonly postsRepository: PostsRepository) {}
 
-  async createOne(createDto: CreateDto, request: Request): Promise<Post> {
-    const user = request.user as User;
-    const isExist = await this.postsRepository.getOneByNameRelatedToUser(createDto, user);
+  async create(createDto: CreateDto, request: Request): Promise<Post> {
+    const user: User = request.user as User;
+    const post: Post = await this.postsRepository.getRelatedByName(createDto, user);
 
-    if (isExist) {
-      throw new BadRequestException(isExist.title + ' already exists');
+    if (post) {
+      throw new BadRequestException(post.title + ' already exists');
     }
 
-    return await this.postsRepository.createOne(createDto, user);
+    return await this.postsRepository.create(createDto, user);
   }
 
   async getAll(getAllDto: GetAllDto): Promise<Post[]> {
@@ -28,38 +28,38 @@ export class PostsService {
   }
 
   async getOne(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<Post> {
-    const isExist = await this.postsRepository.getOneById(identifierDto, getOneDto);
+    const post: Post = await this.postsRepository.getOne(identifierDto, getOneDto);
 
-    if (!isExist) {
+    if (!post) {
       throw new NotFoundException();
     }
 
-    return isExist;
+    return post;
   }
 
-  async updateOne(
+  async update(
     identifierDto: IdentifierDto,
     updateDto: UpdateDto,
     request: Request
   ): Promise<Post> {
-    const user = request.user as User;
-    const isExist = await this.postsRepository.getOneByIdRelatedToUser(identifierDto, user);
+    const user: User = request.user as User;
+    const post: Post = await this.postsRepository.getRelatedById(identifierDto, user);
 
-    if (!isExist) {
+    if (!post) {
       throw new NotFoundException();
     }
 
-    return await this.postsRepository.updateOne(updateDto, isExist);
+    return await this.postsRepository.update(updateDto, post);
   }
 
-  async deleteOne(identifierDto: IdentifierDto, request: Request): Promise<Post> {
-    const user = request.user as User;
-    const isExist = await this.postsRepository.getOneByIdRelatedToUser(identifierDto, user);
+  async delete(identifierDto: IdentifierDto, request: Request): Promise<Post> {
+    const user: User = request.user as User;
+    const post: Post = await this.postsRepository.getRelatedById(identifierDto, user);
 
-    if (!isExist) {
+    if (!post) {
       throw new NotFoundException();
     }
 
-    return await this.postsRepository.deleteOne(identifierDto, isExist);
+    return await this.postsRepository.delete(post);
   }
 }

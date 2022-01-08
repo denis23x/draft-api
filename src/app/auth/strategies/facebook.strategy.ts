@@ -5,12 +5,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
 import { CreateDto } from '../../users/users.dto';
 
-type VerifyCallback = (err: any, user: any, info?: any) => void;
-
-interface JsonProfile {
-  familyName: string;
-  givenName: string;
-}
+type VerifyCallback = (error: any, user?: any, info?: any) => void;
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
@@ -25,19 +20,17 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   }
 
   async validate(
-    a: string,
-    r: string,
+    accessToken: string,
+    refreshToken: string,
     profile: Profile,
     verifyCallback: VerifyCallback
   ): Promise<any> {
+    const email = profile.emails.shift();
+
     verifyCallback(null, {
-      name: profile.displayName || this.getName(profile.name),
-      email: profile.emails[0].value,
+      name: email.value.split('@').shift(),
+      email: email.value,
       facebookId: profile.id
     } as CreateDto);
-  }
-
-  private getName(json: JsonProfile): string {
-    return [json.givenName || '', json.familyName || ''].join(' ').trim();
   }
 }

@@ -12,54 +12,54 @@ import { IdentifierDto } from '../core';
 export class CategoriesService {
   constructor(private readonly categoriesRepository: CategoriesRepository) {}
 
-  async createOne(createDto: CreateDto, request: Request): Promise<Category> {
-    const user = request.user as User;
-    const isExist = await this.categoriesRepository.getOneByNameRelatedToUser(createDto, user);
+  async create(createDto: CreateDto, request: Request): Promise<Category> {
+    const user: User = request.user as User;
+    const category: Category = await this.categoriesRepository.getRelatedByName(createDto, user);
 
-    if (isExist) {
-      throw new BadRequestException(isExist.name + ' already exists');
+    if (category) {
+      throw new BadRequestException(category.name + ' already exists');
     }
 
-    return await this.categoriesRepository.createOne(createDto, user);
+    return await this.categoriesRepository.create(createDto, user);
   }
 
   async getAll(getAllDto: GetAllDto): Promise<Category[]> {
     return await this.categoriesRepository.getAll(getAllDto);
   }
 
-  async getOne(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<Category> {
-    const isExist = await this.categoriesRepository.getOneById(identifierDto, getOneDto);
+  async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Category> {
+    const category: Category = await this.categoriesRepository.getOne(identifierDto, getOneDto);
 
-    if (!isExist) {
+    if (!category) {
       throw new NotFoundException();
     }
 
-    return isExist;
+    return category;
   }
 
-  async updateOne(
+  async update(
     identifierDto: IdentifierDto,
     updateDto: UpdateDto,
     request: Request
   ): Promise<Category> {
-    const user = request.user as User;
-    const isExist = await this.categoriesRepository.getOneByIdRelatedToUser(identifierDto, user);
+    const user: User = request.user as User;
+    const category: Category = await this.categoriesRepository.getRelatedById(identifierDto, user);
 
-    if (!isExist) {
+    if (!category) {
       throw new NotFoundException();
     }
 
-    return await this.categoriesRepository.updateOne(updateDto, isExist);
+    return await this.categoriesRepository.update(updateDto, category);
   }
 
-  async deleteOne(identifierDto: IdentifierDto, request: Request): Promise<Category> {
-    const user = request.user as User;
-    const isExist = await this.categoriesRepository.getOneByIdRelatedToUser(identifierDto, user);
+  async delete(identifierDto: IdentifierDto, request: Request): Promise<Category> {
+    const user: User = request.user as User;
+    const category: Category = await this.categoriesRepository.getRelatedById(identifierDto, user);
 
-    if (!isExist) {
+    if (!category) {
       throw new NotFoundException();
     }
 
-    return await this.categoriesRepository.deleteOne(identifierDto, isExist);
+    return await this.categoriesRepository.delete(category);
   }
 }

@@ -13,7 +13,6 @@ import { LoginDto } from './auth.dto';
 import { CreateDto } from '../users/users.dto';
 import { UsersRepository } from '../users/users.repository';
 import { TokensService } from '../tokens/tokens.service';
-import { IdentifierDto } from '../core';
 import * as url from 'url';
 
 @Injectable()
@@ -24,72 +23,79 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto, response: Response): Promise<User> {
-    const isExist = await this.usersRepository.getOneByEmail(loginDto);
+    const user: User = await this.usersRepository.getByEmail(loginDto);
 
-    if (!isExist) {
+    if (!user) {
       throw new NotFoundException();
     }
 
-    const existCredentials = await this.usersRepository.getOneByIdWithCredentials(
-      isExist as IdentifierDto
-    );
+    const userCredentials = await this.usersRepository.getCredentials(user);
 
-    if (loginDto.password) {
-      const isValid = await compare(loginDto.password, existCredentials.password);
+    if ('password' in loginDto) {
+      const passwordIsValid: boolean = await compare(loginDto.password, userCredentials.password);
 
-      if (isValid) {
-        return await this.getSharedResponse(isExist, response);
+      if (passwordIsValid) {
+        return await this.getSharedResponse(user, response);
       }
     }
 
-    const isGoogle = loginDto.googleId && loginDto.googleId === existCredentials.googleId;
-    const isFacebook = loginDto.facebookId && loginDto.facebookId === existCredentials.facebookId;
+    if ('googleId' in loginDto) {
+      const googleIdIsValid: boolean = loginDto.googleId === userCredentials.googleId;
 
-    if (isGoogle || isFacebook) {
-      return await this.getSharedResponse(isExist, response);
+      if (googleIdIsValid) {
+        return await this.getSharedResponse(user, response);
+      }
+    }
+
+    if ('facebookId' in loginDto) {
+      const facebookIdIsValid: boolean = loginDto.facebookId === userCredentials.facebookId;
+
+      if (facebookIdIsValid) {
+        return await this.getSharedResponse(user, response);
+      }
     }
 
     throw new UnauthorizedException();
   }
 
   async refresh(request: Request, response: Response): Promise<User> {
-    const refreshToken = request.signedCookies.refreshToken;
+    const refreshToken: string = request.signedCookies.refreshToken;
 
     if (!refreshToken) {
       throw new ForbiddenException();
     }
 
-    const isExist = await this.tokensService.resolveRefreshToken(refreshToken);
+    const user: User = await this.tokensService.resolveRefreshToken(refreshToken);
 
-    if (!isExist) {
+    if (!user) {
       throw new ForbiddenException();
     }
 
-    return await this.getSharedResponse(isExist, response);
+    return await this.getSharedResponse(user, response);
   }
 
-  async getSocial(request: Request, response: Response, socialId: string): Promise<void> {
-    const createDto = request.user as CreateDto;
+  async getSocial(request: Request, response: Response, socialKey: string): Promise<void> {
+    const createDto: CreateDto = request.user as CreateDto;
 
     if (!createDto) {
       throw new UnauthorizedException();
     }
 
-    const isExist = await this.usersRepository.getOneByEmail(createDto);
+    const userExist: User = await this.usersRepository.getByEmail(createDto);
 
-    if (isExist) {
-      const exist = { ...isExist, [socialId]: createDto[socialId] };
+    if (userExist) {
+      const user: User = { ...userExist, [socialKey]: createDto[socialKey] };
 
-      return await this.getSharedRedirect(exist, response, socialId);
+      return await this.getSharedRedirect(user, response, socialKey);
     }
 
-    const user = await this.usersRepository.createOne(createDto);
+    const userCreated: User = await this.usersRepository.create(createDto);
 
-    return await this.getSharedRedirect(user, response, socialId);
+    return await this.getSharedRedirect(userCreated, response, socialKey);
   }
 
   async getSharedResponse(user: User, response: Response): Promise<User> {
-    const refreshToken = await this.tokensService.generateRefreshToken(user);
+    const refreshToken: string = await this.tokensService.generateRefreshToken(user);
 
     // TODO: enable secure and sameSite (need HTTPS)
     // secure: true,
@@ -108,13 +114,13 @@ export class AuthService {
     });
   }
 
-  async getSharedRedirect(user: User, response: Response, socialId: string): Promise<void> {
+  async getSharedRedirect(user: User, response: Response, socialKey: string): Promise<void> {
     return response.redirect(
       url.format({
         pathname: process.env.APP_SITE_ORIGIN + '/auth/login',
         query: {
           email: user.email,
-          [socialId]: user[socialId]
+          [socialKey]: user[socialKey]
         }
       })
     );

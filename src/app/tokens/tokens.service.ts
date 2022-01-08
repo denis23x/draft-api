@@ -8,7 +8,8 @@ import { TokensRepository } from './tokens.repository';
 import { UsersRepository } from '../users/users.repository';
 import { JwtDecodedPayload } from '../auth/auth.interface';
 import { IdentifierDto } from '../core';
-import { GetOneDto } from '../users/users.dto';
+import { Token } from './tokens.entity';
+import { DeleteResult } from 'typeorm';
 
 @Injectable()
 export class TokensService {
@@ -19,55 +20,44 @@ export class TokensService {
   ) {}
 
   async generateAccessToken(user: User): Promise<string> {
-    const opts: SignOptions = {
+    const signOptions: SignOptions = {
       ...this.getJwtBaseOptions(),
       subject: String(user.id)
     };
 
-    return await this.jwtService.signAsync({}, opts);
+    return await this.jwtService.signAsync({}, signOptions);
   }
 
   async generateRefreshToken(user: User): Promise<string> {
-    const token = await this.tokensRepository.createOne(user);
+    const token: Token = await this.tokensRepository.create(user);
 
-    const opts: SignOptions = {
+    const signOptions: SignOptions = {
       ...this.getJwtBaseOptions(),
       expiresIn: Number(process.env.JWT_REFRESH_TTL),
       subject: String(user.id),
       jwtid: String(token.id)
     };
 
-    return await this.jwtService.signAsync({}, opts);
+    return await this.jwtService.signAsync({}, signOptions);
   }
 
   async resolveRefreshToken(refreshToken: string): Promise<User> {
-    const payload = await this.decodeRefreshToken(refreshToken);
+    const jwtDecodedPayload: JwtDecodedPayload = await this.decodeRefreshToken(refreshToken);
 
-    const jtiIdentifierDto: IdentifierDto = {
-      id: Number(payload.jti)
-    };
+    const deleteResult: DeleteResult = await this.tokensRepository.delete(jwtDecodedPayload);
 
-    const isDelete = await this.tokensRepository.deleteOne(jtiIdentifierDto);
-
-    if (!isDelete) {
+    if (!deleteResult) {
       throw new UnprocessableEntityException('Refresh token not found');
     }
 
-    const subIdentifierDto: IdentifierDto = {
-      id: Number(payload.sub)
+    const identifierDto: IdentifierDto = {
+      id: Number(jwtDecodedPayload.sub)
     };
 
-    return await this.usersRepository.getOneById(subIdentifierDto, {} as GetOneDto);
+    return await this.usersRepository.getOne(identifierDto);
   }
 
-  private getJwtBaseOptions(): SignOptions {
-    return {
-      issuer: process.env.JWT_ISSUER,
-      audience: process.env.JWT_AUDIENCE
-    };
-  }
-
-  private async decodeRefreshToken(token: string): Promise<JwtDecodedPayload> {
+  async decodeRefreshToken(token: string): Promise<JwtDecodedPayload> {
     try {
       return await this.jwtService.verifyAsync(token);
     } catch (e) {
@@ -77,5 +67,12 @@ export class TokensService {
         throw new UnprocessableEntityException('Refresh token malformed');
       }
     }
+  }
+
+  getJwtBaseOptions(): SignOptions {
+    return {
+      issuer: process.env.JWT_ISSUER,
+      audience: process.env.JWT_AUDIENCE
+    };
   }
 }

@@ -32,22 +32,22 @@ export class UsersController {
 
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  async createOne(
+  async create(
     @Body() createDto: CreateDto,
     @Res(responseOptions) response: Response
   ): Promise<User> {
-    return await this.usersService.createOne(createDto, response);
+    return await this.usersService.create(createDto, response);
   }
 
-  @Get('profile')
+  @Get('me')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async getProfile(@Req() request: Request, @Query() getOneDto: GetOneDto): Promise<User> {
-    return await this.usersService.getProfile(request, getOneDto);
+  async getMe(@Req() request: Request, @Query() getOneDto: GetOneDto): Promise<User> {
+    return await this.usersService.getMe(request, getOneDto);
   }
 
   @Get()
-  async getAll(@Query() getAllDto: GetAllDto): Promise<User | User[]> {
+  async getAll(@Query() getAllDto: GetAllDto): Promise<User[]> {
     return await this.usersService.getAll(getAllDto);
   }
 
@@ -59,16 +59,16 @@ export class UsersController {
     return await this.usersService.getOne(identifierDto, getOneDto);
   }
 
-  @Put('profile')
+  @Put('me')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async updateProfile(@Body() updateDto: UpdateDto, @Req() request: Request): Promise<User> {
-    return await this.usersService.updateProfile(updateDto, request);
+  async update(@Body() updateDto: UpdateDto, @Req() request: Request): Promise<User> {
+    return await this.usersService.update(updateDto, request);
   }
 
-  @Delete('profile')
+  @Delete('me')
   @UseGuards(AuthGuard('jwt'))
-  async deleteProfile(@Req() request: Request): Promise<User> {
-    return await this.usersService.deleteProfile(request);
+  async delete(@Req() request: Request): Promise<User> {
+    return await this.usersService.delete(request);
   }
 }

@@ -28,8 +28,8 @@ export class CategoriesController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async createOne(@Body() createDto: CreateDto, @Req() request: Request): Promise<Category> {
-    return await this.categoriesService.createOne(createDto, request);
+  async create(@Body() createDto: CreateDto, @Req() request: Request): Promise<Category> {
+    return await this.categoriesService.create(createDto, request);
   }
 
   @Get()
@@ -48,20 +48,17 @@ export class CategoriesController {
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async updateOne(
+  async update(
     @Param() identifierDto: IdentifierDto,
     @Body() updateDto: UpdateDto,
     @Req() request: Request
   ): Promise<Category> {
-    return await this.categoriesService.updateOne(identifierDto, updateDto, request);
+    return await this.categoriesService.update(identifierDto, updateDto, request);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
-  async deleteOne(
-    @Param() identifierDto: IdentifierDto,
-    @Req() request: Request
-  ): Promise<Category> {
-    return await this.categoriesService.deleteOne(identifierDto, request);
+  async delete(@Param() identifierDto: IdentifierDto, @Req() request: Request): Promise<Category> {
+    return await this.categoriesService.delete(identifierDto, request);
   }
 }

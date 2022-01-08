@@ -28,8 +28,8 @@ export class PostsController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async createOne(@Body() createDto: CreateDto, @Req() request: Request): Promise<PostEntity> {
-    return await this.postsService.createOne(createDto, request);
+  async create(@Body() createDto: CreateDto, @Req() request: Request): Promise<PostEntity> {
+    return await this.postsService.create(createDto, request);
   }
 
   @Get()
@@ -48,20 +48,20 @@ export class PostsController {
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  async updateOne(
+  async update(
     @Param() identifierDto: IdentifierDto,
     @Body() updateDto: UpdateDto,
     @Req() request: Request
   ): Promise<PostEntity> {
-    return await this.postsService.updateOne(identifierDto, updateDto, request);
+    return await this.postsService.update(identifierDto, updateDto, request);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
-  async deleteOne(
+  async delete(
     @Param() identifierDto: IdentifierDto,
     @Req() request: Request
   ): Promise<PostEntity> {
-    return await this.postsService.deleteOne(identifierDto, request);
+    return await this.postsService.delete(identifierDto, request);
   }
 }

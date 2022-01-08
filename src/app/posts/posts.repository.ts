@@ -7,8 +7,6 @@ import { Post } from './posts.entity';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './posts.dto';
 import { IdentifierDto } from '../core';
 import { User } from '../users/users.entity';
-import { Category } from '../categories/categories.entity';
-import { GetOneDto as GetOneDtoCategory } from '../categories/categories.dto';
 import { CategoriesService } from '../categories/categories.service';
 
 @Injectable()
@@ -19,24 +17,62 @@ export class PostsRepository {
     private readonly categoriesService: CategoriesService
   ) {}
 
-  async createOne(createDto: CreateDto, user: User): Promise<Post> {
-    const entity = new Post();
+  /* UTILITY */
 
-    entity.title = createDto.title;
-    entity.body = createDto.body;
-    entity.user = user;
+  async getRelatedByName(createDto: CreateDto, user: User): Promise<Post> {
+    const query = getRepository(Post)
+      .createQueryBuilder('post')
+      .where('post.title = :title', { title: createDto.title })
+      .andWhere('post.userId = :userId', { userId: user.id })
+      .select([
+        'post.id',
+        'post.title',
+        'post.body',
+        'post.createdAt',
+        'post.updatedAt',
+        'post.userId'
+      ]);
+
+    return await query.getOne();
+  }
+
+  async getRelatedById(identifierDto: IdentifierDto, user: User): Promise<Post> {
+    const query = getRepository(Post)
+      .createQueryBuilder('post')
+      .where('post.id = :id', { id: identifierDto.id })
+      .andWhere('post.userId = :userId', { userId: user.id })
+      .select([
+        'post.id',
+        'post.title',
+        'post.body',
+        'post.createdAt',
+        'post.updatedAt',
+        'post.userId'
+      ]);
+
+    return await query.getOne();
+  }
+
+  /* CRUD */
+
+  async create(createDto: CreateDto, user: User): Promise<Post> {
+    const post: Post = new Post();
+
+    post.title = createDto.title;
+    post.body = createDto.body;
+    post.user = user;
 
     if ('image' in createDto) {
-      entity.image = createDto.image;
+      post.image = createDto.image;
     }
 
     const identifierDto: IdentifierDto = {
       id: Number(createDto.categoryId)
     };
 
-    entity.category = await this.categoriesService.getOne(identifierDto, {} as GetOneDtoCategory);
+    post.category = await this.categoriesService.getOne(identifierDto);
 
-    return await this.repository.save(entity);
+    return await this.repository.save(post);
   }
 
   async getAll(getAllDto: GetAllDto): Promise<Post[]> {
@@ -104,7 +140,7 @@ export class PostsRepository {
     return await query.getMany();
   }
 
-  async getOneById(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<Post> {
+  async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Post> {
     let query = getRepository(Post)
       .createQueryBuilder('post')
       .where('post.id = :id', { id: identifierDto.id })
@@ -117,78 +153,46 @@ export class PostsRepository {
         'post.updatedAt'
       ]);
 
-    if ('scope' in getOneDto) {
-      if (getOneDto.scope.includes('user')) {
-        query = query
-          .addSelect([
-            'user.id',
-            'user.name',
-            'user.avatar',
-            'user.biography',
-            'user.createdAt',
-            'user.updatedAt'
-          ])
-          .leftJoin('post.user', 'user');
-      }
+    if (getOneDto) {
+      if ('scope' in getOneDto) {
+        if (getOneDto.scope.includes('user')) {
+          query = query
+            .addSelect([
+              'user.id',
+              'user.name',
+              'user.avatar',
+              'user.biography',
+              'user.createdAt',
+              'user.updatedAt'
+            ])
+            .leftJoin('post.user', 'user');
+        }
 
-      if (getOneDto.scope.includes('category')) {
-        query = query
-          .addSelect([
-            'category.id',
-            'category.name',
-            'category.isPrivate',
-            'category.createdAt',
-            'category.updatedAt'
-          ])
-          .leftJoin('post.category', 'category');
+        if (getOneDto.scope.includes('category')) {
+          query = query
+            .addSelect([
+              'category.id',
+              'category.name',
+              'category.isPrivate',
+              'category.createdAt',
+              'category.updatedAt'
+            ])
+            .leftJoin('post.category', 'category');
+        }
       }
     }
 
     return await query.getOne();
   }
 
-  async getOneByNameRelatedToUser(createDto: CreateDto, user: User): Promise<Post> {
-    const query = getRepository(Post)
-      .createQueryBuilder('post')
-      .where('post.title = :title', { title: createDto.title })
-      .andWhere('post.userId = :userId', { userId: user.id })
-      .select([
-        'post.id',
-        'post.title',
-        'post.body',
-        'post.createdAt',
-        'post.updatedAt',
-        'post.userId'
-      ]);
+  async update(updateDto: UpdateDto, post: Post): Promise<Post> {
+    const postCreated: Post = new Post();
 
-    return await query.getOne();
-  }
-
-  async getOneByIdRelatedToUser(identifierDto: IdentifierDto, user: User): Promise<Post> {
-    const query = getRepository(Post)
-      .createQueryBuilder('post')
-      .where('post.id = :id', { id: identifierDto.id })
-      .andWhere('post.userId = :userId', { userId: user.id })
-      .select([
-        'post.id',
-        'post.title',
-        'post.body',
-        'post.createdAt',
-        'post.updatedAt',
-        'post.userId'
-      ]);
-
-    return await query.getOne();
-  }
-
-  async updateOne(updateDto: UpdateDto, post: Post): Promise<Post> {
-    const entity = new Post();
-
-    entity.title = updateDto.title;
-    entity.body = updateDto.body;
+    postCreated.title = updateDto.title;
+    postCreated.body = updateDto.body;
 
     if ('image' in updateDto) {
-      entity.image = updateDto.image;
+      postCreated.image = updateDto.image;
     }
 
     if ('categoryId' in updateDto) {
@@ -196,22 +200,20 @@ export class PostsRepository {
         id: Number(updateDto.categoryId)
       };
 
-      entity.category = await this.categoriesService.getOne(identifierDto, {} as GetOneDtoCategory);
+      postCreated.category = await this.categoriesService.getOne(identifierDto);
     }
 
-    await this.repository.update(post.id, entity);
+    await this.repository.update(post.id, postCreated);
 
-    const identifierDto: IdentifierDto = {
-      id: post.id
+    const getOneDto: GetOneDto = {
+      scope: ['category', 'user']
     };
 
-    return await this.getOneById(identifierDto, {
-      scope: ['category', 'user']
-    } as GetOneDto);
+    return await this.getOne(post, getOneDto);
   }
 
-  async deleteOne(identifierDto: IdentifierDto, post: Post): Promise<Post> {
-    await this.repository.delete(identifierDto.id);
+  async delete(post: Post): Promise<Post> {
+    await this.repository.delete(post.id);
 
     return post;
   }

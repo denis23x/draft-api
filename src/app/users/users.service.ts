@@ -15,66 +15,60 @@ export class UsersService {
     private readonly usersRepository: UsersRepository
   ) {}
 
-  async createOne(createDto: CreateDto, response: Response): Promise<User> {
-    const isExist = await this.usersRepository.getOneByEmail(createDto);
+  async create(createDto: CreateDto, response: Response): Promise<User> {
+    const userExist: User = await this.usersRepository.getByEmail(createDto);
 
-    if (isExist) {
-      throw new BadRequestException(isExist.email + ' already exists');
+    if (userExist) {
+      throw new BadRequestException(userExist.email + ' already exists');
     }
 
-    const user = await this.usersRepository.createOne(createDto);
+    const userCreated: User = await this.usersRepository.create(createDto);
 
-    return await this.authService.getSharedResponse(user, response);
+    return await this.authService.getSharedResponse(userCreated, response);
   }
 
-  async getProfile(request: Request, getOneDto?: GetOneDto): Promise<User> {
-    const user = request.user as User;
-    const isExist = await this.usersRepository.getOneById(user as IdentifierDto, getOneDto);
+  async getMe(request: Request, getOneDto?: GetOneDto): Promise<User> {
+    const user: User = request.user as User;
+    const userExist: User = await this.usersRepository.getOne(user, getOneDto);
 
-    if (!isExist) {
+    if (!userExist) {
       throw new NotFoundException();
     }
 
-    return isExist;
+    return userExist;
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<User | User[]> {
-    const isExist = await this.usersRepository.getAll(getAllDto);
-
-    if (!isExist) {
-      throw new NotFoundException();
-    }
-
-    return isExist;
+  async getAll(getAllDto: GetAllDto): Promise<User[]> {
+    return await this.usersRepository.getAll(getAllDto);
   }
 
   async getOne(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<User> {
-    const isExist = await this.usersRepository.getOneById(identifierDto, getOneDto);
+    const user: User = await this.usersRepository.getOne(identifierDto, getOneDto);
 
-    if (!isExist) {
+    if (!user) {
       throw new NotFoundException();
     }
 
-    return isExist;
+    return user;
   }
 
-  async updateProfile(updateDto: UpdateDto, request: Request): Promise<User> {
-    const isExist = await this.getProfile(request);
+  async update(updateDto: UpdateDto, request: Request): Promise<User> {
+    const user: User = await this.getMe(request);
 
-    if (!isExist) {
+    if (!user) {
       throw new NotFoundException();
     }
 
-    return await this.usersRepository.updateProfile(updateDto, isExist);
+    return await this.usersRepository.update(updateDto, user);
   }
 
-  async deleteProfile(request: Request): Promise<User> {
-    const isExist = await this.getProfile(request);
+  async delete(request: Request): Promise<User> {
+    const user: User = await this.getMe(request);
 
-    if (!isExist) {
+    if (!user) {
       throw new NotFoundException();
     }
 
-    return await this.usersRepository.deleteProfile(isExist);
+    return await this.usersRepository.delete(user);
   }
 }

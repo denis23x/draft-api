@@ -16,7 +16,37 @@ export class UsersRepository {
     private readonly repository: Repository<User>
   ) {}
 
-  async createOne(createDto: CreateDto): Promise<User> {
+  /* UTILITY */
+
+  async getCredentials(user: User): Promise<User> {
+    const query = getRepository(User)
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id: user.id })
+      .addSelect(['user.password', 'user.googleId', 'user.facebookId']);
+
+    return await query.getOne();
+  }
+
+  async getByEmail(createDto: CreateDto | LoginDto): Promise<User> {
+    const query = getRepository(User)
+      .createQueryBuilder('user')
+      .where('user.email = :email', { email: createDto.email })
+      .addSelect(['user.email'])
+      .addSelect([
+        'categories.id',
+        'categories.name',
+        'categories.isPrivate',
+        'categories.createdAt',
+        'categories.updatedAt'
+      ])
+      .leftJoin('user.categories', 'categories');
+
+    return await query.getOne();
+  }
+
+  /* CRUD */
+
+  async create(createDto: CreateDto): Promise<User> {
     const entity = new User();
 
     entity.name = createDto.name;
@@ -37,7 +67,7 @@ export class UsersRepository {
     return await this.repository.save(entity);
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<User | User[]> {
+  async getAll(getAllDto: GetAllDto): Promise<User[]> {
     let query = getRepository(User)
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC')
@@ -80,7 +110,7 @@ export class UsersRepository {
       if ('exact' in getAllDto && !!getAllDto.exact) {
         query = query.where('user.name = :name', { name: getAllDto.name });
 
-        return await query.getOne();
+        return await query.getMany();
       } else {
         query = query.where('user.name like :name', { name: '%' + getAllDto.name + '%' });
       }
@@ -99,7 +129,7 @@ export class UsersRepository {
     return await query.getMany();
   }
 
-  async getOneById(identifierDto: IdentifierDto, getOneDto: GetOneDto): Promise<User> {
+  async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<User> {
     let query = getRepository(User)
       .createQueryBuilder('user')
       .where('user.id = :id', { id: identifierDto.id })
@@ -112,76 +142,54 @@ export class UsersRepository {
         'user.updatedAt'
       ]);
 
-    if ('scope' in getOneDto) {
-      if (getOneDto.scope.includes('categories')) {
-        query = query
-          .addSelect([
-            'categories.id',
-            'categories.name',
-            'categories.isPrivate',
-            'categories.createdAt',
-            'categories.updatedAt'
-          ])
-          .leftJoin('user.categories', 'categories');
-      }
+    if (getOneDto) {
+      if ('scope' in getOneDto) {
+        if (getOneDto.scope.includes('categories')) {
+          query = query
+            .addSelect([
+              'categories.id',
+              'categories.name',
+              'categories.isPrivate',
+              'categories.createdAt',
+              'categories.updatedAt'
+            ])
+            .leftJoin('user.categories', 'categories');
+        }
 
-      if (getOneDto.scope.includes('posts')) {
-        query = query
-          .addSelect([
-            'posts.id',
-            'posts.title',
-            'posts.image',
-            'posts.createdAt',
-            'posts.updatedAt'
-          ])
-          .leftJoin('user.posts', 'posts');
+        if (getOneDto.scope.includes('posts')) {
+          query = query
+            .addSelect([
+              'posts.id',
+              'posts.title',
+              'posts.image',
+              'posts.createdAt',
+              'posts.updatedAt'
+            ])
+            .leftJoin('user.posts', 'posts');
+        }
       }
     }
 
     return await query.getOne();
   }
 
-  async getOneByIdWithCredentials(identifierDto: IdentifierDto): Promise<User> {
-    const query = getRepository(User)
-      .createQueryBuilder('user')
-      .where('user.id = :id', { id: identifierDto.id })
-      .addSelect('user.password')
-      .addSelect('user.googleId')
-      .addSelect('user.facebookId');
-
-    return await query.getOne();
-  }
-
-  async getOneByEmail(createDto: CreateDto | LoginDto): Promise<User> {
-    const query = getRepository(User)
-      .createQueryBuilder('user')
-      .where('user.email = :email', { email: createDto.email })
-      .addSelect('user.email');
-
-    return await query.getOne();
-  }
-
-  async updateProfile(updateDto: UpdateDto, user: User): Promise<User> {
-    const entity = new User();
+  async update(updateDto: UpdateDto, user: User): Promise<User> {
+    const userCreated: User = new User();
 
     if ('name' in updateDto) {
-      entity.name = updateDto.name;
+      userCreated.name = updateDto.name;
     }
 
     if ('biography' in updateDto) {
-      entity.biography = updateDto.biography;
+      userCreated.biography = updateDto.biography;
     }
 
-    await this.repository.update(user.id, entity);
+    await this.repository.update(user.id, userCreated);
 
-    const identifierDto: IdentifierDto = {
-      id: user.id
-    };
-
-    return await this.getOneById(identifierDto, {} as GetOneDto);
+    return await this.getOne(user);
   }
 
-  async deleteProfile(user: User): Promise<User> {
+  async delete(user: User): Promise<User> {
     await this.repository.delete(user.id);
 
     return user;
