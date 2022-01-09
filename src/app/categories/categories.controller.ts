@@ -19,7 +19,7 @@ import { Category } from './categories.entity';
 import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { IdentifierDto } from '../core';
+import { IdentifierDto, TransformInterceptor } from '../core';
 
 @Controller('categories')
 export class CategoriesController {
@@ -27,17 +27,19 @@ export class CategoriesController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async create(@Body() createDto: CreateDto, @Req() request: Request): Promise<Category> {
     return await this.categoriesService.create(createDto, request);
   }
 
   @Get()
+  @UseInterceptors(TransformInterceptor)
   async getAll(@Query() getAllDto: GetAllDto): Promise<Category[]> {
     return await this.categoriesService.getAll(getAllDto);
   }
 
   @Get(':id')
+  @UseInterceptors(TransformInterceptor)
   async getOne(
     @Param() identifierDto: IdentifierDto,
     @Query() getOneDto: GetOneDto
@@ -47,7 +49,7 @@ export class CategoriesController {
 
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async update(
     @Param() identifierDto: IdentifierDto,
     @Body() updateDto: UpdateDto,
@@ -58,6 +60,7 @@ export class CategoriesController {
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(TransformInterceptor)
   async delete(@Param() identifierDto: IdentifierDto, @Req() request: Request): Promise<Category> {
     return await this.categoriesService.delete(identifierDto, request);
   }

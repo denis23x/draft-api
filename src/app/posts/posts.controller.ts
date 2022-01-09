@@ -17,7 +17,7 @@ import {
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './posts.dto';
 import { Post as PostEntity } from './posts.entity';
 import { PostsService } from './posts.service';
-import { IdentifierDto } from '../core';
+import { IdentifierDto, TransformInterceptor } from '../core';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
@@ -27,17 +27,19 @@ export class PostsController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async create(@Body() createDto: CreateDto, @Req() request: Request): Promise<PostEntity> {
     return await this.postsService.create(createDto, request);
   }
 
   @Get()
+  @UseInterceptors(TransformInterceptor)
   async getAll(@Query() getAllDto: GetAllDto): Promise<PostEntity[]> {
     return await this.postsService.getAll(getAllDto);
   }
 
   @Get(':id')
+  @UseInterceptors(TransformInterceptor)
   async getOne(
     @Param() identifierDto: IdentifierDto,
     @Query() getOneDto: GetOneDto
@@ -47,7 +49,7 @@ export class PostsController {
 
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async update(
     @Param() identifierDto: IdentifierDto,
     @Body() updateDto: UpdateDto,
@@ -58,6 +60,7 @@ export class PostsController {
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(TransformInterceptor)
   async delete(
     @Param() identifierDto: IdentifierDto,
     @Req() request: Request

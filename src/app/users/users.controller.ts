@@ -20,7 +20,7 @@ import { User } from './users.entity';
 import { UsersService } from './users.service';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
 import { Request, Response } from 'express';
-import { IdentifierDto } from '../core';
+import { IdentifierDto, TransformInterceptor } from '../core';
 
 const responseOptions = {
   passthrough: true
@@ -31,7 +31,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async create(
     @Body() createDto: CreateDto,
     @Res(responseOptions) response: Response
@@ -41,17 +41,19 @@ export class UsersController {
 
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async getMe(@Req() request: Request, @Query() getOneDto: GetOneDto): Promise<User> {
     return await this.usersService.getMe(request, getOneDto);
   }
 
   @Get()
+  @UseInterceptors(TransformInterceptor)
   async getAll(@Query() getAllDto: GetAllDto): Promise<User[]> {
     return await this.usersService.getAll(getAllDto);
   }
 
   @Get(':id')
+  @UseInterceptors(TransformInterceptor)
   async getOne(
     @Param() identifierDto: IdentifierDto,
     @Query() getOneDto: GetOneDto
@@ -61,13 +63,14 @@ export class UsersController {
 
   @Put('me')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async update(@Body() updateDto: UpdateDto, @Req() request: Request): Promise<User> {
     return await this.usersService.update(updateDto, request);
   }
 
   @Delete('me')
   @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(TransformInterceptor)
   async delete(@Req() request: Request): Promise<User> {
     return await this.usersService.delete(request);
   }

@@ -16,6 +16,7 @@ import { Request, Response } from 'express';
 import { User } from '../users/users.entity';
 import { AuthService } from './auth.service';
 import { LoginDto } from './auth.dto';
+import { TransformInterceptor } from '../core';
 
 const responseOptions = {
   passthrough: true
@@ -26,13 +27,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async login(@Body() loginDto: LoginDto, @Res(responseOptions) response: Response): Promise<User> {
     return await this.authService.login(loginDto, response);
   }
 
   @Post('refresh')
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
     return await this.authService.refresh(request, response);
   }
