@@ -1,25 +1,26 @@
 /** @format */
 
 import { Injectable } from '@nestjs/common';
-import { Repository, getRepository } from 'typeorm';
+import { Repository, getRepository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'bcrypt';
 import { User } from './users.entity';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
 import { LoginDto } from '../auth/auth.dto';
-import { IdentifierDto } from '../core';
+import { IdentifierDto, HelperService } from '../core';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectRepository(User)
-    private readonly repository: Repository<User>
+    private readonly repository: Repository<User>,
+    private readonly helperService: HelperService
   ) {}
 
   /* UTILITY */
 
   async getCredentials(user: User): Promise<User> {
-    const query = getRepository(User)
+    const query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
       .where('user.id = :id', { id: user.id })
       .addSelect(['user.password', 'user.googleId', 'user.facebookId']);
@@ -28,14 +29,13 @@ export class UsersRepository {
   }
 
   async getByEmail(createDto: CreateDto | LoginDto): Promise<User> {
-    const query = getRepository(User)
+    const query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
       .where('user.email = :email', { email: createDto.email })
       .addSelect(['user.email'])
       .addSelect([
         'categories.id',
         'categories.name',
-        'categories.isPrivate',
         'categories.createdAt',
         'categories.updatedAt'
       ])
@@ -68,7 +68,7 @@ export class UsersRepository {
   }
 
   async getAll(getAllDto: GetAllDto): Promise<User[]> {
-    let query = getRepository(User)
+    let query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC')
       .select([
@@ -83,10 +83,10 @@ export class UsersRepository {
     if ('scope' in getAllDto) {
       if (getAllDto.scope.includes('categories')) {
         query = query
+          .addOrderBy('categories.id', 'DESC')
           .addSelect([
             'categories.id',
             'categories.name',
-            'categories.isPrivate',
             'categories.createdAt',
             'categories.updatedAt'
           ])
@@ -95,6 +95,7 @@ export class UsersRepository {
 
       if (getAllDto.scope.includes('posts')) {
         query = query
+          .addOrderBy('posts.id', 'DESC')
           .addSelect([
             'posts.id',
             'posts.title',
@@ -116,21 +117,11 @@ export class UsersRepository {
       }
     }
 
-    if (!('page' in getAllDto) || !('size' in getAllDto)) {
-      getAllDto = {
-        ...getAllDto,
-        page: 1,
-        size: 10
-      };
-    }
-
-    query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
-
-    return await query.getMany();
+    return await this.helperService.pagination(query, getAllDto);
   }
 
   async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<User> {
-    let query = getRepository(User)
+    let query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
       .where('user.id = :id', { id: identifierDto.id })
       .select([
@@ -146,10 +137,10 @@ export class UsersRepository {
       if ('scope' in getOneDto) {
         if (getOneDto.scope.includes('categories')) {
           query = query
+            .addOrderBy('categories.id', 'DESC')
             .addSelect([
               'categories.id',
               'categories.name',
-              'categories.isPrivate',
               'categories.createdAt',
               'categories.updatedAt'
             ])
@@ -158,6 +149,7 @@ export class UsersRepository {
 
         if (getOneDto.scope.includes('posts')) {
           query = query
+            .addOrderBy('posts.id', 'DESC')
             .addSelect([
               'posts.id',
               'posts.title',

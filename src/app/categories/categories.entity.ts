@@ -22,11 +22,6 @@ export class Category {
   @Column()
   name: string;
 
-  @Column({
-    default: false
-  })
-  isPrivate: boolean;
-
   @CreateDateColumn()
   createdAt: Date;
 

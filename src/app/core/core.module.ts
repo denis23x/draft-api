@@ -1,9 +1,10 @@
 /** @format */
 
 import { Module } from '@nestjs/common';
+import { HelperService } from './services';
 
 @Module({
-  exports: [],
-  providers: []
+  exports: [HelperService],
+  providers: [HelperService]
 })
 export class CoreModule {}

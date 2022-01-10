@@ -1,11 +1,11 @@
 /** @format */
 
 import { Injectable } from '@nestjs/common';
-import { Repository, getRepository } from 'typeorm';
+import { Repository, getRepository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './posts.entity';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './posts.dto';
-import { IdentifierDto } from '../core';
+import { HelperService, IdentifierDto } from '../core';
 import { User } from '../users/users.entity';
 import { CategoriesService } from '../categories/categories.service';
 
@@ -14,13 +14,14 @@ export class PostsRepository {
   constructor(
     @InjectRepository(Post)
     private readonly repository: Repository<Post>,
-    private readonly categoriesService: CategoriesService
+    private readonly categoriesService: CategoriesService,
+    private readonly helperService: HelperService
   ) {}
 
   /* UTILITY */
 
   async getRelatedByName(createDto: CreateDto, user: User): Promise<Post> {
-    const query = getRepository(Post)
+    const query: SelectQueryBuilder<Post> = getRepository(Post)
       .createQueryBuilder('post')
       .where('post.title = :title', { title: createDto.title })
       .andWhere('post.userId = :userId', { userId: user.id })
@@ -37,7 +38,7 @@ export class PostsRepository {
   }
 
   async getRelatedById(identifierDto: IdentifierDto, user: User): Promise<Post> {
-    const query = getRepository(Post)
+    const query: SelectQueryBuilder<Post> = getRepository(Post)
       .createQueryBuilder('post')
       .where('post.id = :id', { id: identifierDto.id })
       .andWhere('post.userId = :userId', { userId: user.id })
@@ -76,7 +77,7 @@ export class PostsRepository {
   }
 
   async getAll(getAllDto: GetAllDto): Promise<Post[]> {
-    let query = getRepository(Post)
+    let query: SelectQueryBuilder<Post> = getRepository(Post)
       .createQueryBuilder('post')
       .orderBy('post.id', 'DESC')
       .select(['post.id', 'post.title', 'post.image', 'post.createdAt', 'post.updatedAt']);
@@ -97,13 +98,7 @@ export class PostsRepository {
 
       if (getAllDto.scope.includes('category')) {
         query = query
-          .addSelect([
-            'category.id',
-            'category.name',
-            'category.isPrivate',
-            'category.createdAt',
-            'category.updatedAt'
-          ])
+          .addSelect(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt'])
           .leftJoin('post.category', 'category');
       }
     }
@@ -127,21 +122,11 @@ export class PostsRepository {
       );
     }
 
-    if (!('page' in getAllDto) || !('size' in getAllDto)) {
-      getAllDto = {
-        ...getAllDto,
-        page: 1,
-        size: 10
-      };
-    }
-
-    query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
-
-    return await query.getMany();
+    return await this.helperService.pagination(query, getAllDto);
   }
 
   async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Post> {
-    let query = getRepository(Post)
+    let query: SelectQueryBuilder<Post> = getRepository(Post)
       .createQueryBuilder('post')
       .where('post.id = :id', { id: identifierDto.id })
       .select([
@@ -170,13 +155,7 @@ export class PostsRepository {
 
         if (getOneDto.scope.includes('category')) {
           query = query
-            .addSelect([
-              'category.id',
-              'category.name',
-              'category.isPrivate',
-              'category.createdAt',
-              'category.updatedAt'
-            ])
+            .addSelect(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt'])
             .leftJoin('post.category', 'category');
         }
       }

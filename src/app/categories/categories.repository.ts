@@ -1,31 +1,31 @@
 /** @format */
 
 import { Injectable } from '@nestjs/common';
-import { Repository, getRepository } from 'typeorm';
+import { Repository, getRepository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './categories.entity';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './categories.dto';
 import { User } from '../users/users.entity';
-import { IdentifierDto } from '../core';
+import { HelperService, IdentifierDto } from '../core';
 
 @Injectable()
 export class CategoriesRepository {
   constructor(
     @InjectRepository(Category)
-    private readonly repository: Repository<Category>
+    private readonly repository: Repository<Category>,
+    private readonly helperService: HelperService
   ) {}
 
   /* UTILITY */
 
   async getRelatedByName(createDto: CreateDto, user: User): Promise<Category> {
-    const query = getRepository(Category)
+    const query: SelectQueryBuilder<Category> = getRepository(Category)
       .createQueryBuilder('category')
       .where('category.name = :name', { name: createDto.name })
       .andWhere('category.userId = :userId', { userId: user.id })
       .select([
         'category.id',
         'category.name',
-        'category.isPrivate',
         'category.createdAt',
         'category.updatedAt',
         'category.userId'
@@ -35,14 +35,13 @@ export class CategoriesRepository {
   }
 
   async getRelatedById(identifierDto: IdentifierDto, user: User): Promise<Category> {
-    const query = getRepository(Category)
+    const query: SelectQueryBuilder<Category> = getRepository(Category)
       .createQueryBuilder('category')
       .where('category.id = :id', { id: identifierDto.id })
       .andWhere('category.userId = :userId', { userId: user.id })
       .select([
         'category.id',
         'category.name',
-        'category.isPrivate',
         'category.createdAt',
         'category.updatedAt',
         'category.userId'
@@ -59,24 +58,14 @@ export class CategoriesRepository {
     category.name = createDto.name;
     category.user = user;
 
-    if ('isPrivate' in createDto) {
-      category.isPrivate = !!createDto.isPrivate;
-    }
-
     return await this.repository.save(category);
   }
 
   async getAll(getAllDto: GetAllDto): Promise<Category[]> {
-    let query = getRepository(Category)
+    let query: SelectQueryBuilder<Category> = getRepository(Category)
       .createQueryBuilder('category')
       .orderBy('category.id', 'DESC')
-      .select([
-        'category.id',
-        'category.name',
-        'category.isPrivate',
-        'category.createdAt',
-        'category.updatedAt'
-      ]);
+      .select(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt']);
 
     if ('scope' in getAllDto) {
       if (getAllDto.scope.includes('user')) {
@@ -94,6 +83,7 @@ export class CategoriesRepository {
 
       if (getAllDto.scope.includes('posts')) {
         query = query
+          .addOrderBy('posts.id', 'DESC')
           .addSelect([
             'posts.id',
             'posts.title',
@@ -117,30 +107,14 @@ export class CategoriesRepository {
       });
     }
 
-    if (!('page' in getAllDto) || !('size' in getAllDto)) {
-      getAllDto = {
-        ...getAllDto,
-        page: 1,
-        size: 10
-      };
-    }
-
-    query = query.skip((getAllDto.page - 1) * getAllDto.size).take(getAllDto.size);
-
-    return await query.getMany();
+    return await this.helperService.pagination(query, getAllDto);
   }
 
   async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Category> {
-    let query = getRepository(Category)
+    let query: SelectQueryBuilder<Category> = getRepository(Category)
       .createQueryBuilder('category')
       .where('category.id = :id', { id: identifierDto.id })
-      .select([
-        'category.id',
-        'category.name',
-        'category.isPrivate',
-        'category.createdAt',
-        'category.updatedAt'
-      ]);
+      .select(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt']);
 
     if (getOneDto) {
       if ('scope' in getOneDto) {
@@ -159,6 +133,7 @@ export class CategoriesRepository {
 
         if (getOneDto.scope.includes('posts')) {
           query = query
+            .addOrderBy('posts.id', 'DESC')
             .addSelect([
               'posts.id',
               'posts.title',
@@ -178,10 +153,6 @@ export class CategoriesRepository {
     const categoryCreated: Category = new Category();
 
     categoryCreated.name = updateDto.name;
-
-    if ('isPrivate' in updateDto) {
-      categoryCreated.isPrivate = !!updateDto.isPrivate;
-    }
 
     await this.repository.update(category.id, categoryCreated);
 

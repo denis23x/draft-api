@@ -16,9 +16,6 @@ export class CreateDto {
   @MinLength(4)
   @MaxLength(24)
   readonly name: string;
-
-  @IsOptional()
-  readonly isPrivate?: string;
 }
 
 export class GetAllDto {
@@ -65,7 +62,4 @@ export class UpdateDto {
   @MinLength(4)
   @MaxLength(24)
   readonly name?: string;
-
-  @IsOptional()
-  readonly isPrivate?: string;
 }
