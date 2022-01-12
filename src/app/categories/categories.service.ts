@@ -1,34 +1,76 @@
 /** @format */
 
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ForbiddenException
+} from '@nestjs/common';
 import { Category } from './categories.entity';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './categories.dto';
 import { CategoriesRepository } from './categories.repository';
 import { Request } from 'express';
 import { User } from '../users/users.entity';
-import { IdentifierDto } from '../core';
+import { IdDto } from '../core';
+import { Post } from '../posts/posts.entity';
 
 @Injectable()
 export class CategoriesService {
   constructor(private readonly categoriesRepository: CategoriesRepository) {}
 
-  async create(createDto: CreateDto, request: Request): Promise<Category> {
-    const user: User = request.user as User;
-    const category: Category = await this.categoriesRepository.getRelatedByName(createDto, user);
+  /* UTILITY */
 
-    if (category) {
-      throw new BadRequestException(category.name + ' already exists');
+  async getRelated(idDto: IdDto, user: User): Promise<Category> {
+    const getOneDto: GetOneDto = {
+      scope: ['user']
+    };
+
+    const category: Category = await this.categoriesRepository.getOne(idDto, getOneDto);
+
+    if (!category) {
+      throw new NotFoundException();
     }
+
+    if (category.user.id !== user.id) {
+      throw new ForbiddenException();
+    }
+
+    return category;
+  }
+
+  async getAvailable(createDto: CreateDto | UpdateDto, user: User, idDto?: IdDto): Promise<void> {
+    const getAllDto: GetAllDto = {
+      name: createDto.name,
+      userId: user.id,
+      exact: 1
+    };
+
+    const category: Category[] = await this.categoriesRepository.getAll(getAllDto);
+    const categoryExist: Category = category.shift();
+
+    if (categoryExist) {
+      if (!idDto || idDto.id !== categoryExist.id) {
+        throw new BadRequestException(categoryExist.name + ' already exists');
+      }
+    }
+  }
+
+  /* CRUD */
+
+  async create(request: Request, createDto: CreateDto): Promise<Category> {
+    const user: User = request.user as User;
+
+    await this.getAvailable(createDto, user);
 
     return await this.categoriesRepository.create(createDto, user);
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<Category[]> {
+  async getAll(request: Request, getAllDto: GetAllDto): Promise<Category[]> {
     return await this.categoriesRepository.getAll(getAllDto);
   }
 
-  async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Category> {
-    const category: Category = await this.categoriesRepository.getOne(identifierDto, getOneDto);
+  async getOne(request: Request, idDto: IdDto, getOneDto?: GetOneDto): Promise<Category> {
+    const category: Category = await this.categoriesRepository.getOne(idDto, getOneDto);
 
     if (!category) {
       throw new NotFoundException();
@@ -37,29 +79,21 @@ export class CategoriesService {
     return category;
   }
 
-  async update(
-    identifierDto: IdentifierDto,
-    updateDto: UpdateDto,
-    request: Request
-  ): Promise<Category> {
+  async update(request: Request, idDto: IdDto, updateDto: UpdateDto): Promise<Category> {
     const user: User = request.user as User;
-    const category: Category = await this.categoriesRepository.getRelatedById(identifierDto, user);
 
-    if (!category) {
-      throw new NotFoundException();
-    }
+    await this.getRelated(idDto, user);
+    await this.getAvailable(updateDto, user, idDto);
 
-    return await this.categoriesRepository.update(updateDto, category);
+    return await this.categoriesRepository.update(idDto, updateDto);
   }
 
-  async delete(identifierDto: IdentifierDto, request: Request): Promise<Category> {
+  async delete(request: Request, idDto: IdDto): Promise<Category> {
     const user: User = request.user as User;
-    const category: Category = await this.categoriesRepository.getRelatedById(identifierDto, user);
+    const category: Category = await this.getRelated(idDto, user);
 
-    if (!category) {
-      throw new NotFoundException();
-    }
+    await this.categoriesRepository.delete(idDto);
 
-    return await this.categoriesRepository.delete(category);
+    return category;
   }
 }

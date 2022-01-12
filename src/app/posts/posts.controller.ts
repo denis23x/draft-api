@@ -17,7 +17,7 @@ import {
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './posts.dto';
 import { Post as PostEntity } from './posts.entity';
 import { PostsService } from './posts.service';
-import { IdentifierDto, TransformInterceptor } from '../core';
+import { IdDto, TransformInterceptor } from '../core';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
@@ -28,43 +28,41 @@ export class PostsController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
-  async create(@Body() createDto: CreateDto, @Req() request: Request): Promise<PostEntity> {
-    return await this.postsService.create(createDto, request);
+  async create(@Req() request: Request, @Body() createDto: CreateDto): Promise<PostEntity> {
+    return await this.postsService.create(request, createDto);
   }
 
   @Get()
   @UseInterceptors(TransformInterceptor)
-  async getAll(@Query() getAllDto: GetAllDto): Promise<PostEntity[]> {
-    return await this.postsService.getAll(getAllDto);
+  async getAll(@Req() request: Request, @Query() getAllDto: GetAllDto): Promise<PostEntity[]> {
+    return await this.postsService.getAll(request, getAllDto);
   }
 
   @Get(':id')
   @UseInterceptors(TransformInterceptor)
   async getOne(
-    @Param() identifierDto: IdentifierDto,
+    @Req() request: Request,
+    @Param() idDto: IdDto,
     @Query() getOneDto: GetOneDto
   ): Promise<PostEntity> {
-    return await this.postsService.getOne(identifierDto, getOneDto);
+    return await this.postsService.getOne(request, idDto, getOneDto);
   }
 
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async update(
-    @Param() identifierDto: IdentifierDto,
-    @Body() updateDto: UpdateDto,
-    @Req() request: Request
+    @Req() request: Request,
+    @Param() idDto: IdDto,
+    @Body() updateDto: UpdateDto
   ): Promise<PostEntity> {
-    return await this.postsService.update(identifierDto, updateDto, request);
+    return await this.postsService.update(request, idDto, updateDto);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(TransformInterceptor)
-  async delete(
-    @Param() identifierDto: IdentifierDto,
-    @Req() request: Request
-  ): Promise<PostEntity> {
-    return await this.postsService.delete(identifierDto, request);
+  async delete(@Req() request: Request, @Param() idDto: IdDto): Promise<PostEntity> {
+    return await this.postsService.delete(request, idDto);
   }
 }

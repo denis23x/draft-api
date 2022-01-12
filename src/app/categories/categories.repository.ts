@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './categories.entity';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './categories.dto';
 import { User } from '../users/users.entity';
-import { HelperService, IdentifierDto } from '../core';
+import { HelperService, IdDto } from '../core';
 
 @Injectable()
 export class CategoriesRepository {
@@ -15,42 +15,6 @@ export class CategoriesRepository {
     private readonly repository: Repository<Category>,
     private readonly helperService: HelperService
   ) {}
-
-  /* UTILITY */
-
-  async getRelatedByName(createDto: CreateDto, user: User): Promise<Category> {
-    const query: SelectQueryBuilder<Category> = getRepository(Category)
-      .createQueryBuilder('category')
-      .where('category.name = :name', { name: createDto.name })
-      .andWhere('category.userId = :userId', { userId: user.id })
-      .select([
-        'category.id',
-        'category.name',
-        'category.createdAt',
-        'category.updatedAt',
-        'category.userId'
-      ]);
-
-    return await query.getOne();
-  }
-
-  async getRelatedById(identifierDto: IdentifierDto, user: User): Promise<Category> {
-    const query: SelectQueryBuilder<Category> = getRepository(Category)
-      .createQueryBuilder('category')
-      .where('category.id = :id', { id: identifierDto.id })
-      .andWhere('category.userId = :userId', { userId: user.id })
-      .select([
-        'category.id',
-        'category.name',
-        'category.createdAt',
-        'category.updatedAt',
-        'category.userId'
-      ]);
-
-    return await query.getOne();
-  }
-
-  /* CRUD */
 
   async create(createDto: CreateDto, user: User): Promise<Category> {
     const category: Category = new Category();
@@ -95,6 +59,22 @@ export class CategoriesRepository {
       }
     }
 
+    // TODO: rewrite
+
+    if ('name' in getAllDto && 'userId' in getAllDto) {
+      if ('exact' in getAllDto && !!getAllDto.exact) {
+        query = query
+          .where('category.name = :name', { name: getAllDto.name })
+          .andWhere('category.userId = :userId', { userId: getAllDto.userId });
+
+        return await query.getMany();
+      } else {
+        query = query
+          .where('category.name like :name', { name: '%' + getAllDto.name + '%' })
+          .andWhere('category.userId = :userId', { userId: '%' + getAllDto.userId + '%' });
+      }
+    }
+
     if ('name' in getAllDto) {
       query = query.where('category.name like :name', {
         name: '%' + getAllDto.name + '%'
@@ -110,10 +90,10 @@ export class CategoriesRepository {
     return await this.helperService.pagination(query, getAllDto);
   }
 
-  async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<Category> {
+  async getOne(idDto: IdDto, getOneDto?: GetOneDto): Promise<Category> {
     let query: SelectQueryBuilder<Category> = getRepository(Category)
       .createQueryBuilder('category')
-      .where('category.id = :id', { id: identifierDto.id })
+      .where('category.id = :id', { id: idDto.id })
       .select(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt']);
 
     if (getOneDto) {
@@ -149,19 +129,19 @@ export class CategoriesRepository {
     return await query.getOne();
   }
 
-  async update(updateDto: UpdateDto, category: Category): Promise<Category> {
+  async update(idDto: IdDto, updateDto: UpdateDto): Promise<Category> {
     const categoryCreated: Category = new Category();
 
-    categoryCreated.name = updateDto.name;
+    if ('name' in updateDto) {
+      categoryCreated.name = updateDto.name;
+    }
 
-    await this.repository.update(category.id, categoryCreated);
+    await this.repository.update(idDto.id, categoryCreated);
 
-    return await this.getOne(category);
+    return await this.getOne(idDto);
   }
 
-  async delete(category: Category): Promise<Category> {
-    await this.repository.delete(category.id);
-
-    return category;
+  async delete(idDto: IdDto): Promise<void> {
+    await this.repository.delete(idDto.id);
   }
 }

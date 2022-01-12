@@ -9,7 +9,8 @@ import {
   IsOptional,
   IsPositive,
   MaxLength,
-  MinLength
+  MinLength,
+  ValidateIf
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -23,7 +24,9 @@ export class CreateDto {
   @IsEmail()
   email: string;
 
-  @IsOptional()
+  @ValidateIf((createDto: CreateDto) => {
+    return !createDto.googleId && !createDto.facebookId;
+  })
   @MinLength(6)
   @MaxLength(32)
   password?: string;
@@ -42,6 +45,10 @@ export class GetAllDto {
   @MinLength(4)
   @MaxLength(24)
   readonly name?: string;
+
+  @IsOptional()
+  @IsEmail()
+  readonly email?: string;
 
   @IsOptional()
   @IsNumber()
@@ -64,7 +71,7 @@ export class GetAllDto {
   @IsIn(['categories', 'posts'], {
     each: true
   })
-  readonly scope: string[];
+  readonly scope?: string[];
 }
 
 export class GetOneDto {
@@ -72,7 +79,7 @@ export class GetOneDto {
   @IsIn(['categories', 'posts'], {
     each: true
   })
-  readonly scope: string[];
+  readonly scope?: string[];
 }
 
 export class UpdateDto {
@@ -85,4 +92,8 @@ export class UpdateDto {
   @MinLength(4)
   @MaxLength(24)
   readonly biography?: string;
+
+  @IsOptional()
+  @IsEmail()
+  readonly email?: string;
 }

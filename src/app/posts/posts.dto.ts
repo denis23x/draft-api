@@ -42,6 +42,11 @@ export class GetAllDto {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
+  readonly exact?: number;
+
+  @IsOptional()
+  @IsNumber()
   @IsPositive()
   @Type(() => Number)
   readonly userId?: number;
@@ -68,7 +73,7 @@ export class GetAllDto {
   @IsIn(['user', 'category'], {
     each: true
   })
-  readonly scope: string[];
+  readonly scope?: string[];
 }
 
 export class GetOneDto {
@@ -76,26 +81,26 @@ export class GetOneDto {
   @IsIn(['user', 'category'], {
     each: true
   })
-  readonly scope: string[];
+  readonly scope?: string[];
 }
 
 export class UpdateDto {
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly title: string;
+  readonly title?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(4)
   @MaxLength(6400)
-  readonly body: string;
+  readonly body?: string;
 
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly image: string;
+  readonly image?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   @IsPositive()
   @Type(() => Number)

@@ -32,7 +32,9 @@ export class User {
   })
   facebookId: string;
 
-  @Column()
+  @Column({
+    unique: true
+  })
   name: string;
 
   @Column({

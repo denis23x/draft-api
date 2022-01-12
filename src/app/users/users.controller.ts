@@ -20,11 +20,7 @@ import { User } from './users.entity';
 import { UsersService } from './users.service';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
 import { Request, Response } from 'express';
-import { IdentifierDto, TransformInterceptor } from '../core';
-
-const responseOptions = {
-  passthrough: true
-};
+import { IdDto, TransformInterceptor } from '../core';
 
 @Controller('users')
 export class UsersController {
@@ -33,10 +29,11 @@ export class UsersController {
   @Post()
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async create(
-    @Body() createDto: CreateDto,
-    @Res(responseOptions) response: Response
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+    @Body() createDto: CreateDto
   ): Promise<User> {
-    return await this.usersService.create(createDto, response);
+    return await this.usersService.create(request, response, createDto);
   }
 
   @Get('me')
@@ -48,30 +45,35 @@ export class UsersController {
 
   @Get()
   @UseInterceptors(TransformInterceptor)
-  async getAll(@Query() getAllDto: GetAllDto): Promise<User[]> {
-    return await this.usersService.getAll(getAllDto);
+  async getAll(@Req() request: Request, @Query() getAllDto: GetAllDto): Promise<User[]> {
+    return await this.usersService.getAll(request, getAllDto);
   }
 
   @Get(':id')
   @UseInterceptors(TransformInterceptor)
   async getOne(
-    @Param() identifierDto: IdentifierDto,
+    @Req() request: Request,
+    @Param() idDto: IdDto,
     @Query() getOneDto: GetOneDto
   ): Promise<User> {
-    return await this.usersService.getOne(identifierDto, getOneDto);
+    return await this.usersService.getOne(request, idDto, getOneDto);
   }
 
-  @Put('me')
+  @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
-  async update(@Body() updateDto: UpdateDto, @Req() request: Request): Promise<User> {
-    return await this.usersService.update(updateDto, request);
+  async update(
+    @Req() request: Request,
+    @Param() idDto: IdDto,
+    @Body() updateDto: UpdateDto
+  ): Promise<User> {
+    return await this.usersService.update(request, idDto, updateDto);
   }
 
-  @Delete('me')
+  @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(TransformInterceptor)
-  async delete(@Req() request: Request): Promise<User> {
-    return await this.usersService.delete(request);
+  async delete(@Req() request: Request, @Param() idDto: IdDto): Promise<User> {
+    return await this.usersService.delete(request, idDto);
   }
 }

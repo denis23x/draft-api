@@ -23,13 +23,13 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto, response: Response): Promise<User> {
-    const user: User = await this.usersRepository.getByEmail(loginDto);
+    const user: User = await this.usersRepository.getMe(loginDto);
 
     if (!user) {
       throw new NotFoundException();
     }
 
-    const userCredentials = await this.usersRepository.getCredentials(user);
+    const userCredentials = await this.usersRepository.getMe(loginDto, user);
 
     if ('password' in loginDto) {
       const passwordIsValid: boolean = await compare(loginDto.password, userCredentials.password);
@@ -81,7 +81,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const userExist: User = await this.usersRepository.getByEmail(createDto);
+    const userExist: User = await this.usersRepository.getMe(createDto);
 
     if (userExist) {
       const user: User = { ...userExist, [socialKey]: createDto[socialKey] };

@@ -26,6 +26,11 @@ export class GetAllDto {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
+  readonly exact?: number;
+
+  @IsOptional()
+  @IsNumber()
   @IsPositive()
   @Type(() => Number)
   readonly userId?: number;
@@ -46,7 +51,7 @@ export class GetAllDto {
   @IsIn(['user', 'posts'], {
     each: true
   })
-  readonly scope: string[];
+  readonly scope?: string[];
 }
 
 export class GetOneDto {
@@ -54,7 +59,7 @@ export class GetOneDto {
   @IsIn(['user', 'posts'], {
     each: true
   })
-  readonly scope: string[];
+  readonly scope?: string[];
 }
 
 export class UpdateDto {

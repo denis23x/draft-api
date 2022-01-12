@@ -7,7 +7,7 @@ import { User } from '../users/users.entity';
 import { TokensRepository } from './tokens.repository';
 import { UsersRepository } from '../users/users.repository';
 import { JwtDecodedPayload } from '../auth/auth.interface';
-import { IdentifierDto } from '../core';
+import { IdDto } from '../core';
 import { Token } from './tokens.entity';
 import { DeleteResult } from 'typeorm';
 
@@ -50,11 +50,11 @@ export class TokensService {
       throw new UnprocessableEntityException('Refresh token not found');
     }
 
-    const identifierDto: IdentifierDto = {
+    const idDto: IdDto = {
       id: Number(jwtDecodedPayload.sub)
     };
 
-    return await this.usersRepository.getOne(identifierDto);
+    return await this.usersRepository.getOne(idDto);
   }
 
   async decodeRefreshToken(token: string): Promise<JwtDecodedPayload> {

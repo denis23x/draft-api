@@ -7,7 +7,7 @@ import { hash } from 'bcrypt';
 import { User } from './users.entity';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
 import { LoginDto } from '../auth/auth.dto';
-import { IdentifierDto, HelperService } from '../core';
+import { IdDto, HelperService } from '../core';
 
 @Injectable()
 export class UsersRepository {
@@ -16,35 +16,6 @@ export class UsersRepository {
     private readonly repository: Repository<User>,
     private readonly helperService: HelperService
   ) {}
-
-  /* UTILITY */
-
-  async getCredentials(user: User): Promise<User> {
-    const query: SelectQueryBuilder<User> = getRepository(User)
-      .createQueryBuilder('user')
-      .where('user.id = :id', { id: user.id })
-      .addSelect(['user.password', 'user.googleId', 'user.facebookId']);
-
-    return await query.getOne();
-  }
-
-  async getByEmail(createDto: CreateDto | LoginDto): Promise<User> {
-    const query: SelectQueryBuilder<User> = getRepository(User)
-      .createQueryBuilder('user')
-      .where('user.email = :email', { email: createDto.email })
-      .addSelect(['user.email'])
-      .addSelect([
-        'categories.id',
-        'categories.name',
-        'categories.createdAt',
-        'categories.updatedAt'
-      ])
-      .leftJoin('user.categories', 'categories');
-
-    return await query.getOne();
-  }
-
-  /* CRUD */
 
   async create(createDto: CreateDto): Promise<User> {
     const entity = new User();
@@ -65,6 +36,31 @@ export class UsersRepository {
     }
 
     return await this.repository.save(entity);
+  }
+
+  async getMe(createDto: CreateDto | LoginDto, user?: User): Promise<User> {
+    let query: SelectQueryBuilder<User> = getRepository(User).createQueryBuilder('user');
+
+    if (user) {
+      query = query
+        .where('user.id = :id', { id: user.id })
+        .addSelect(['user.password', 'user.googleId', 'user.facebookId']);
+
+      return await query.getOne();
+    }
+
+    query = query
+      .where('user.email = :email', { email: createDto.email })
+      .addSelect(['user.email'])
+      .addSelect([
+        'categories.id',
+        'categories.name',
+        'categories.createdAt',
+        'categories.updatedAt'
+      ])
+      .leftJoin('user.categories', 'categories');
+
+    return await query.getOne();
   }
 
   async getAll(getAllDto: GetAllDto): Promise<User[]> {
@@ -107,6 +103,22 @@ export class UsersRepository {
       }
     }
 
+    // TODO: rewrite
+
+    if ('name' in getAllDto && 'email' in getAllDto) {
+      if ('exact' in getAllDto && !!getAllDto.exact) {
+        query = query
+          .where('user.name = :name', { name: getAllDto.name })
+          .orWhere('user.email = :email', { email: getAllDto.email });
+
+        return await query.getMany();
+      } else {
+        query = query
+          .where('user.name like :name', { name: '%' + getAllDto.name + '%' })
+          .orWhere('user.email = :email', { email: '%' + getAllDto.email + '%' });
+      }
+    }
+
     if ('name' in getAllDto) {
       if ('exact' in getAllDto && !!getAllDto.exact) {
         query = query.where('user.name = :name', { name: getAllDto.name });
@@ -117,13 +129,23 @@ export class UsersRepository {
       }
     }
 
+    if ('email' in getAllDto) {
+      if ('exact' in getAllDto && !!getAllDto.exact) {
+        query = query.where('user.email = :email', { email: getAllDto.email });
+
+        return await query.getMany();
+      } else {
+        query = query.where('user.email like :email', { email: '%' + getAllDto.email + '%' });
+      }
+    }
+
     return await this.helperService.pagination(query, getAllDto);
   }
 
-  async getOne(identifierDto: IdentifierDto, getOneDto?: GetOneDto): Promise<User> {
+  async getOne(idDto: IdDto, getOneDto?: GetOneDto): Promise<User> {
     let query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
-      .where('user.id = :id', { id: identifierDto.id })
+      .where('user.id = :id', { id: idDto.id })
       .select([
         'user.id',
         'user.name',
@@ -165,7 +187,7 @@ export class UsersRepository {
     return await query.getOne();
   }
 
-  async update(updateDto: UpdateDto, user: User): Promise<User> {
+  async update(idDto: IdDto, updateDto: UpdateDto): Promise<User> {
     const userCreated: User = new User();
 
     if ('name' in updateDto) {
@@ -176,14 +198,12 @@ export class UsersRepository {
       userCreated.biography = updateDto.biography;
     }
 
-    await this.repository.update(user.id, userCreated);
+    await this.repository.update(idDto.id, userCreated);
 
-    return await this.getOne(user);
+    return await this.getOne(idDto);
   }
 
-  async delete(user: User): Promise<User> {
-    await this.repository.delete(user.id);
-
-    return user;
+  async delete(idDto: IdDto): Promise<void> {
+    await this.repository.delete(idDto.id);
   }
 }
