@@ -12,7 +12,6 @@ import { CategoriesRepository } from './categories.repository';
 import { Request } from 'express';
 import { User } from '../users/users.entity';
 import { IdDto } from '../core';
-import { Post } from '../posts/posts.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -46,10 +45,11 @@ export class CategoriesService {
     };
 
     const category: Category[] = await this.categoriesRepository.getAll(getAllDto);
-    const categoryExist: Category = category.shift();
 
-    if (categoryExist) {
-      if (!idDto || idDto.id !== categoryExist.id) {
+    if (!!category.length) {
+      const categoryExist: Category = category.shift();
+
+      if (categoryExist && (!idDto || idDto.id !== categoryExist.id)) {
         throw new BadRequestException(categoryExist.name + ' already exists');
       }
     }

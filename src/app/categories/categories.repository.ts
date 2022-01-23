@@ -59,30 +59,18 @@ export class CategoriesRepository {
       }
     }
 
-    // TODO: rewrite
-
-    if ('name' in getAllDto && 'userId' in getAllDto) {
-      if ('exact' in getAllDto && !!getAllDto.exact) {
-        query = query
-          .where('category.name = :name', { name: getAllDto.name })
-          .andWhere('category.userId = :userId', { userId: getAllDto.userId });
-
-        return await query.getMany();
-      } else {
-        query = query
-          .where('category.name like :name', { name: '%' + getAllDto.name + '%' })
-          .andWhere('category.userId = :userId', { userId: '%' + getAllDto.userId + '%' });
-      }
-    }
+    const exact: boolean = 'exact' in getAllDto && !!getAllDto.exact;
+    const op: string = exact ? '=' : 'like';
+    const parameter = (column: string): string => (exact ? column : '%' + column + '%');
 
     if ('name' in getAllDto) {
-      query = query.where('category.name like :name', {
-        name: '%' + getAllDto.name + '%'
+      query = query.where('category.name ' + op + ' :name', {
+        name: parameter(getAllDto.name)
       });
     }
 
     if ('userId' in getAllDto) {
-      query = query[getAllDto.name ? 'andWhere' : 'where']('category.userId like :userId', {
+      query = query[getAllDto.name ? 'andWhere' : 'where']('category.userId = :userId', {
         userId: getAllDto.userId
       });
     }
