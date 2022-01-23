@@ -103,40 +103,22 @@ export class UsersRepository {
       }
     }
 
-    // TODO: rewrite
-
-    if ('name' in getAllDto && 'email' in getAllDto) {
-      if ('exact' in getAllDto && !!getAllDto.exact) {
-        query = query
-          .where('user.name = :name', { name: getAllDto.name })
-          .orWhere('user.email = :email', { email: getAllDto.email });
-
-        return await query.getMany();
-      } else {
-        query = query
-          .where('user.name like :name', { name: '%' + getAllDto.name + '%' })
-          .orWhere('user.email = :email', { email: '%' + getAllDto.email + '%' });
-      }
-    }
+    const exact: boolean = 'exact' in getAllDto && !!getAllDto.exact;
+    const op: string = exact ? '=' : 'like';
+    const parameter = (column: string): string => (exact ? column : '%' + column + '%');
 
     if ('name' in getAllDto) {
-      if ('exact' in getAllDto && !!getAllDto.exact) {
-        query = query.where('user.name = :name', { name: getAllDto.name });
-
-        return await query.getMany();
-      } else {
-        query = query.where('user.name like :name', { name: '%' + getAllDto.name + '%' });
-      }
+      query = query.where('user.name ' + op + ' :name', {
+        name: parameter(getAllDto.name)
+      });
     }
 
     if ('email' in getAllDto) {
-      if ('exact' in getAllDto && !!getAllDto.exact) {
-        query = query.where('user.email = :email', { email: getAllDto.email });
+      query = query[getAllDto.name ? 'orWhere' : 'where']('user.email ' + op + ' :email', {
+        email: parameter(getAllDto.email)
+      });
 
-        return await query.getMany();
-      } else {
-        query = query.where('user.email like :email', { email: '%' + getAllDto.email + '%' });
-      }
+      exact && (query = query.addSelect('user.email'));
     }
 
     return await this.helperService.pagination(query, getAllDto);
@@ -196,6 +178,10 @@ export class UsersRepository {
 
     if ('biography' in updateDto) {
       userCreated.biography = updateDto.biography;
+    }
+
+    if ('email' in updateDto) {
+      userCreated.email = updateDto.email;
     }
 
     await this.repository.update(idDto.id, userCreated);

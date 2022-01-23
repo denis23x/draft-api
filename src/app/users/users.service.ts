@@ -36,7 +36,7 @@ export class UsersService {
     return user;
   }
 
-  async getAvailable(createDto: CreateDto | UpdateDto): Promise<void> {
+  async getAvailable(createDto: CreateDto | UpdateDto, idDto?: IdDto): Promise<void> {
     const getAllDto: GetAllDto = {
       name: createDto.name,
       email: createDto.email,
@@ -44,13 +44,18 @@ export class UsersService {
     };
 
     const user: User[] = await this.usersRepository.getAll(getAllDto);
-    const userExist: User = user.shift();
 
-    if (userExist) {
-      const errorMessage: string =
-        createDto.name === userExist.name ? createDto.name : createDto.email;
+    if (!!user.length) {
+      const nameExist: User = user.find((user: User) => user.name === createDto.name);
+      const emailExist: User = user.find((user: User) => user.email === createDto.email);
 
-      throw new BadRequestException(errorMessage + ' already exists');
+      if (!!nameExist && (!idDto || idDto.id !== nameExist.id)) {
+        throw new BadRequestException(createDto.name + ' already exists');
+      }
+
+      if (!!emailExist && (!idDto || idDto.id !== emailExist.id)) {
+        throw new BadRequestException(createDto.email + ' already exists');
+      }
     }
   }
 
@@ -93,7 +98,7 @@ export class UsersService {
     const user: User = request.user as User;
 
     await this.getRelated(idDto, user);
-    await this.getAvailable(updateDto);
+    await this.getAvailable(updateDto, idDto);
 
     return await this.usersRepository.update(idDto, updateDto);
   }
