@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'bcrypt';
 import { User } from './users.entity';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
-import { LoginDto } from '../auth/auth.dto';
 import { IdDto, HelperService } from '../core';
 
 @Injectable()
@@ -22,6 +21,7 @@ export class UsersRepository {
 
     entity.name = createDto.name;
     entity.email = createDto.email;
+    entity.categories = [];
 
     if ('password' in createDto) {
       entity.password = await hash(createDto.password, 10);
@@ -38,68 +38,20 @@ export class UsersRepository {
     return await this.repository.save(entity);
   }
 
-  async getMe(createDto: CreateDto | LoginDto, user?: User): Promise<User> {
-    let query: SelectQueryBuilder<User> = getRepository(User).createQueryBuilder('user');
-
-    if (user) {
-      query = query
-        .where('user.id = :id', { id: user.id })
-        .addSelect(['user.password', 'user.googleId', 'user.facebookId']);
-
-      return await query.getOne();
-    }
-
-    query = query
-      .where('user.email = :email', { email: createDto.email })
-      .addSelect(['user.email'])
-      .addSelect([
-        'categories.id',
-        'categories.name',
-        'categories.createdAt',
-        'categories.updatedAt'
-      ])
-      .leftJoin('user.categories', 'categories');
-
-    return await query.getOne();
-  }
-
   async getAll(getAllDto: GetAllDto): Promise<User[]> {
     let query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
-      .orderBy('user.id', 'DESC')
-      .select([
-        'user.id',
-        'user.name',
-        'user.avatar',
-        'user.biography',
-        'user.createdAt',
-        'user.updatedAt'
-      ]);
+      .orderBy('user.id', 'DESC');
 
     if ('scope' in getAllDto) {
       if (getAllDto.scope.includes('categories')) {
         query = query
           .addOrderBy('categories.id', 'DESC')
-          .addSelect([
-            'categories.id',
-            'categories.name',
-            'categories.createdAt',
-            'categories.updatedAt'
-          ])
-          .leftJoin('user.categories', 'categories');
+          .leftJoinAndSelect('user.categories', 'categories');
       }
 
       if (getAllDto.scope.includes('posts')) {
-        query = query
-          .addOrderBy('posts.id', 'DESC')
-          .addSelect([
-            'posts.id',
-            'posts.title',
-            'posts.image',
-            'posts.createdAt',
-            'posts.updatedAt'
-          ])
-          .leftJoin('user.posts', 'posts');
+        query = query.addOrderBy('posts.id', 'DESC').leftJoinAndSelect('user.posts', 'posts');
       }
     }
 
@@ -114,56 +66,35 @@ export class UsersRepository {
     }
 
     if ('email' in getAllDto) {
-      query = query[getAllDto.name ? 'orWhere' : 'where']('user.email ' + op + ' :email', {
+      query = query[getAllDto.name ? 'andWhere' : 'where']('user.email ' + op + ' :email', {
         email: parameter(getAllDto.email)
       });
-
-      exact && (query = query.addSelect('user.email'));
     }
 
     return await this.helperService.pagination(query, getAllDto);
   }
 
-  async getOne(idDto: IdDto, getOneDto?: GetOneDto): Promise<User> {
+  async getOne(idDto: IdDto, getOneDto?: GetOneDto, credentials = false): Promise<User> {
     let query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
-      .where('user.id = :id', { id: idDto.id })
-      .select([
-        'user.id',
-        'user.name',
-        'user.avatar',
-        'user.biography',
-        'user.createdAt',
-        'user.updatedAt'
-      ]);
+      .where('user.id = :id', { id: idDto.id });
 
-    if (getOneDto) {
+    if (!!getOneDto) {
       if ('scope' in getOneDto) {
         if (getOneDto.scope.includes('categories')) {
           query = query
             .addOrderBy('categories.id', 'DESC')
-            .addSelect([
-              'categories.id',
-              'categories.name',
-              'categories.createdAt',
-              'categories.updatedAt'
-            ])
-            .leftJoin('user.categories', 'categories');
+            .leftJoinAndSelect('user.categories', 'categories');
         }
 
         if (getOneDto.scope.includes('posts')) {
-          query = query
-            .addOrderBy('posts.id', 'DESC')
-            .addSelect([
-              'posts.id',
-              'posts.title',
-              'posts.image',
-              'posts.createdAt',
-              'posts.updatedAt'
-            ])
-            .leftJoin('user.posts', 'posts');
+          query = query.addOrderBy('posts.id', 'DESC').leftJoinAndSelect('user.posts', 'posts');
         }
       }
+    }
+
+    if (credentials) {
+      query = query.addSelect(['user.password', 'user.googleId', 'user.facebookId']);
     }
 
     return await query.getOne();

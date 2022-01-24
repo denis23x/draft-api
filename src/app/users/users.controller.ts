@@ -12,6 +12,7 @@ import {
   Query,
   Req,
   Res,
+  UseFilters,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
@@ -20,7 +21,7 @@ import { User } from './users.entity';
 import { UsersService } from './users.service';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './users.dto';
 import { Request, Response } from 'express';
-import { IdDto, TransformInterceptor } from '../core';
+import { TypeORMExceptionFilter, IdDto, TransformInterceptor } from '../core';
 
 @Controller('users')
 export class UsersController {
@@ -28,19 +29,13 @@ export class UsersController {
 
   @Post()
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
+  @UseFilters(TypeORMExceptionFilter)
   async create(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
     @Body() createDto: CreateDto
   ): Promise<User> {
     return await this.usersService.create(request, response, createDto);
-  }
-
-  @Get('me')
-  @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
-  async getMe(@Req() request: Request, @Query() getOneDto: GetOneDto): Promise<User> {
-    return await this.usersService.getMe(request, getOneDto);
   }
 
   @Get()
@@ -62,6 +57,7 @@ export class UsersController {
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
+  @UseFilters(TypeORMExceptionFilter)
   async update(
     @Req() request: Request,
     @Param() idDto: IdDto,

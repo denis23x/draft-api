@@ -11,13 +11,13 @@ export class Posts1617536481160 implements MigrationInterface {
       categoryId: category.id
     }));
 
-    const values = [...Array(categories.length * 25)].map(() => {
+    const values = [...Array(categories.length * 25)].map((value: undefined, key: number) => {
       const relation = categories[faker.random.number({ min: 0, max: categories.length - 1 })];
       const imagePath = process.env.APP_STORAGE + '/images/';
       const imageFile = faker.random.number({ min: 0, max: 667 }) + '.jpg';
 
       return [
-        faker.lorem.sentence(),
+        faker.lorem.sentence() + key,
         faker.lorem.paragraphs(),
         faker.random.boolean() ? imagePath + imageFile : null,
         relation.userId,

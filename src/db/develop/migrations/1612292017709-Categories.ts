@@ -8,8 +8,8 @@ export class Categories1612292017709 implements MigrationInterface {
     const select = await queryRunner.query('SELECT id FROM users');
     const users = select.map(user => user.id);
 
-    const values = [...Array(users.length * 5)].map(() => [
-      faker.commerce.department(),
+    const values = [...Array(users.length * 5)].map((value: undefined, key: number) => [
+      faker.commerce.department() + key,
       users[faker.random.number({ min: 0, max: users.length - 1 })]
     ]);
 

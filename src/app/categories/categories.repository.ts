@@ -28,34 +28,15 @@ export class CategoriesRepository {
   async getAll(getAllDto: GetAllDto): Promise<Category[]> {
     let query: SelectQueryBuilder<Category> = getRepository(Category)
       .createQueryBuilder('category')
-      .orderBy('category.id', 'DESC')
-      .select(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt']);
+      .orderBy('category.id', 'DESC');
 
     if ('scope' in getAllDto) {
       if (getAllDto.scope.includes('user')) {
-        query = query
-          .addSelect([
-            'user.id',
-            'user.name',
-            'user.avatar',
-            'user.biography',
-            'user.createdAt',
-            'user.updatedAt'
-          ])
-          .leftJoin('category.user', 'user');
+        query = query.leftJoinAndSelect('category.user', 'user');
       }
 
       if (getAllDto.scope.includes('posts')) {
-        query = query
-          .addOrderBy('posts.id', 'DESC')
-          .addSelect([
-            'posts.id',
-            'posts.title',
-            'posts.image',
-            'posts.createdAt',
-            'posts.updatedAt'
-          ])
-          .leftJoin('category.posts', 'posts');
+        query = query.addOrderBy('posts.id', 'DESC').leftJoinAndSelect('category.posts', 'posts');
       }
     }
 
@@ -87,29 +68,11 @@ export class CategoriesRepository {
     if (getOneDto) {
       if ('scope' in getOneDto) {
         if (getOneDto.scope.includes('user')) {
-          query = query
-            .addSelect([
-              'user.id',
-              'user.name',
-              'user.avatar',
-              'user.biography',
-              'user.createdAt',
-              'user.updatedAt'
-            ])
-            .leftJoin('category.user', 'user');
+          query = query.leftJoinAndSelect('category.user', 'user');
         }
 
         if (getOneDto.scope.includes('posts')) {
-          query = query
-            .addOrderBy('posts.id', 'DESC')
-            .addSelect([
-              'posts.id',
-              'posts.title',
-              'posts.image',
-              'posts.createdAt',
-              'posts.updatedAt'
-            ])
-            .leftJoin('category.posts', 'posts');
+          query = query.addOrderBy('posts.id', 'DESC').leftJoinAndSelect('category.posts', 'posts');
         }
       }
     }

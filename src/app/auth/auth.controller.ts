@@ -38,6 +38,13 @@ export class AuthController {
     return await this.authService.refresh(request, response);
   }
 
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
+  async getMe(@Req() request: Request): Promise<User> {
+    return await this.authService.getMe(request);
+  }
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
   // eslint-disable-next-line @typescript-eslint/no-empty-function

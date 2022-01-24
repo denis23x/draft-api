@@ -11,13 +11,14 @@ import {
   Put,
   Query,
   Req,
+  UseFilters,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './posts.dto';
 import { Post as PostEntity } from './posts.entity';
 import { PostsService } from './posts.service';
-import { IdDto, TransformInterceptor } from '../core';
+import { IdDto, TransformInterceptor, TypeORMExceptionFilter } from '../core';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
@@ -28,6 +29,7 @@ export class PostsController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
+  @UseFilters(TypeORMExceptionFilter)
   async create(@Req() request: Request, @Body() createDto: CreateDto): Promise<PostEntity> {
     return await this.postsService.create(request, createDto);
   }
@@ -51,6 +53,7 @@ export class PostsController {
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
+  @UseFilters(TypeORMExceptionFilter)
   async update(
     @Req() request: Request,
     @Param() idDto: IdDto,

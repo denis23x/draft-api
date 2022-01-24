@@ -10,7 +10,7 @@ import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
 import { User } from '../users/users.entity';
 import { LoginDto } from './auth.dto';
-import { CreateDto } from '../users/users.dto';
+import { CreateDto, GetAllDto, GetOneDto } from '../users/users.dto';
 import { UsersRepository } from '../users/users.repository';
 import { TokensService } from '../tokens/tokens.service';
 import * as url from 'url';
@@ -23,35 +23,42 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto, response: Response): Promise<User> {
-    const user: User = await this.usersRepository.getMe(loginDto);
+    const getAllDto: GetAllDto = {
+      email: loginDto.email,
+      exact: 1
+    };
 
-    if (!user) {
+    const user: User[] = await this.usersRepository.getAll(getAllDto);
+
+    if (!user.length) {
       throw new NotFoundException();
     }
 
-    const userCredentials = await this.usersRepository.getMe(loginDto, user);
+    const userExist: User = user.shift();
+
+    const getOneDto: GetOneDto = {
+      scope: ['categories']
+    };
+
+    const userCredentials: User = await this.usersRepository.getOne(userExist, getOneDto, true);
 
     if ('password' in loginDto) {
-      const passwordIsValid: boolean = await compare(loginDto.password, userCredentials.password);
+      const password: boolean = await compare(loginDto.password, userCredentials.password);
 
-      if (passwordIsValid) {
-        return await this.getSharedResponse(user, response);
+      if (password) {
+        return await this.setResponse(userCredentials, response);
       }
     }
 
     if ('googleId' in loginDto) {
-      const googleIdIsValid: boolean = loginDto.googleId === userCredentials.googleId;
-
-      if (googleIdIsValid) {
-        return await this.getSharedResponse(user, response);
+      if (loginDto.googleId === userCredentials.googleId) {
+        return await this.setResponse(userCredentials, response);
       }
     }
 
     if ('facebookId' in loginDto) {
-      const facebookIdIsValid: boolean = loginDto.facebookId === userCredentials.facebookId;
-
-      if (facebookIdIsValid) {
-        return await this.getSharedResponse(user, response);
+      if (loginDto.facebookId === userCredentials.facebookId) {
+        return await this.setResponse(userCredentials, response);
       }
     }
 
@@ -71,7 +78,23 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    return await this.getSharedResponse(user, response);
+    return await this.setResponse(user, response);
+  }
+
+  async getMe(request: Request): Promise<User> {
+    const user: User = request.user as User;
+
+    const getOneDto: GetOneDto = {
+      scope: ['categories']
+    };
+
+    const userExist: User = await this.usersRepository.getOne(user, getOneDto);
+
+    if (!userExist) {
+      throw new NotFoundException();
+    }
+
+    return userExist;
   }
 
   async getSocial(request: Request, response: Response, socialKey: string): Promise<void> {
@@ -81,20 +104,30 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const userExist: User = await this.usersRepository.getMe(createDto);
+    const getAllDto: GetAllDto = {
+      email: createDto.email,
+      exact: 1
+    };
 
-    if (userExist) {
-      const user: User = { ...userExist, [socialKey]: createDto[socialKey] };
+    const user: User[] = await this.usersRepository.getAll(getAllDto);
+    const userExist: User = user.shift();
 
-      return await this.getSharedRedirect(user, response, socialKey);
+    if (!!userExist) {
+      const user: User = {
+        ...userExist,
+        email: createDto.email,
+        [socialKey]: createDto[socialKey]
+      };
+
+      return await this.setRedirect(user, response, socialKey);
     }
 
     const userCreated: User = await this.usersRepository.create(createDto);
 
-    return await this.getSharedRedirect(userCreated, response, socialKey);
+    return await this.setRedirect(userCreated, response, socialKey);
   }
 
-  async getSharedResponse(user: User, response: Response): Promise<User> {
+  async setResponse(user: User, response: Response): Promise<User> {
     const refreshToken: string = await this.tokensService.generateRefreshToken(user);
 
     // TODO: enable secure and sameSite (need HTTPS)
@@ -109,12 +142,16 @@ export class AuthService {
       maxAge: Number(process.env.JWT_REFRESH_TTL)
     });
 
+    delete user.password;
+    delete user.googleId;
+    delete user.facebookId;
+
     return Object.assign(user, {
       accessToken: await this.tokensService.generateAccessToken(user)
     });
   }
 
-  async getSharedRedirect(user: User, response: Response, socialKey: string): Promise<void> {
+  async setRedirect(user: User, response: Response, socialKey: string): Promise<void> {
     return response.redirect(
       url.format({
         pathname: process.env.APP_SITE_ORIGIN + '/auth/login',

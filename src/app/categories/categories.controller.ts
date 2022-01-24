@@ -11,6 +11,7 @@ import {
   Put,
   Query,
   Req,
+  UseFilters,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
@@ -19,7 +20,7 @@ import { Category } from './categories.entity';
 import { CategoriesService } from './categories.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { IdDto, TransformInterceptor } from '../core';
+import { IdDto, TransformInterceptor, TypeORMExceptionFilter } from '../core';
 
 @Controller('categories')
 export class CategoriesController {
@@ -28,6 +29,7 @@ export class CategoriesController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
+  @UseFilters(TypeORMExceptionFilter)
   async create(@Req() request: Request, @Body() createDto: CreateDto): Promise<Category> {
     return await this.categoriesService.create(request, createDto);
   }
@@ -51,6 +53,7 @@ export class CategoriesController {
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
+  @UseFilters(TypeORMExceptionFilter)
   async update(
     @Req() request: Request,
     @Param() idDto: IdDto,

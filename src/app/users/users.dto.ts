@@ -76,6 +76,10 @@ export class GetAllDto {
 
 export class GetOneDto {
   @IsOptional()
+  @IsEmail()
+  readonly email?: string;
+
+  @IsOptional()
   @IsIn(['categories', 'posts'], {
     each: true
   })

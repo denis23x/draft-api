@@ -6,6 +6,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersRepository } from '../../users/users.repository';
 import { User } from '../../users/users.entity';
 import { IdDto } from '../../core';
+import { GetOneDto } from '../../users/users.dto';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -22,6 +23,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       id: Number(payload.sub)
     };
 
-    return this.usersRepository.getOne(idDto);
+    const getOneDto: GetOneDto = {
+      scope: ['categories']
+    };
+
+    return this.usersRepository.getOne(idDto, getOneDto);
   }
 }

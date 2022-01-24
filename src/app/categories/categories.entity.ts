@@ -8,6 +8,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
@@ -15,6 +16,7 @@ import { User } from '../users/users.entity';
 import { Post } from '../posts/posts.entity';
 
 @Entity({ name: 'categories' })
+@Unique('related', ['name', 'user'])
 export class Category {
   @PrimaryGeneratedColumn()
   id: number;

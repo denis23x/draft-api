@@ -23,7 +23,6 @@ export class PostsRepository {
 
     post.title = createDto.title;
     post.body = createDto.body;
-    post.user = user;
 
     if ('image' in createDto) {
       post.image = createDto.image;
@@ -34,6 +33,10 @@ export class PostsRepository {
     };
 
     post.category = await this.categoriesRepository.getOne(idDto);
+
+    delete user.categories;
+
+    post.user = user;
 
     return await this.repository.save(post);
   }
@@ -46,54 +49,31 @@ export class PostsRepository {
 
     if ('scope' in getAllDto) {
       if (getAllDto.scope.includes('user')) {
-        query = query
-          .addSelect([
-            'user.id',
-            'user.name',
-            'user.avatar',
-            'user.biography',
-            'user.createdAt',
-            'user.updatedAt'
-          ])
-          .leftJoin('post.user', 'user');
+        query = query.leftJoinAndSelect('post.user', 'user');
       }
 
       if (getAllDto.scope.includes('category')) {
-        query = query
-          .addSelect(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt'])
-          .leftJoin('post.category', 'category');
+        query = query.leftJoinAndSelect('post.category', 'category');
       }
     }
 
-    // TODO: rewrite
-
-    // if ('name' in getAllDto && 'email' in getAllDto) {
-    //   if ('exact' in getAllDto && !!getAllDto.exact) {
-    //     query = query
-    //       .where('user.name = :name', { name: getAllDto.name })
-    //       .orWhere('user.email = :email', { email: getAllDto.email });
-    //
-    //     return await query.getMany();
-    //   } else {
-    //     query = query
-    //       .where('user.name like :name', { name: '%' + getAllDto.name + '%' })
-    //       .orWhere('user.email = :email', { email: '%' + getAllDto.email + '%' });
-    //   }
-    // }
+    const exact: boolean = 'exact' in getAllDto && !!getAllDto.exact;
+    const op: string = exact ? '=' : 'like';
+    const parameter = (column: string): string => (exact ? column : '%' + column + '%');
 
     if ('title' in getAllDto) {
-      query = query.where('post.title like :title', { title: '%' + getAllDto.title + '%' });
+      query = query.where('post.title ' + op + ' :title', { title: parameter(getAllDto.title) });
     }
 
     if ('userId' in getAllDto) {
-      query = query[getAllDto.title ? 'andWhere' : 'where']('post.userId like :userId', {
+      query = query[getAllDto.title ? 'andWhere' : 'where']('post.userId = :userId', {
         userId: getAllDto.userId
       });
     }
 
     if ('categoryId' in getAllDto) {
       query = query[getAllDto.title || getAllDto.userId ? 'andWhere' : 'where'](
-        'post.categoryId like :categoryId',
+        'post.categoryId = :categoryId',
         {
           categoryId: getAllDto.categoryId
         }
