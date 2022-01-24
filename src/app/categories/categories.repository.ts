@@ -67,8 +67,7 @@ export class CategoriesRepository {
   async getOne(idDto: IdDto, getOneDto?: GetOneDto): Promise<Category> {
     let query: SelectQueryBuilder<Category> = getRepository(Category)
       .createQueryBuilder('category')
-      .where('category.id = :id', { id: idDto.id })
-      .select(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt']);
+      .where('category.id = :id', { id: idDto.id });
 
     if (!!getOneDto) {
       if ('scope' in getOneDto) {

@@ -44,8 +44,7 @@ export class PostsRepository {
   async getAll(getAllDto?: GetAllDto): Promise<Post[]> {
     let query: SelectQueryBuilder<Post> = getRepository(Post)
       .createQueryBuilder('post')
-      .orderBy('post.id', 'DESC')
-      .select(['post.id', 'post.title', 'post.image', 'post.createdAt', 'post.updatedAt']);
+      .orderBy('post.id', 'DESC');
 
     if (!!getAllDto) {
       const exact: boolean = 'exact' in getAllDto && !!getAllDto.exact;
@@ -88,15 +87,7 @@ export class PostsRepository {
   async getOne(idDto: IdDto, getOneDto?: GetOneDto): Promise<Post> {
     let query: SelectQueryBuilder<Post> = getRepository(Post)
       .createQueryBuilder('post')
-      .where('post.id = :id', { id: idDto.id })
-      .select([
-        'post.id',
-        'post.title',
-        'post.body',
-        'post.image',
-        'post.createdAt',
-        'post.updatedAt'
-      ]);
+      .where('post.id = :id', { id: idDto.id });
 
     if (!!getOneDto) {
       if ('scope' in getOneDto) {

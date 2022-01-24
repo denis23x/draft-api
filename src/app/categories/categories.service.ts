@@ -57,6 +57,13 @@ export class CategoriesService {
 
     await this.categoriesRepository.delete(idDto);
 
-    return category;
+    delete user.categories;
+
+    const categoryDeleted: Category = {
+      ...category,
+      user
+    };
+
+    return categoryDeleted;
   }
 }

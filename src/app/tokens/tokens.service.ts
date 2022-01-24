@@ -10,6 +10,7 @@ import { JwtDecodedPayload } from '../auth/auth.interface';
 import { IdDto } from '../core';
 import { Token } from './tokens.entity';
 import { DeleteResult } from 'typeorm';
+import { GetOneDto } from '../users/users.dto';
 
 @Injectable()
 export class TokensService {
@@ -54,7 +55,11 @@ export class TokensService {
       id: Number(jwtDecodedPayload.sub)
     };
 
-    return await this.usersRepository.getOne(idDto);
+    const getOneDto: GetOneDto = {
+      scope: ['categories']
+    };
+
+    return await this.usersRepository.getOne(idDto, getOneDto);
   }
 
   async decodeRefreshToken(token: string): Promise<JwtDecodedPayload> {

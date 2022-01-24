@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as cookieParser from 'cookie-parser';
+import * as compression from 'compression';
 
 const bootstrap = async () => {
   const globalPrefix = process.env.APP_PREFIX || '';
@@ -32,6 +33,7 @@ const bootstrap = async () => {
   );
 
   app.use(cookieParser(process.env.APP_COOKIE_SECRET));
+  app.use(compression());
 
   await app.listen(port, () => {
     Logger.log('Listening at http://localhost:' + port + '/' + globalPrefix);
