@@ -41,43 +41,45 @@ export class PostsRepository {
     return await this.repository.save(post);
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<Post[]> {
+  async getAll(getAllDto?: GetAllDto): Promise<Post[]> {
     let query: SelectQueryBuilder<Post> = getRepository(Post)
       .createQueryBuilder('post')
       .orderBy('post.id', 'DESC')
       .select(['post.id', 'post.title', 'post.image', 'post.createdAt', 'post.updatedAt']);
 
-    if ('scope' in getAllDto) {
-      if (getAllDto.scope.includes('user')) {
-        query = query.leftJoinAndSelect('post.user', 'user');
-      }
+    if (!!getAllDto) {
+      const exact: boolean = 'exact' in getAllDto && !!getAllDto.exact;
+      const op: string = exact ? '=' : 'like';
+      const parameter = (column: string): string => (exact ? column : '%' + column + '%');
 
-      if (getAllDto.scope.includes('category')) {
-        query = query.leftJoinAndSelect('post.category', 'category');
-      }
-    }
-
-    const exact: boolean = 'exact' in getAllDto && !!getAllDto.exact;
-    const op: string = exact ? '=' : 'like';
-    const parameter = (column: string): string => (exact ? column : '%' + column + '%');
-
-    if ('title' in getAllDto) {
-      query = query.where('post.title ' + op + ' :title', { title: parameter(getAllDto.title) });
-    }
-
-    if ('userId' in getAllDto) {
-      query = query[getAllDto.title ? 'andWhere' : 'where']('post.userId = :userId', {
-        userId: getAllDto.userId
-      });
-    }
-
-    if ('categoryId' in getAllDto) {
-      query = query[getAllDto.title || getAllDto.userId ? 'andWhere' : 'where'](
-        'post.categoryId = :categoryId',
-        {
-          categoryId: getAllDto.categoryId
+      if ('scope' in getAllDto) {
+        if (getAllDto.scope.includes('user')) {
+          query = query.leftJoinAndSelect('post.user', 'user');
         }
-      );
+
+        if (getAllDto.scope.includes('category')) {
+          query = query.leftJoinAndSelect('post.category', 'category');
+        }
+      }
+
+      if ('title' in getAllDto) {
+        query = query.where('post.title ' + op + ' :title', { title: parameter(getAllDto.title) });
+      }
+
+      if ('userId' in getAllDto) {
+        query = query[getAllDto.title ? 'andWhere' : 'where']('post.userId = :userId', {
+          userId: getAllDto.userId
+        });
+      }
+
+      if ('categoryId' in getAllDto) {
+        query = query[getAllDto.title || getAllDto.userId ? 'andWhere' : 'where'](
+          'post.categoryId = :categoryId',
+          {
+            categoryId: getAllDto.categoryId
+          }
+        );
+      }
     }
 
     return await this.helperService.pagination(query, getAllDto);
@@ -96,25 +98,14 @@ export class PostsRepository {
         'post.updatedAt'
       ]);
 
-    if (getOneDto) {
+    if (!!getOneDto) {
       if ('scope' in getOneDto) {
         if (getOneDto.scope.includes('user')) {
-          query = query
-            .addSelect([
-              'user.id',
-              'user.name',
-              'user.avatar',
-              'user.biography',
-              'user.createdAt',
-              'user.updatedAt'
-            ])
-            .leftJoin('post.user', 'user');
+          query = query.leftJoinAndSelect('post.user', 'user');
         }
 
         if (getOneDto.scope.includes('category')) {
-          query = query
-            .addSelect(['category.id', 'category.name', 'category.createdAt', 'category.updatedAt'])
-            .leftJoin('post.category', 'category');
+          query = query.leftJoinAndSelect('post.category', 'category');
         }
       }
     }

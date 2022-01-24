@@ -38,43 +38,45 @@ export class UsersRepository {
     return await this.repository.save(entity);
   }
 
-  async getAll(getAllDto: GetAllDto): Promise<User[]> {
+  async getAll(getAllDto?: GetAllDto): Promise<User[]> {
     let query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC');
 
-    if ('scope' in getAllDto) {
-      if (getAllDto.scope.includes('categories')) {
-        query = query
-          .addOrderBy('categories.id', 'DESC')
-          .leftJoinAndSelect('user.categories', 'categories');
+    if (!!getAllDto) {
+      const exact: boolean = 'exact' in getAllDto && !!getAllDto.exact;
+      const op: string = exact ? '=' : 'like';
+      const parameter = (column: string): string => (exact ? column : '%' + column + '%');
+
+      if ('scope' in getAllDto) {
+        if (getAllDto.scope.includes('categories')) {
+          query = query
+            .addOrderBy('categories.id', 'DESC')
+            .leftJoinAndSelect('user.categories', 'categories');
+        }
+
+        if (getAllDto.scope.includes('posts')) {
+          query = query.addOrderBy('posts.id', 'DESC').leftJoinAndSelect('user.posts', 'posts');
+        }
       }
 
-      if (getAllDto.scope.includes('posts')) {
-        query = query.addOrderBy('posts.id', 'DESC').leftJoinAndSelect('user.posts', 'posts');
+      if ('name' in getAllDto) {
+        query = query.where('user.name ' + op + ' :name', {
+          name: parameter(getAllDto.name)
+        });
       }
-    }
 
-    const exact: boolean = 'exact' in getAllDto && !!getAllDto.exact;
-    const op: string = exact ? '=' : 'like';
-    const parameter = (column: string): string => (exact ? column : '%' + column + '%');
-
-    if ('name' in getAllDto) {
-      query = query.where('user.name ' + op + ' :name', {
-        name: parameter(getAllDto.name)
-      });
-    }
-
-    if ('email' in getAllDto) {
-      query = query[getAllDto.name ? 'andWhere' : 'where']('user.email ' + op + ' :email', {
-        email: parameter(getAllDto.email)
-      });
+      if ('email' in getAllDto) {
+        query = query[getAllDto.name ? 'andWhere' : 'where']('user.email ' + op + ' :email', {
+          email: parameter(getAllDto.email)
+        });
+      }
     }
 
     return await this.helperService.pagination(query, getAllDto);
   }
 
-  async getOne(idDto: IdDto, getOneDto?: GetOneDto, credentials = false): Promise<User> {
+  async getOne(idDto: IdDto, getOneDto?: GetOneDto, credentials?: boolean): Promise<User> {
     let query: SelectQueryBuilder<User> = getRepository(User)
       .createQueryBuilder('user')
       .where('user.id = :id', { id: idDto.id });

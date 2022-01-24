@@ -22,8 +22,10 @@ export class TypeORMExceptionFilter implements ExceptionFilter {
           const message: string = exception.message
             .match(/'(.*?)'/g)
             .shift()
-            .replace(/'/g, ' ')
-            .concat('already exist!')
+            .replace(/'/g, '')
+            .split('-')
+            .shift()
+            .concat(' ', 'already exist!')
             .trim();
 
           return response.status(statusCode).json({
