@@ -8,57 +8,49 @@ import {
 } from '@nestjs/common';
 import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
-import { User } from '../users/users.entity';
 import { LoginDto } from './auth.dto';
-import { CreateDto, GetAllDto, GetOneDto } from '../users/users.dto';
-import { UsersRepository } from '../users/users.repository';
-import { TokensService } from '../tokens/tokens.service';
+import { TokenService } from '../token/token.service';
 import * as url from 'url';
+import { User } from '@prisma/client';
+import { PrismaService } from '../core';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly tokensService: TokensService
+    private readonly tokenService: TokenService,
+    private readonly prismaService: PrismaService
   ) {}
 
   async login(loginDto: LoginDto, response: Response): Promise<User> {
-    const getAllDto: GetAllDto = {
-      email: loginDto.email,
-      exact: 1
-    };
+    // TODO: add categories
 
-    const user: User[] = await this.usersRepository.getAll(getAllDto);
+    const user: User = await this.prismaService.user.findUnique({
+      where: {
+        email: loginDto.email
+      }
+    });
 
-    if (!user.length) {
+    if (!user) {
       throw new NotFoundException();
     }
 
-    const userExist: User = user.shift();
-
-    const getOneDto: GetOneDto = {
-      scope: ['categories']
-    };
-
-    const userCredentials: User = await this.usersRepository.getOne(userExist, getOneDto, true);
-
-    if ('password' in loginDto) {
-      const password: boolean = await compare(loginDto.password, userCredentials.password);
+    if (loginDto.hasOwnProperty('password')) {
+      const password: boolean = await compare(loginDto.password, user.password);
 
       if (password) {
-        return await this.setResponse(userCredentials, response);
+        return this.setResponse(user, response);
       }
     }
 
-    if ('googleId' in loginDto) {
-      if (loginDto.googleId === userCredentials.googleId) {
-        return await this.setResponse(userCredentials, response);
+    if (loginDto.hasOwnProperty('googleId')) {
+      if (loginDto.googleId === user.googleId) {
+        return this.setResponse(user, response);
       }
     }
 
-    if ('facebookId' in loginDto) {
-      if (loginDto.facebookId === userCredentials.facebookId) {
-        return await this.setResponse(userCredentials, response);
+    if (loginDto.hasOwnProperty('facebookId')) {
+      if (loginDto.facebookId === user.facebookId) {
+        return this.setResponse(user, response);
       }
     }
 
@@ -72,63 +64,72 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    const user: User = await this.tokensService.resolveRefreshToken(refreshToken);
+    const user: User = await this.tokenService.resolveRefreshToken(refreshToken);
 
     if (!user) {
       throw new ForbiddenException();
     }
 
-    return await this.setResponse(user, response);
+    return this.setResponse(user, response);
   }
 
-  async getMe(request: Request): Promise<User> {
-    const user: User = request.user as User;
+  async me(request: Request): Promise<User> {
+    // TODO: add categories
 
-    const getOneDto: GetOneDto = {
-      scope: ['categories']
-    };
+    const user: User = await this.prismaService.user.findUnique({
+      ...this.prismaService.setNonSensitiveUserSelect(),
+      where: {
+        id: (request.user as any).id
+      }
+    });
 
-    const userExist: User = await this.usersRepository.getOne(user, getOneDto);
-
-    if (!userExist) {
+    if (!user) {
       throw new NotFoundException();
     }
 
-    return userExist;
+    return user;
   }
 
   async getSocial(request: Request, response: Response, socialKey: string): Promise<void> {
-    const createDto: CreateDto = request.user as CreateDto;
-
-    if (!createDto) {
+    if (!request.user) {
       throw new UnauthorizedException();
     }
 
-    const getAllDto: GetAllDto = {
-      email: createDto.email,
-      exact: 1
-    };
+    let user: User = await this.prismaService.user.findUnique({
+      where: {
+        email: (request.user as any).email
+      }
+    });
 
-    const user: User[] = await this.usersRepository.getAll(getAllDto);
-    const userExist: User = user.shift();
-
-    if (!!userExist) {
-      const user: User = {
-        ...userExist,
-        email: createDto.email,
-        [socialKey]: createDto[socialKey]
-      };
-
-      return await this.setRedirect(user, response, socialKey);
+    if (!!user) {
+      return this.setRedirect(
+        {
+          ...user,
+          email: (request.user as any).email,
+          [socialKey]: (request.user as any)[socialKey]
+        },
+        response,
+        socialKey
+      );
     }
 
-    const userCreated: User = await this.usersRepository.create(createDto);
+    user = await this.prismaService.user.create({
+      // @ts-ignore
+      data: request.user
+    });
 
-    return await this.setRedirect(userCreated, response, socialKey);
+    return this.setRedirect(user, response, socialKey);
   }
 
   async setResponse(user: User, response: Response): Promise<User> {
-    const refreshToken: string = await this.tokensService.generateRefreshToken(user);
+    const { select } = this.prismaService.setNonSensitiveUserSelect();
+
+    for (const column in select) {
+      !select[column] && delete user[column];
+    }
+
+    const refreshToken: string = await this.tokenService.generateRefreshToken(user.id);
+    const accessToken: string = await this.tokenService.generateAccessToken(user.id);
 
     // TODO: enable secure and sameSite (need HTTPS)
     // secure: true,
@@ -142,13 +143,11 @@ export class AuthService {
       maxAge: Number(process.env.JWT_REFRESH_TTL)
     });
 
-    delete user.password;
-    delete user.googleId;
-    delete user.facebookId;
-
-    return Object.assign(user, {
-      accessToken: await this.tokensService.generateAccessToken(user)
-    });
+    return {
+      ...user,
+      // @ts-ignore
+      accessToken
+    };
   }
 
   async setRedirect(user: User, response: Response, socialKey: string): Promise<void> {

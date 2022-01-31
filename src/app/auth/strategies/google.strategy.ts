@@ -2,8 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, Profile, VerifyCallback } from 'passport-google-oauth20';
-import { CreateDto } from '../../users/users.dto';
+import { Strategy, Profile } from 'passport-google-oauth20';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -20,7 +19,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    verifyCallback: VerifyCallback
+    verifyCallback: any
   ): Promise<void> {
     const email = profile.emails.shift();
 
@@ -28,6 +27,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       name: email.value.split('@').shift(),
       email: email.value,
       googleId: profile.id
-    } as CreateDto);
+    });
   }
 }

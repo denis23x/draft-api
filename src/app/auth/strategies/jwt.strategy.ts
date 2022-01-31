@@ -3,14 +3,13 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UsersRepository } from '../../users/users.repository';
-import { User } from '../../users/users.entity';
-import { IdDto } from '../../core';
-import { GetOneDto } from '../../users/users.dto';
+import { PrismaService } from '../../core';
+import { User } from '@prisma/client';
+import { JwtDecodedPayload } from '../auth.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private readonly usersRepository: UsersRepository) {
+  constructor(private readonly prismaService: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -18,15 +17,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload): Promise<User> {
-    const idDto: IdDto = {
-      id: Number(payload.sub)
-    };
+  async validate(jwtDecodedPayload: JwtDecodedPayload): Promise<User> {
+    // TODO: add categories
 
-    const getOneDto: GetOneDto = {
-      scope: ['categories']
-    };
-
-    return this.usersRepository.getOne(idDto, getOneDto);
+    return this.prismaService.user.findUnique({
+      where: {
+        id: Number(jwtDecodedPayload.sub)
+      }
+    });
   }
 }

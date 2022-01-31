@@ -13,10 +13,10 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
-import { User } from '../users/users.entity';
 import { AuthService } from './auth.service';
 import { LoginDto } from './auth.dto';
 import { TransformInterceptor } from '../core';
+import { User } from '@prisma/client';
 
 const responseOptions = {
   passthrough: true
@@ -29,20 +29,20 @@ export class AuthController {
   @Post('login')
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async login(@Body() loginDto: LoginDto, @Res(responseOptions) response: Response): Promise<User> {
-    return await this.authService.login(loginDto, response);
+    return this.authService.login(loginDto, response);
   }
 
   @Post('refresh')
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
-    return await this.authService.refresh(request, response);
+    return this.authService.refresh(request, response);
   }
 
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
-  async getMe(@Req() request: Request): Promise<User> {
-    return await this.authService.getMe(request);
+  async me(@Req() request: Request): Promise<User> {
+    return this.authService.me(request);
   }
 
   @Get('google')
@@ -54,7 +54,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @UseInterceptors(ClassSerializerInterceptor)
   async getGoogleRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
-    return await this.authService.getSocial(request, response, 'googleId');
+    return this.authService.getSocial(request, response, 'googleId');
   }
 
   @Get('facebook')
@@ -66,6 +66,6 @@ export class AuthController {
   @UseGuards(AuthGuard('facebook'))
   @UseInterceptors(ClassSerializerInterceptor)
   async getFacebookRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
-    return await this.authService.getSocial(request, response, 'facebookId');
+    return this.authService.getSocial(request, response, 'facebookId');
   }
 }

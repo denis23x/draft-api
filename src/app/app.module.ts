@@ -1,13 +1,12 @@
 /** @format */
 
-import { Global, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { CategoriesModule } from './categories/categories.module';
-import { PostsModule } from './posts/posts.module';
-import { TokensModule } from './tokens/tokens.module';
-import { UsersModule } from './users/users.module';
+import { CategoryModule } from './category/category.module';
+import { CoreModule } from './core';
+import { TokenModule } from './token/token.module';
+import { UserModule } from './user/user.module';
 
 @Global()
 @Module({
@@ -16,23 +15,12 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
       envFilePath: '.env'
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DATABASE_HOST,
-      port: Number(process.env.DATABASE_PORT),
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      charset: 'utf8mb4',
-      autoLoadEntities: true,
-      synchronize: true
-    }),
     AuthModule,
-    CategoriesModule,
-    PostsModule,
-    TokensModule,
-    UsersModule
+    CategoryModule,
+    CoreModule,
+    TokenModule,
+    UserModule
   ],
-  exports: [AuthModule, CategoriesModule, PostsModule, TokensModule, UsersModule]
+  exports: [AuthModule, CategoryModule, CoreModule, TokenModule, UserModule]
 })
 export class AppModule {}

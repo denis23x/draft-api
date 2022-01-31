@@ -3,9 +3,6 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
-import { CreateDto } from '../../users/users.dto';
-
-type VerifyCallback = (error: any, user?: any, info?: any) => void;
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
@@ -23,14 +20,14 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    verifyCallback: VerifyCallback
-  ): Promise<any> {
+    verifyCallback: any
+  ): Promise<void> {
     const email = profile.emails.shift();
 
     verifyCallback(null, {
       name: email.value.split('@').shift(),
       email: email.value,
       facebookId: profile.id
-    } as CreateDto);
+    });
   }
 }

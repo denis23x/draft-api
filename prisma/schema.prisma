@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Token {
+  id        Int       @default(autoincrement()) @id
+  userId    Int
+  createdAt DateTime  @default(now()) @db.DateTime(6)
+  updatedAt DateTime  @default(now()) @db.DateTime(6)
+  expiredAt DateTime  @db.DateTime(0)
+}
+
+model User {
+  id         Int          @default(autoincrement()) @id
+  googleId   String?      @db.VarChar(255)
+  facebookId String?      @db.VarChar(255)
+  name       String       @db.VarChar(255) @unique
+  biography  String?      @db.VarChar(255)
+  avatar     String?      @db.VarChar(255)
+  email      String       @db.VarChar(255) @unique
+  password   String?      @db.VarChar(255)
+  categories Category[]
+  posts      Post[]
+  createdAt  DateTime     @db.DateTime(6) @default(now())
+  updatedAt  DateTime     @db.DateTime(6) @default(now())
+  deletedAt  DateTime?    @db.DateTime(6)
+}
+
+model Category {
+  id        Int       @default(autoincrement()) @id
+  user      User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userId    Int?
+  name      String    @db.VarChar(255)
+  posts     Post[]
+  createdAt DateTime  @db.DateTime(6) @default(now())
+  updatedAt DateTime  @db.DateTime(6) @default(now())
+  deletedAt DateTime? @db.DateTime(6)
+
+  @@unique([name, userId])
+
+  @@index([userId])
+}
+
+model Post {
+  id         Int         @default(autoincrement()) @id
+  title      String      @db.VarChar(255)
+  body       String      @db.Text
+  image      String?     @db.VarChar(255)
+  user       User?       @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userId     Int?
+  category   Category?   @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  categoryId Int?
+  createdAt  DateTime    @db.DateTime(6) @default(now())
+  updatedAt  DateTime    @db.DateTime(6) @default(now())
+  deletedAt  DateTime?   @db.DateTime(6)
+
+  @@unique([title, userId, categoryId])
+
+  @@index([categoryId])
+  @@index([userId])
+}

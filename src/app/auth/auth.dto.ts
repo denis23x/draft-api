@@ -6,7 +6,8 @@ import {
   IsNumberString,
   IsOptional,
   MaxLength,
-  MinLength
+  MinLength,
+  ValidateIf
 } from 'class-validator';
 
 export class LoginDto {
@@ -14,7 +15,9 @@ export class LoginDto {
   @IsEmail()
   email: string;
 
-  @IsOptional()
+  @ValidateIf((loginDto: LoginDto) => {
+    return !loginDto.googleId && !loginDto.facebookId;
+  })
   @MinLength(6)
   @MaxLength(32)
   password?: string;

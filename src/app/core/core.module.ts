@@ -1,10 +1,11 @@
 /** @format */
 
-import { Module } from '@nestjs/common';
-import { HelperService } from './services';
+import { Global, Module } from '@nestjs/common';
+import { HelperService, PrismaService } from './services';
 
+@Global()
 @Module({
-  exports: [HelperService],
-  providers: [HelperService]
+  providers: [HelperService, PrismaService],
+  exports: [HelperService, PrismaService]
 })
 export class CoreModule {}

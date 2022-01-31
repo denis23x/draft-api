@@ -1,14 +1,15 @@
 /** @format */
 
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { TransformInterceptor } from './app/core';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 
 const bootstrap = async () => {
-  const globalPrefix = process.env.APP_PREFIX || '';
+  const globalPrefix = process.env.APP_PREFIX;
   const port = Number(process.env.APP_PORT);
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -20,6 +21,9 @@ const bootstrap = async () => {
       credentials: true
     }
   });
+
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   app.useStaticAssets('src/assets');
   app.setGlobalPrefix(globalPrefix);

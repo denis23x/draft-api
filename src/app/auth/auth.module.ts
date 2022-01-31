@@ -11,7 +11,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 @Module({
   imports: [PassportModule],
   controllers: [AuthController],
-  exports: [AuthService, FacebookStrategy, GoogleStrategy, JwtStrategy],
-  providers: [AuthService, FacebookStrategy, GoogleStrategy, JwtStrategy]
+  providers: [AuthService, FacebookStrategy, GoogleStrategy, JwtStrategy],
+  exports: [AuthService, FacebookStrategy, GoogleStrategy, JwtStrategy]
 })
 export class AuthModule {}
