@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
-import { LoginDto } from './auth.dto';
+import { LoginDto } from './dto';
 import { TokenService } from '../token/token.service';
 import * as url from 'url';
 import { User } from '@prisma/client';

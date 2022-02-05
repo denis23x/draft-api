@@ -9,11 +9,19 @@ export const userRaw = async () => {
    * Create RAW user data
    */
 
-  const raw = [];
+  const raw = [
+    {
+      name: 'moderator',
+      email: 'moder@moder.com',
+      biography: null,
+      avatar: null,
+      password: await hash('moder@moder.com', 10)
+    }
+  ];
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 19; i++) {
     const email = faker.internet.email().toLowerCase();
-    const avatarPath = process.env.APP_STORAGE + '/images/';
+    const avatarPath = process.env.APP_ORIGIN + '/images/';
     const avatarFile = faker.datatype.number({ min: 0, max: 200 }) + '.jpg';
 
     raw.push({

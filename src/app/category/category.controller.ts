@@ -24,7 +24,9 @@ import {
 import { Request } from 'express';
 import { PrismaExceptionFilter } from '../core';
 import { Category } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Categories')
 @Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}

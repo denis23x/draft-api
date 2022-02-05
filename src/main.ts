@@ -5,8 +5,11 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { TransformInterceptor } from './app/core';
+import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
+import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
+import { readFileSync } from 'fs';
 
 const bootstrap = async () => {
   const globalPrefix = process.env.APP_PREFIX;
@@ -39,9 +42,49 @@ const bootstrap = async () => {
   app.use(cookieParser(process.env.APP_COOKIE_SECRET));
   app.use(compression());
 
-  await app.listen(port, () => {
-    Logger.log('Listening at http://localhost:' + port + '/' + globalPrefix);
-  });
+  try {
+    const description: string = readFileSync('md/swagger-ui-description.md', 'utf8');
+
+    const config = new DocumentBuilder()
+      .setTitle('Swagger UI')
+      .setDescription(description)
+      .setVersion('0.1')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        },
+        'accessToken'
+      )
+      .build();
+
+    const openAPIObject: OpenAPIObject = SwaggerModule.createDocument(app, config);
+
+    /** https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ */
+
+    const swaggerCustomOptions: SwaggerCustomOptions = {
+      swaggerOptions: {
+        filter: true,
+        persistAuthorization: true,
+        docExpansion: 'list',
+        showExtensions: true,
+        showCommonExtensions: true,
+        defaultModelsExpandDepth: -1,
+        syntaxHighlight: {
+          activate: true,
+          theme: 'monokai'
+        },
+        operationIdFactory: (controllerKey: string, methodKey: string) => methodKey
+      }
+    };
+
+    SwaggerModule.setup('docs', app, openAPIObject, swaggerCustomOptions);
+  } catch (error: any) {
+    Logger.error("Can't start Swagger UI: " + error);
+  }
+
+  await app.listen(port, () => Logger.log('http://localhost:' + port + '/docs'));
 };
 
 bootstrap();

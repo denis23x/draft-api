@@ -20,11 +20,13 @@ import { CreateUserDto, GetAllUserDto, GetOneUserDto, UpdateUserDto } from './us
 import { Request, Response } from 'express';
 import { PrismaExceptionFilter } from '../core';
 import { User } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
 const responseOptions = {
   passthrough: true
 };
 
+@ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}

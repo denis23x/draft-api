@@ -22,7 +22,7 @@ export const postRaw = async () => {
   for (let i = 0; i < categoriesDB.length * 10; i++) {
     const category = categoriesDB[faker.datatype.number({ min: 0, max: categoriesDB.length - 1 })];
 
-    const imagePath = process.env.APP_STORAGE + '/images/';
+    const imagePath = process.env.APP_ORIGIN + '/images/';
     const imageFile = faker.datatype.number({ min: 0, max: 667 }) + '.jpg';
 
     raw.push({
