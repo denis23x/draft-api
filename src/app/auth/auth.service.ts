@@ -4,15 +4,17 @@ import {
   ForbiddenException,
   NotFoundException,
   Injectable,
-  UnauthorizedException
+  UnauthorizedException,
+  UnprocessableEntityException
 } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { LoginDto, RegistrationDto } from './dto';
 import { TokenService } from '../token/token.service';
 import * as url from 'url';
-import { User } from '@prisma/client';
+import { Token, User } from '@prisma/client';
 import { PrismaService } from '../core';
+import { JwtDecodedPayload } from './auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -82,13 +84,23 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    const user: User = await this.tokenService.resolveRefreshToken(refreshToken);
+    const jwtDecodedPayload: JwtDecodedPayload = await this.tokenService.decodeRefreshToken(
+      refreshToken
+    );
 
-    if (!user) {
-      throw new ForbiddenException();
+    if ((request.user as any).id === Number(jwtDecodedPayload.sub)) {
+      const token: Token = await this.prismaService.token.delete({
+        where: {
+          id: Number(jwtDecodedPayload.jti)
+        }
+      });
+
+      if (!token) {
+        throw new UnprocessableEntityException('Refresh token not found');
+      }
     }
 
-    return this.setResponse(user, response);
+    return this.setResponse(request.user as any, response);
   }
 
   async me(request: Request): Promise<User> {

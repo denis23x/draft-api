@@ -4,7 +4,7 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignOptions, TokenExpiredError } from 'jsonwebtoken';
 import { JwtDecodedPayload } from '../auth/auth.interface';
-import { Token, User } from '@prisma/client';
+import { Token } from '@prisma/client';
 import { PrismaService } from '../core';
 
 @Injectable()
@@ -47,28 +47,6 @@ export class TokenService {
     };
 
     return this.jwtService.signAsync({}, signOptions);
-  }
-
-  async resolveRefreshToken(refreshToken: string): Promise<User> {
-    const jwtDecodedPayload: JwtDecodedPayload = await this.decodeRefreshToken(refreshToken);
-
-    const token: Token = await this.prismaService.token.delete({
-      where: {
-        id: Number(jwtDecodedPayload.jti)
-      }
-    });
-
-    if (!token) {
-      throw new UnprocessableEntityException('Refresh token not found');
-    }
-
-    // TODO: add categories
-
-    return this.prismaService.user.findUnique({
-      where: {
-        id: Number(jwtDecodedPayload.sub)
-      }
-    });
   }
 
   async decodeRefreshToken(token: string): Promise<JwtDecodedPayload> {
