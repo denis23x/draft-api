@@ -1,22 +1,11 @@
 /** @format */
 
-import {
-  Body,
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Post,
-  Req,
-  Res,
-  UseFilters,
-  UseGuards,
-  UseInterceptors
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto, RegistrationDto, AccessTokenDto } from './dto';
-import { PrismaExceptionFilter, TransformInterceptor } from '../core';
+import { PrismaExceptionFilter } from '../core';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
@@ -40,6 +29,7 @@ export class AuthController {
 
   /** LOGIN */
 
+  // prettier-ignore
   @ApiOperation({
     description: '## User authentication'
   })
@@ -51,15 +41,13 @@ export class AuthController {
     type: IntersectionType(UserDto, AccessTokenDto)
   })
   @Post('login')
-  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
-  async login(
-    @Req() request: Request,
-    @Res(responseOptions) response: Response,
-    @Body() loginDto: LoginDto
-  ): Promise<User> {
+  async login(@Req() request: Request, @Res(responseOptions) response: Response, @Body() loginDto: LoginDto): Promise<User> {
     return this.authService.login(request, response, loginDto);
   }
 
+  /** REGISTRATION */
+
+  // prettier-ignore
   @ApiOperation({
     description: '## User registration'
   })
@@ -72,11 +60,7 @@ export class AuthController {
   })
   @Post('registration')
   @UseFilters(PrismaExceptionFilter)
-  async registration(
-    @Req() request: Request,
-    @Res(responseOptions) response: Response,
-    @Body() registrationDto: RegistrationDto
-  ): Promise<User> {
+  async registration(@Req() request: Request, @Res(responseOptions) response: Response, @Body() registrationDto: RegistrationDto): Promise<User> {
     return this.authService.registration(request, response, registrationDto);
   }
 
@@ -91,8 +75,6 @@ export class AuthController {
   })
   @ApiBearerAuth('accessToken')
   @Post('refresh')
-  @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
     return this.authService.refresh(request, response);
   }
@@ -109,7 +91,6 @@ export class AuthController {
   @ApiBearerAuth('accessToken')
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async me(@Req() request: Request): Promise<User> {
     return this.authService.me(request);
   }
@@ -125,7 +106,6 @@ export class AuthController {
   @ApiExcludeEndpoint()
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  @UseInterceptors(ClassSerializerInterceptor)
   async googleRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
     return this.authService.getSocial(request, response, 'googleId');
   }
@@ -139,7 +119,6 @@ export class AuthController {
   @ApiExcludeEndpoint()
   @Get('facebook/redirect')
   @UseGuards(AuthGuard('facebook'))
-  @UseInterceptors(ClassSerializerInterceptor)
   async facebookRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
     return this.authService.getSocial(request, response, 'facebookId');
   }

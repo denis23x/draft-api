@@ -59,11 +59,8 @@ export class AuthService {
     throw new UnauthorizedException();
   }
 
-  async registration(
-    request: Request,
-    response: Response,
-    registrationDto: RegistrationDto
-  ): Promise<User> {
+  // prettier-ignore
+  async registration(request: Request, response: Response, registrationDto: RegistrationDto): Promise<User> {
     if (registrationDto.hasOwnProperty('password')) {
       registrationDto.password = await hash(registrationDto.password, 10);
     }
@@ -88,19 +85,31 @@ export class AuthService {
       refreshToken
     );
 
-    if ((request.user as any).id === Number(jwtDecodedPayload.sub)) {
-      const token: Token = await this.prismaService.token.delete({
-        where: {
-          id: Number(jwtDecodedPayload.jti)
-        }
-      });
+    // TODO: update refresh auth
 
-      if (!token) {
-        throw new UnprocessableEntityException('Refresh token not found');
+    const user: User = await this.prismaService.user.findUnique({
+      where: {
+        id: Number(jwtDecodedPayload.sub)
       }
-    }
+    });
 
-    return this.setResponse(request.user as any, response);
+    return this.setResponse(user, response);
+
+    // TODO: update refresh auth
+
+    // if ((request.user as any).id === Number(jwtDecodedPayload.sub)) {
+    //   const token: Token = await this.prismaService.token.delete({
+    //     where: {
+    //       id: Number(jwtDecodedPayload.jti)
+    //     }
+    //   });
+    //
+    //   if (!token) {
+    //     throw new UnprocessableEntityException('Refresh token not found');
+    //   }
+    // }
+    //
+    // return this.setResponse(request.user as any, response);
   }
 
   async me(request: Request): Promise<User> {
@@ -125,27 +134,16 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    let user: User = await this.prismaService.user.findUnique({
+    const user: User = await this.prismaService.user.upsert({
       where: {
         email: (request.user as any).email
+      },
+      update: {
+        [socialKey]: request.user[socialKey]
+      },
+      create: {
+        ...(request.user as any)
       }
-    });
-
-    if (!!user) {
-      return this.setRedirect(
-        {
-          ...user,
-          email: (request.user as any).email,
-          [socialKey]: (request.user as any)[socialKey]
-        },
-        response,
-        socialKey
-      );
-    }
-
-    user = await this.prismaService.user.create({
-      // @ts-ignore
-      data: request.user
     });
 
     return this.setRedirect(user, response, socialKey);
