@@ -1,22 +1,10 @@
 /** @format */
 
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Put,
-  Query,
-  Req,
-  UseFilters,
-  UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { GetAllUserDto, GetOneUserDto, UpdateUserDto } from './user.dto';
 import { Request } from 'express';
-import { PrismaExceptionFilter } from '../core';
 import { User } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -30,22 +18,17 @@ export class UserController {
     return this.userService.getAll(request, getAllUserDto);
   }
 
+  // prettier-ignore
   @Get(':id')
-  async getOne(
-    @Req() request: Request,
-    @Param('id') id: number,
-    @Query() getOneUserDto: GetOneUserDto
+  async getOne(@Req() request: Request, @Param('id') id: number, @Query() getOneUserDto: GetOneUserDto
   ): Promise<User> {
     return this.userService.getOne(request, id, getOneUserDto);
   }
 
+  // prettier-ignore
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
-  @UseFilters(PrismaExceptionFilter)
-  async update(
-    @Req() request: Request,
-    @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto
+  async update(@Req() request: Request, @Param('id') id: number, @Body() updateUserDto: UpdateUserDto
   ): Promise<User> {
     return this.userService.update(request, id, updateUserDto);
   }

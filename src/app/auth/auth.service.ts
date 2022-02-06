@@ -1,18 +1,12 @@
 /** @format */
 
-import {
-  ForbiddenException,
-  NotFoundException,
-  Injectable,
-  UnauthorizedException,
-  UnprocessableEntityException
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { LoginDto, RegistrationDto } from './dto';
 import { TokenService } from '../token/token.service';
 import * as url from 'url';
-import { Token, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtDecodedPayload } from './auth.interface';
 
@@ -31,10 +25,6 @@ export class AuthService {
         email: loginDto.email
       }
     });
-
-    if (!user) {
-      throw new NotFoundException();
-    }
 
     if (loginDto.hasOwnProperty('password')) {
       const password: boolean = await compare(loginDto.password, user.password);
@@ -81,9 +71,8 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    const jwtDecodedPayload: JwtDecodedPayload = await this.tokenService.decodeRefreshToken(
-      refreshToken
-    );
+    // prettier-ignore
+    const jwtDecodedPayload: JwtDecodedPayload = await this.tokenService.decodeRefreshToken(refreshToken);
 
     // TODO: update refresh auth
 
@@ -115,18 +104,12 @@ export class AuthService {
   async me(request: Request): Promise<User> {
     // TODO: add categories
 
-    const user: User = await this.prismaService.user.findUnique({
+    return this.prismaService.user.findUnique({
       ...this.prismaService.setNonSensitiveUserSelect(),
       where: {
         id: (request.user as any).id
       }
     });
-
-    if (!user) {
-      throw new NotFoundException();
-    }
-
-    return user;
   }
 
   async getSocial(request: Request, response: Response, socialKey: string): Promise<void> {

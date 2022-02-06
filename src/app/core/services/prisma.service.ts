@@ -1,10 +1,23 @@
 /** @format */
 
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  constructor() {
+    super({
+      rejectOnNotFound: {
+        findUnique: {
+          // prettier-ignore
+          User: (error: Error) => {
+            return new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+          }
+        }
+      }
+    });
+  }
+
   async onModuleInit() {
     await this.$connect();
   }

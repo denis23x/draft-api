@@ -1,7 +1,7 @@
 /** @format */
 
 import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 import { Prisma } from '@prisma/client';
 
@@ -16,8 +16,8 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     const httpArgumentsHost: HttpArgumentsHost = argumentsHost.switchToHttp();
 
     const response: Response = httpArgumentsHost.getResponse<Response>();
-    const request: Request = httpArgumentsHost.getRequest<Request>();
 
+    /** https://www.prisma.io/docs/reference/api-reference/error-reference */
     /** https://developer.mozilla.org/ru/docs/Web/HTTP/Status */
 
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
@@ -25,26 +25,22 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         const statusCode = 400;
 
         switch (exception.code) {
+          case 'P2001': {
+            return {
+              statusCode,
+              message: 'Not found'
+            };
+          }
           case 'P2002': {
-            switch (request.url) {
-              case '/api/users': {
-                return {
-                  statusCode,
-                  message: 'User already exists'
-                };
-              }
-              default: {
-                return {
-                  statusCode,
-                  message: 'Already exists'
-                };
-              }
-            }
+            return {
+              statusCode,
+              message: 'Already exist'
+            };
           }
           default: {
             return {
               statusCode,
-              message: 'Already exists'
+              message: 'Unknown error'
             };
           }
         }

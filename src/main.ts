@@ -4,7 +4,7 @@ import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/comm
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { TransformInterceptor } from './app/core';
+import { TransformInterceptor, PrismaExceptionFilter } from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
@@ -25,11 +25,20 @@ const bootstrap = async () => {
     }
   });
 
+  app.setGlobalPrefix(globalPrefix);
+
+  /** FILTERS */
+
+  app.useGlobalFilters(new PrismaExceptionFilter());
+
+  /** INTERCEPTORS */
+
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new TransformInterceptor());
 
+  /** MISC */
+
   app.useStaticAssets('src/assets');
-  app.setGlobalPrefix(globalPrefix);
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

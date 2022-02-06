@@ -1,11 +1,10 @@
 /** @format */
 
-import { Body, Controller, Get, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto, RegistrationDto, AccessTokenDto } from './dto';
-import { PrismaExceptionFilter } from '../core';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
@@ -59,7 +58,6 @@ export class AuthController {
     type: IntersectionType(UserDto, AccessTokenDto)
   })
   @Post('registration')
-  @UseFilters(PrismaExceptionFilter)
   async registration(@Req() request: Request, @Res(responseOptions) response: Response, @Body() registrationDto: RegistrationDto): Promise<User> {
     return this.authService.registration(request, response, registrationDto);
   }
