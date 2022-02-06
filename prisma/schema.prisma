@@ -8,11 +8,14 @@ datasource db {
 }
 
 model Token {
-  id        Int       @default(autoincrement()) @id
-  userId    Int
-  createdAt DateTime  @default(now()) @db.DateTime(6)
-  updatedAt DateTime  @default(now()) @db.DateTime(6)
-  expiredAt DateTime  @db.DateTime(0)
+  id          Int       @default(autoincrement()) @id
+  user        User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userId      Int?
+  device      Json
+  fingerprint String
+  createdAt   DateTime  @default(now()) @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @db.DateTime(6)
+  expiredAt   DateTime  @db.DateTime(0)
 }
 
 model User {
@@ -26,6 +29,7 @@ model User {
   password   String?      @db.VarChar(255)
   categories Category[]
   posts      Post[]
+  tokens     Token[]
   createdAt  DateTime     @db.DateTime(6) @default(now())
   updatedAt  DateTime     @db.DateTime(6) @default(now())
   deletedAt  DateTime?    @db.DateTime(6)

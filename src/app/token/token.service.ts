@@ -6,6 +6,7 @@ import { SignOptions, TokenExpiredError } from 'jsonwebtoken';
 import { JwtDecodedPayload } from '../auth/auth.interface';
 import { Token } from '@prisma/client';
 import { PrismaService } from '../core';
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class TokenService {
@@ -28,14 +29,20 @@ export class TokenService {
     return this.jwtService.signAsync({}, signOptions);
   }
 
-  async generateRefreshToken(id: number): Promise<string> {
+  async generateRefreshToken(id: number, device: any): Promise<string> {
     const date: Date = new Date();
+    const fingerprint: string = await hash(JSON.stringify(device), 0);
 
-    // @ts-ignore
     const token: Token = await this.prismaService.token.create({
       data: {
-        userId: id,
-        expiredAt: new Date(date.setTime(date.getTime() + Number(process.env.JWT_REFRESH_TTL)))
+        device,
+        fingerprint,
+        expiredAt: new Date(date.setTime(date.getTime() + Number(process.env.JWT_REFRESH_TTL))),
+        user: {
+          connect: {
+            id
+          }
+        }
       }
     });
 

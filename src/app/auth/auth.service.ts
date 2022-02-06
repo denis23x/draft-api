@@ -9,6 +9,7 @@ import * as url from 'url';
 import { User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtDecodedPayload } from './auth.interface';
+import DeviceDetector = require('device-detector-js');
 
 @Injectable()
 export class AuthService {
@@ -30,19 +31,19 @@ export class AuthService {
       const password: boolean = await compare(loginDto.password, user.password);
 
       if (password) {
-        return this.setResponse(user, response);
+        return this.setResponse(request, response, user);
       }
     }
 
     if (loginDto.hasOwnProperty('googleId')) {
       if (loginDto.googleId === user.googleId) {
-        return this.setResponse(user, response);
+        return this.setResponse(request, response, user);
       }
     }
 
     if (loginDto.hasOwnProperty('facebookId')) {
       if (loginDto.facebookId === user.facebookId) {
-        return this.setResponse(user, response);
+        return this.setResponse(request, response, user);
       }
     }
 
@@ -61,7 +62,7 @@ export class AuthService {
       data: registrationDto
     });
 
-    return this.setResponse(user, response);
+    return this.setResponse(request, response, user);
   }
 
   async refresh(request: Request, response: Response): Promise<User> {
@@ -82,7 +83,7 @@ export class AuthService {
       }
     });
 
-    return this.setResponse(user, response);
+    return this.setResponse(request, response, user);
 
     // TODO: update refresh auth
 
@@ -132,14 +133,23 @@ export class AuthService {
     return this.setRedirect(user, response, socialKey);
   }
 
-  async setResponse(user: User, response: Response): Promise<User> {
+  async setResponse(request: Request, response: Response, user: User): Promise<User> {
+    /** REMOVE SENSITIVE DATA */
+
     const { select } = this.prismaService.setNonSensitiveUserSelect();
 
     for (const column in select) {
       !select[column] && delete user[column];
     }
 
-    const refreshToken: string = await this.tokenService.generateRefreshToken(user.id);
+    /** DETECT DEVICE */
+
+    const deviceDetector: any = new DeviceDetector();
+    const device: any = deviceDetector.parse(request.headers['user-agent']);
+
+    /** TOKEN ISSUE */
+
+    const refreshToken: string = await this.tokenService.generateRefreshToken(user.id, device);
     const accessToken: string = await this.tokenService.generateAccessToken(user.id);
 
     // TODO: enable secure and sameSite (need HTTPS)
