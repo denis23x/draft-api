@@ -6,9 +6,9 @@ import {
   Injectable,
   UnauthorizedException
 } from '@nestjs/common';
-import { compare } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
-import { LoginDto } from './dto';
+import { LoginDto, RegistrationDto } from './dto';
 import { TokenService } from '../token/token.service';
 import * as url from 'url';
 import { User } from '@prisma/client';
@@ -21,7 +21,7 @@ export class AuthService {
     private readonly prismaService: PrismaService
   ) {}
 
-  async login(loginDto: LoginDto, response: Response): Promise<User> {
+  async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
     // TODO: add categories
 
     const user: User = await this.prismaService.user.findUnique({
@@ -55,6 +55,24 @@ export class AuthService {
     }
 
     throw new UnauthorizedException();
+  }
+
+  async registration(
+    request: Request,
+    response: Response,
+    registrationDto: RegistrationDto
+  ): Promise<User> {
+    if (registrationDto.hasOwnProperty('password')) {
+      registrationDto.password = await hash(registrationDto.password, 10);
+    }
+
+    // @ts-ignore
+    const user: User = await this.prismaService.user.create({
+      ...this.prismaService.setNonSensitiveUserSelect(),
+      data: registrationDto
+    });
+
+    return this.setResponse(user, response);
   }
 
   async refresh(request: Request, response: Response): Promise<User> {

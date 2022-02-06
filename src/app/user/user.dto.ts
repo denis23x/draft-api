@@ -3,42 +3,13 @@
 import {
   IsEmail,
   IsIn,
-  IsNotEmpty,
   IsNumber,
-  IsNumberString,
   IsOptional,
   IsPositive,
   MaxLength,
-  MinLength,
-  ValidateIf
+  MinLength
 } from 'class-validator';
 import { Type } from 'class-transformer';
-
-export class CreateUserDto {
-  @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(24)
-  name: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @ValidateIf((createUserDto: CreateUserDto) => {
-    return !createUserDto.googleId && !createUserDto.facebookId;
-  })
-  @MinLength(6)
-  @MaxLength(32)
-  password?: string;
-
-  @IsOptional()
-  @IsNumberString()
-  googleId?: string;
-
-  @IsOptional()
-  @IsNumberString()
-  facebookId?: string;
-}
 
 export class GetAllUserDto {
   @IsOptional()

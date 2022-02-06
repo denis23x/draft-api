@@ -8,15 +8,17 @@ import {
   Post,
   Req,
   Res,
+  UseFilters,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, AccessTokenDto } from './dto';
-import { TransformInterceptor } from '../core';
+import { LoginDto, RegistrationDto, AccessTokenDto } from './dto';
+import { PrismaExceptionFilter, TransformInterceptor } from '../core';
 import { User } from '@prisma/client';
+import { UserDto } from '../user/dto';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -26,7 +28,6 @@ import {
   ApiTags,
   IntersectionType
 } from '@nestjs/swagger';
-import { UserDto } from '../user/dto';
 
 const responseOptions = {
   passthrough: true
@@ -52,10 +53,31 @@ export class AuthController {
   @Post('login')
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async login(
-    @Body() loginRequestDto: LoginDto,
-    @Res(responseOptions) response: Response
+    @Req() request: Request,
+    @Res(responseOptions) response: Response,
+    @Body() loginDto: LoginDto
   ): Promise<User> {
-    return this.authService.login(loginRequestDto, response);
+    return this.authService.login(request, response, loginDto);
+  }
+
+  @ApiOperation({
+    description: '## User registration'
+  })
+  @ApiBody({
+    type: RegistrationDto
+  })
+  @ApiResponse({
+    status: 201,
+    type: IntersectionType(UserDto, AccessTokenDto)
+  })
+  @Post('registration')
+  @UseFilters(PrismaExceptionFilter)
+  async registration(
+    @Req() request: Request,
+    @Res(responseOptions) response: Response,
+    @Body() registrationDto: RegistrationDto
+  ): Promise<User> {
+    return this.authService.registration(request, response, registrationDto);
   }
 
   /** REFRESH */
@@ -69,6 +91,7 @@ export class AuthController {
   })
   @ApiBearerAuth('accessToken')
   @Post('refresh')
+  @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor, TransformInterceptor)
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
     return this.authService.refresh(request, response);

@@ -6,40 +6,24 @@ import {
   Delete,
   Get,
   Param,
-  Post,
   Put,
   Query,
   Req,
-  Res,
   UseFilters,
   UseGuards
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
-import { CreateUserDto, GetAllUserDto, GetOneUserDto, UpdateUserDto } from './user.dto';
-import { Request, Response } from 'express';
+import { GetAllUserDto, GetOneUserDto, UpdateUserDto } from './user.dto';
+import { Request } from 'express';
 import { PrismaExceptionFilter } from '../core';
 import { User } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
-
-const responseOptions = {
-  passthrough: true
-};
 
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post()
-  @UseFilters(PrismaExceptionFilter)
-  async create(
-    @Req() request: Request,
-    @Res(responseOptions) response: Response,
-    @Body() createUserDto: CreateUserDto
-  ): Promise<User> {
-    return this.userService.create(request, response, createUserDto);
-  }
 
   @Get()
   async getAll(@Req() request: Request, @Query() getAllUserDto: GetAllUserDto): Promise<User[]> {
