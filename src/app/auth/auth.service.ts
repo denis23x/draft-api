@@ -9,7 +9,6 @@ import * as url from 'url';
 import { User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtDecodedPayload } from './auth.interface';
-import DeviceDetector = require('device-detector-js');
 
 @Injectable()
 export class AuthService {
@@ -142,15 +141,10 @@ export class AuthService {
       !select[column] && delete user[column];
     }
 
-    /** DETECT DEVICE */
-
-    const deviceDetector: any = new DeviceDetector();
-    const device: any = deviceDetector.parse(request.headers['user-agent']);
-
     /** TOKEN ISSUE */
 
-    const refreshToken: string = await this.tokenService.generateRefreshToken(user.id, device);
-    const accessToken: string = await this.tokenService.generateAccessToken(user.id);
+    const refreshToken: string = await this.tokenService.generateRefreshToken(request, user);
+    const accessToken: string = await this.tokenService.generateAccessToken(request, user);
 
     // TODO: enable secure and sameSite (need HTTPS)
     // secure: true,
@@ -158,7 +152,7 @@ export class AuthService {
 
     response.cookie('refreshToken', refreshToken, {
       domain: process.env.APP_COOKIE_DOMAIN,
-      path: '/api/auth/refresh',
+      path: '/api/auth',
       signed: true,
       httpOnly: true,
       maxAge: Number(process.env.JWT_REFRESH_TTL)

@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { LoginDto, RegistrationDto, AccessTokenDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -73,6 +74,7 @@ export class AuthController {
   })
   @ApiBearerAuth('accessToken')
   @Post('refresh')
+  @UseGuards(JwtAuthGuard)
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
     return this.authService.refresh(request, response);
   }

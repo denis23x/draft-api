@@ -12,10 +12,12 @@ model Token {
   user        User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   userId      Int?
   device      Json
-  fingerprint String
-  createdAt   DateTime  @default(now()) @db.DateTime(6)
-  updatedAt   DateTime  @default(now()) @db.DateTime(6)
-  expiredAt   DateTime  @db.DateTime(0)
+  fingerprint String    @db.VarChar(255)
+  expire      DateTime  @db.DateTime(0)
+  createdAt   DateTime  @db.DateTime(6) @default(now())
+  updatedAt   DateTime  @db.DateTime(6) @default(now())
+
+  @@index([userId])
 }
 
 model User {
