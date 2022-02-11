@@ -1,14 +1,12 @@
 /** @format */
 
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { SignOptions, TokenExpiredError } from 'jsonwebtoken';
+import { SignOptions } from 'jsonwebtoken';
 import { JwtDecodedPayload } from '../auth/auth.interface';
-import { User } from '@prisma/client';
+import { User, Token } from '@prisma/client';
 import { PrismaService } from '../core';
-import { hash } from 'bcrypt';
 import { Request } from 'express';
-import DeviceDetector = require('device-detector-js');
 
 @Injectable()
 export class TokenService {
@@ -22,7 +20,7 @@ export class TokenService {
     private readonly prismaService: PrismaService
   ) {}
 
-  async generateAccessToken(request: Request, user: User): Promise<string> {
+  async createAccess(request: Request, user: User): Promise<string> {
     const signOptions: SignOptions = {
       ...this.signOptions,
       expiresIn: Number(process.env.JWT_ACCESS_TTL),
@@ -32,57 +30,19 @@ export class TokenService {
     return this.jwtService.signAsync({}, signOptions);
   }
 
-  async generateRefreshToken(request: Request, user: User): Promise<string> {
-    /** DETECT DEVICE */
-
-    const deviceDetector: any = new DeviceDetector();
-    const device: any = deviceDetector.parse(request.headers['user-agent']);
-
-    const date: Date = new Date();
-    const fingerprint: string = await hash(JSON.stringify(device), 10);
-
-    const refreshToken: string = request.signedCookies.refreshToken;
-
-    let token: any = {};
-
-    // TODO: REWRITE
-
-    if (!refreshToken) {
-      token = await this.prismaService.token.create({
-        data: {
-          device,
-          fingerprint,
-          expire: new Date(date.setTime(date.getTime() + Number(process.env.JWT_REFRESH_TTL))),
-          user: {
-            connect: {
-              id: user.id
-            }
+  async createRefresh(request: Request, user: User): Promise<string> {
+    const token: Token = await this.prismaService.token.create({
+      data: {
+        ua: request.headers['user-agent'],
+        fingerprint: request.body.fingerprint,
+        ip: request.ip,
+        user: {
+          connect: {
+            id: user.id
           }
         }
-      });
-    } else {
-      // prettier-ignore
-      const jwtDecodedPayload: JwtDecodedPayload = await this.decodeRefreshToken(refreshToken);
-
-      token = await this.prismaService.token.upsert({
-        where: {
-          id: Number(jwtDecodedPayload.jti)
-        },
-        update: {
-          expire: new Date(date.setTime(date.getTime() + Number(process.env.JWT_REFRESH_TTL)))
-        },
-        create: {
-          device,
-          fingerprint,
-          expire: new Date(date.setTime(date.getTime() + Number(process.env.JWT_REFRESH_TTL))),
-          user: {
-            connect: {
-              id: user.id
-            }
-          }
-        }
-      });
-    }
+      }
+    });
 
     const signOptions: SignOptions = {
       ...this.signOptions,
@@ -94,15 +54,38 @@ export class TokenService {
     return this.jwtService.signAsync({}, signOptions);
   }
 
-  async decodeRefreshToken(token: string): Promise<JwtDecodedPayload> {
-    try {
-      return this.jwtService.verifyAsync(token);
-    } catch (error: any) {
-      if (error instanceof TokenExpiredError) {
-        throw new UnprocessableEntityException('Refresh token expired');
-      } else {
-        throw new UnprocessableEntityException('Refresh token malformed');
+  async upsertRefresh(request: Request, user: User): Promise<string> {
+    // prettier-ignore
+    const jwtDecodedPayload: JwtDecodedPayload = await this.jwtService.verifyAsync(request.signedCookies.refresh);
+
+    const token: Token = await this.prismaService.token.upsert({
+      where: {
+        id: Number(jwtDecodedPayload.jti)
+      },
+      update: {
+        ua: request.headers['user-agent'],
+        fingerprint: request.body.fingerprint,
+        ip: request.ip
+      },
+      create: {
+        ua: request.headers['user-agent'],
+        fingerprint: request.body.fingerprint,
+        ip: request.ip,
+        user: {
+          connect: {
+            id: user.id
+          }
+        }
       }
-    }
+    });
+
+    const signOptions: SignOptions = {
+      ...this.signOptions,
+      expiresIn: Number(process.env.JWT_REFRESH_TTL),
+      subject: String(user.id),
+      jwtid: String(token.id)
+    };
+
+    return this.jwtService.signAsync({}, signOptions);
   }
 }

@@ -11,9 +11,9 @@ model Token {
   id          Int       @default(autoincrement()) @id
   user        User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   userId      Int?
-  device      Json
+  ua          String    @db.VarChar(255)
   fingerprint String    @db.VarChar(255)
-  expire      DateTime  @db.DateTime(0)
+  ip          String    @db.VarChar(255)
   createdAt   DateTime  @db.DateTime(6) @default(now())
   updatedAt   DateTime  @db.DateTime(6) @default(now())
 

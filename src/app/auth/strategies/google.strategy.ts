@@ -15,15 +15,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-    verifyCallback: any
-  ): Promise<void> {
+  async validate(access: string, refresh: string, profile: Profile, callback: any): Promise<void> {
     const email = profile.emails.shift();
 
-    verifyCallback(null, {
+    callback(null, {
       name: email.value.split('@').shift(),
       email: email.value,
       googleId: profile.id

@@ -4,10 +4,10 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, RegistrationDto, AccessTokenDto } from './dto';
+import { LoginDto, RegistrationDto, AccessDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtAuthGuard } from './guards';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -38,7 +38,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 201,
-    type: IntersectionType(UserDto, AccessTokenDto)
+    type: IntersectionType(UserDto, AccessDto)
   })
   @Post('login')
   async login(@Req() request: Request, @Res(responseOptions) response: Response, @Body() loginDto: LoginDto): Promise<User> {
@@ -56,7 +56,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 201,
-    type: IntersectionType(UserDto, AccessTokenDto)
+    type: UserDto
   })
   @Post('registration')
   async registration(@Req() request: Request, @Res(responseOptions) response: Response, @Body() registrationDto: RegistrationDto): Promise<User> {
@@ -70,9 +70,9 @@ export class AuthController {
   })
   @ApiResponse({
     status: 201,
-    type: IntersectionType(UserDto, AccessTokenDto)
+    type: IntersectionType(UserDto, AccessDto)
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Post('refresh')
   @UseGuards(JwtAuthGuard)
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
@@ -88,7 +88,7 @@ export class AuthController {
     status: 200,
     type: UserDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   async me(@Req() request: Request): Promise<User> {

@@ -22,25 +22,23 @@ export class PrismaExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       const getErrorBody = (): ErrorBody => {
-        const statusCode = 400;
-
         switch (exception.code) {
           case 'P2001': {
             return {
-              statusCode,
+              statusCode: 404,
               message: 'Not found'
             };
           }
           case 'P2002': {
             return {
-              statusCode,
+              statusCode: 422,
               message: 'Already exist'
             };
           }
           default: {
             return {
-              statusCode,
-              message: 'Unknown error'
+              statusCode: 400,
+              message: 'Bad Request'
             };
           }
         }

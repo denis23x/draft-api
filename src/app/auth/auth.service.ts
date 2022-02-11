@@ -8,7 +8,6 @@ import { TokenService } from '../token/token.service';
 import * as url from 'url';
 import { User } from '@prisma/client';
 import { PrismaService } from '../core';
-import { JwtDecodedPayload } from './auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -51,13 +50,10 @@ export class AuthService {
       registrationDto.password = await hash(registrationDto.password, 10);
     }
 
-    // @ts-ignore
-    const user: User = await this.prismaService.user.create({
+    return this.prismaService.user.create({
       ...this.prismaService.setNonSensitiveUserSelect(),
       data: registrationDto
     });
-
-    return this.setResponse(request, response, user);
   }
 
   async refresh(request: Request, response: Response): Promise<User> {
@@ -68,13 +64,13 @@ export class AuthService {
     }
 
     // prettier-ignore
-    const jwtDecodedPayload: JwtDecodedPayload = await this.tokenService.decodeRefreshToken(refreshToken);
+    // const jwtDecodedPayload: JwtDecodedPayload = await this.tokenService.decodeRefreshToken(refreshToken);
 
     // TODO: update refresh auth
 
     const user: User = await this.prismaService.user.findUnique({
       where: {
-        id: Number(jwtDecodedPayload.sub)
+        // id: Number(jwtDecodedPayload.sub)
       }
     });
 
@@ -139,14 +135,15 @@ export class AuthService {
 
     /** TOKEN ISSUE */
 
-    const refreshToken: string = await this.tokenService.generateRefreshToken(request, user);
-    const accessToken: string = await this.tokenService.generateAccessToken(request, user);
+    // prettier-ignore
+    const refresh: string = await this.tokenService[request.signedCookies.refresh ? 'upsertRefresh' : 'createRefresh'](request, user);
+    const access: string = await this.tokenService.createAccess(request, user);
 
     // TODO: enable secure and sameSite (need HTTPS)
     // secure: true,
     // sameSite: 'none'
 
-    response.cookie('refreshToken', refreshToken, {
+    response.cookie('refresh', refresh, {
       domain: process.env.APP_COOKIE_DOMAIN,
       path: '/api/auth',
       signed: true,
@@ -157,7 +154,7 @@ export class AuthService {
     return {
       ...user,
       // @ts-ignore
-      accessToken
+      access
     };
   }
 

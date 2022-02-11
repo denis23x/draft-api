@@ -14,28 +14,26 @@ import { ExtractJwt } from 'passport-jwt';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor() {}
-
   canActivate(executionContext: ExecutionContext) {
-    const httpArgumentsHost: HttpArgumentsHost = executionContext.switchToHttp();
-
-    const request: Request = httpArgumentsHost.getRequest<Request>();
-    const response: Response = httpArgumentsHost.getResponse<Response>();
-
-    console.log('request.headers.authorization = ', request.headers.authorization);
-    console.log('request.signedCookies.refreshToken = ', request.signedCookies.refreshToken);
-
-    const asd = new JwtService({
-      secret: process.env.JWT_SECRET
-    });
-
-    asd.verifyAsync(request.headers.authorization.replace('Bearer ', '')).then(res => {
-      console.log(res);
-    });
-
-    asd.verifyAsync(request.signedCookies.refreshToken).then(res => {
-      console.log(res);
-    });
+    // const httpArgumentsHost: HttpArgumentsHost = executionContext.switchToHttp();
+    //
+    // const request: Request = httpArgumentsHost.getRequest<Request>();
+    // const response: Response = httpArgumentsHost.getResponse<Response>();
+    //
+    // console.log('request.headers.authorization = ', request.headers.authorization);
+    // console.log('request.signedCookies.refreshToken = ', request.signedCookies.refreshToken);
+    //
+    // const asd = new JwtService({
+    //   secret: process.env.JWT_SECRET
+    // });
+    //
+    // asd.verifyAsync(request.headers.authorization.replace('Bearer ', '')).then(res => {
+    //   console.log(res);
+    // });
+    //
+    // asd.verifyAsync(request.signedCookies.refreshToken).then(res => {
+    //   console.log(res);
+    // });
 
     // console.log(asd.url);
 

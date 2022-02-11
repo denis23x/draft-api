@@ -9,7 +9,7 @@ import {
   MinLength,
   ValidateIf
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RegistrationDto {
   @ApiProperty({
@@ -42,18 +42,12 @@ export class RegistrationDto {
   @MaxLength(32)
   password?: string;
 
-  @ApiPropertyOptional({
-    description: 'Google identification',
-    default: null
-  })
+  @ApiHideProperty()
   @IsOptional()
   @IsNumberString()
   googleId?: string;
 
-  @ApiPropertyOptional({
-    description: 'Facebook identification',
-    default: null
-  })
+  @ApiHideProperty()
   @IsOptional()
   @IsNumberString()
   facebookId?: string;

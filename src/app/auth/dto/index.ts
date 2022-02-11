@@ -1,5 +1,5 @@
 /** @format */
 
-export { AccessTokenDto } from './access-token.dto';
+export { AccessDto } from './access.dto';
 export { LoginDto } from './login.dto';
 export { RegistrationDto } from './registration.dto';
