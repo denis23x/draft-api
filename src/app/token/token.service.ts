@@ -1,10 +1,10 @@
 /** @format */
 
-import { ForbiddenException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignOptions, TokenExpiredError } from 'jsonwebtoken';
 import { JwtDecodedPayload } from '../auth/auth.interface';
-import { Token, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { hash } from 'bcrypt';
 import { Request } from 'express';
@@ -62,7 +62,7 @@ export class TokenService {
       });
     } else {
       // prettier-ignore
-      const jwtDecodedPayload: JwtDecodedPayload = await this.decodeRefreshToken(refreshToken || '');
+      const jwtDecodedPayload: JwtDecodedPayload = await this.decodeRefreshToken(refreshToken);
 
       token = await this.prismaService.token.upsert({
         where: {

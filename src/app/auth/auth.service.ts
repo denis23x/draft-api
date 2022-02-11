@@ -34,15 +34,11 @@ export class AuthService {
       }
     }
 
-    if (loginDto.hasOwnProperty('googleId')) {
-      if (loginDto.googleId === user.googleId) {
-        return this.setResponse(request, response, user);
-      }
-    }
-
-    if (loginDto.hasOwnProperty('facebookId')) {
-      if (loginDto.facebookId === user.facebookId) {
-        return this.setResponse(request, response, user);
+    for (const socialKey of ['googleId', 'facebookId']) {
+      if (loginDto.hasOwnProperty(socialKey)) {
+        if (loginDto[socialKey] === user[socialKey]) {
+          return this.setResponse(request, response, user);
+        }
       }
     }
 

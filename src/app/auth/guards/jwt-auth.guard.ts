@@ -1,22 +1,41 @@
 /** @format */
 
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+  UnauthorizedException
+} from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 import { Request, Response } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import { ExtractJwt } from 'passport-jwt';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  canActivate(context: ExecutionContextHost) {
-    const asd = context.getArgByIndex(0);
+export class JwtAuthGuard implements CanActivate {
+  constructor() {}
 
-    // const httpArgumentsHost: HttpArgumentsHost = asd.switchToHttp();
-    //
-    // const response: Response = httpArgumentsHost.getResponse<Response>();
-    // const request: Request = httpArgumentsHost.getRequest<Request>();
+  canActivate(executionContext: ExecutionContext) {
+    const httpArgumentsHost: HttpArgumentsHost = executionContext.switchToHttp();
 
-    console.log(asd.headers);
+    const request: Request = httpArgumentsHost.getRequest<Request>();
+    const response: Response = httpArgumentsHost.getResponse<Response>();
+
+    console.log('request.headers.authorization = ', request.headers.authorization);
+    console.log('request.signedCookies.refreshToken = ', request.signedCookies.refreshToken);
+
+    const asd = new JwtService({
+      secret: process.env.JWT_SECRET
+    });
+
+    asd.verifyAsync(request.headers.authorization.replace('Bearer ', '')).then(res => {
+      console.log(res);
+    });
+
+    asd.verifyAsync(request.signedCookies.refreshToken).then(res => {
+      console.log(res);
+    });
 
     // console.log(asd.url);
 
@@ -26,7 +45,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // Add your custom authentication logic here
     // for example, call super.logIn(request) to establish a session.
-    return super.canActivate(context);
+    return true;
+  }
+
+  async validate(username: string, password: string): Promise<any> {
+    console.log('validate');
+
+    return false;
   }
 
   handleRequest(err, user, info) {
