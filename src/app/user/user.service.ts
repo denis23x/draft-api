@@ -5,7 +5,7 @@ import { GetAllUserDto, GetOneUserDto, UpdateUserDto } from './user.dto';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { User } from '@prisma/client';
-import { TokenService } from '../token/token.service';
+import { TokenService } from '../auth/token.service';
 
 @Injectable()
 export class UserService {

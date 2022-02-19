@@ -7,7 +7,6 @@ import { AuthService } from './auth.service';
 import { LoginDto, RegistrationDto, AccessDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
-import { JwtAuthGuard } from './guards';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -74,7 +73,7 @@ export class AuthController {
   })
   @ApiBearerAuth('access')
   @Post('refresh')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('custom'))
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
     return this.authService.refresh(request, response);
   }
@@ -90,7 +89,7 @@ export class AuthController {
   })
   @ApiBearerAuth('access')
   @Get('me')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('custom'))
   async me(@Req() request: Request): Promise<User> {
     return this.authService.me(request);
   }

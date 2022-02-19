@@ -4,7 +4,7 @@ import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/c
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { LoginDto, RegistrationDto } from './dto';
-import { TokenService } from '../token/token.service';
+import { TokenService } from './token.service';
 import * as url from 'url';
 import { User } from '@prisma/client';
 import { PrismaService } from '../core';

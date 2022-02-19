@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
-import { JwtDecodedPayload } from '../auth/auth.interface';
+import { JwtDecodedPayload } from './auth.interface';
 import { User, Token } from '@prisma/client';
 import { PrismaService } from '../core';
 import { Request } from 'express';
