@@ -1,11 +1,6 @@
 /** @format */
 
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { LoginDto, RegistrationDto } from './dto';
@@ -14,15 +9,10 @@ import { Token, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
-import { JwtDecodedPayload } from './auth.interface';
+import { JwtDecodedPayload, JwtDecodedPayload2 } from './auth.interface';
 
 @Injectable()
 export class AuthService {
-  signOptions: SignOptions = {
-    issuer: process.env.JWT_ISSUER,
-    audience: process.env.JWT_AUDIENCE
-  };
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService
@@ -121,17 +111,13 @@ export class AuthService {
       !select[column] && delete user[column];
     }
 
-    /** TOKEN ISSUE */
-
-    // prettier-ignore
-    const refresh: string = await this[request.signedCookies.refresh ? 'upsertRefresh' : 'createRefresh'](request, user);
-    const access: string = await this.createAccess(request, user);
+    const jwtDecodedPayload2: JwtDecodedPayload2 = await this.setTokens(request, user);
 
     // TODO: enable secure and sameSite (need HTTPS)
     // secure: true,
     // sameSite: 'none'
 
-    response.cookie('refresh', refresh, {
+    response.cookie('refresh', jwtDecodedPayload2.refresh, {
       domain: process.env.APP_COOKIE_DOMAIN,
       path: '/api/auth',
       signed: true,
@@ -142,7 +128,7 @@ export class AuthService {
     return {
       ...user,
       // @ts-ignore
-      access
+      access: jwtDecodedPayload2.access
     };
   }
 
@@ -160,19 +146,10 @@ export class AuthService {
 
   /** TOKEN METHODS */
 
-  async createAccess(request: Request, user: User): Promise<string> {
-    const signOptions: SignOptions = {
-      ...this.signOptions,
-      expiresIn: Number(process.env.JWT_ACCESS_TTL),
-      subject: String(user.id)
-    };
-
-    return this.jwtService.signAsync({}, signOptions);
-  }
-
-  async createRefresh(request: Request, user: User): Promise<string> {
-    const token: Token = await this.prismaService.token.create({
-      data: {
+  async setTokens(request: Request, user: User): Promise<JwtDecodedPayload2> {
+    const createRefresh = async (): Promise<Token> => {
+      const refresh: string | undefined = request.signedCookies.refresh;
+      const refreshPayload: any = {
         ua: request.headers['user-agent'],
         fingerprint: request.body.fingerprint,
         ip: request.ip,
@@ -181,49 +158,42 @@ export class AuthService {
             id: user.id
           }
         }
-      }
-    });
+      };
 
-    const signOptions: SignOptions = {
-      ...this.signOptions,
-      expiresIn: Number(process.env.JWT_REFRESH_TTL),
-      subject: String(user.id),
-      jwtid: String(token.id)
-    };
+      if (!!refresh) {
+        const jwtDecodedPayload: JwtDecodedPayload = await this.jwtService.verifyAsync(refresh);
 
-    return this.jwtService.signAsync({}, signOptions);
-  }
-
-  async upsertRefresh(request: Request, user: User): Promise<string> {
-    // prettier-ignore
-    const jwtDecodedPayload: JwtDecodedPayload = await this.jwtService.verifyAsync(request.signedCookies.refresh);
-
-    const payload: any = {
-      ua: request.headers['user-agent'],
-      fingerprint: request.body.fingerprint,
-      ip: request.ip,
-      user: {
-        connect: {
-          id: user.id
-        }
+        return this.prismaService.token.upsert({
+          where: {
+            id: Number(jwtDecodedPayload.jti)
+          },
+          update: refreshPayload,
+          create: refreshPayload
+        });
+      } else {
+        return this.prismaService.token.create({
+          data: refreshPayload
+        });
       }
     };
 
-    const token: Token = await this.prismaService.token.upsert({
-      where: {
-        id: Number(jwtDecodedPayload.jti)
-      },
-      update: payload,
-      create: payload
-    });
+    const signToken = async (token: Token, expiresIn: string): Promise<string> => {
+      const signOptions: SignOptions = {
+        issuer: process.env.JWT_ISSUER,
+        audience: process.env.JWT_AUDIENCE,
+        expiresIn: Number(expiresIn),
+        subject: String(user.id),
+        jwtid: String(token.id)
+      };
 
-    const signOptions: SignOptions = {
-      ...this.signOptions,
-      expiresIn: Number(process.env.JWT_REFRESH_TTL),
-      subject: String(user.id),
-      jwtid: String(token.id)
+      return this.jwtService.signAsync({}, signOptions);
     };
 
-    return this.jwtService.signAsync({}, signOptions);
+    const token: Token = await createRefresh();
+
+    const access = await signToken(token, process.env.JWT_ACCESS_TTL);
+    const refresh = await signToken(token, process.env.JWT_REFRESH_TTL);
+
+    return { access, refresh };
   }
 }

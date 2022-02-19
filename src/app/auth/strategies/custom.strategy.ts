@@ -30,10 +30,12 @@ export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
       throw new UnauthorizedException();
     }
 
-    try {
-      const decode: any = await this.jwtService.verifyAsync(access.slice(7));
+    const decode3: any = await this.jwtService.decode(access.slice(7));
 
-      resolveCallback(Number(decode.sub));
+    try {
+      const decode1: any = await this.jwtService.verifyAsync(access.slice(7));
+
+      resolveCallback(Number(decode1.sub));
     } catch (error: any) {
       const isExpired: boolean = error instanceof TokenExpiredError;
       const isRefresh: boolean = request.url === '/api/auth/refresh';
@@ -46,18 +48,21 @@ export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
         }
 
         try {
-          const decode: any = await this.jwtService.verifyAsync(refresh);
+          const decode2: any = await this.jwtService.verifyAsync(refresh);
           const token: Token = await this.prismaService.token.delete({
             where: {
-              id: Number(decode.jti)
+              id: Number(decode2.jti)
             }
           });
 
-          // TODO: compare fingerprint
+          const invalidJti: boolean = decode3.jti !== decode2.jti;
+          const invalidFingerprint: boolean = request.body.fingerprint !== token.fingerprint;
 
-          console.log(token);
+          if (invalidJti || invalidFingerprint) {
+            throw new ForbiddenException();
+          }
 
-          resolveCallback(Number(decode.sub));
+          resolveCallback(Number(decode2.sub));
         } catch (error: any) {
           throw new ForbiddenException();
         }
