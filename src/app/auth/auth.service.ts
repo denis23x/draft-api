@@ -4,15 +4,22 @@ import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/c
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { LoginDto, RegistrationDto } from './dto';
-import { TokenService } from './token.service';
 import * as url from 'url';
-import { User } from '@prisma/client';
+import { Token, User } from '@prisma/client';
 import { PrismaService } from '../core';
+import { JwtService } from '@nestjs/jwt';
+import { SignOptions } from 'jsonwebtoken';
+import { JwtDecodedPayload } from './auth.interface';
 
 @Injectable()
 export class AuthService {
+  signOptions: SignOptions = {
+    issuer: process.env.JWT_ISSUER,
+    audience: process.env.JWT_AUDIENCE
+  };
+
   constructor(
-    private readonly tokenService: TokenService,
+    private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService
   ) {}
 
@@ -104,7 +111,7 @@ export class AuthService {
     });
   }
 
-  async getSocial(request: Request, response: Response, socialKey: string): Promise<void> {
+  async social(request: Request, response: Response, socialKey: string): Promise<void> {
     if (!request.user) {
       throw new UnauthorizedException();
     }
@@ -124,6 +131,8 @@ export class AuthService {
     return this.setRedirect(user, response, socialKey);
   }
 
+  /** SHARED METHODS */
+
   async setResponse(request: Request, response: Response, user: User): Promise<User> {
     /** REMOVE SENSITIVE DATA */
 
@@ -136,8 +145,8 @@ export class AuthService {
     /** TOKEN ISSUE */
 
     // prettier-ignore
-    const refresh: string = await this.tokenService[request.signedCookies.refresh ? 'upsertRefresh' : 'createRefresh'](request, user);
-    const access: string = await this.tokenService.createAccess(request, user);
+    const refresh: string = await this[request.signedCookies.refresh ? 'upsertRefresh' : 'createRefresh'](request, user);
+    const access: string = await this.createAccess(request, user);
 
     // TODO: enable secure and sameSite (need HTTPS)
     // secure: true,
@@ -168,5 +177,74 @@ export class AuthService {
         }
       })
     );
+  }
+
+  /** TOKEN METHODS */
+
+  async createAccess(request: Request, user: User): Promise<string> {
+    const signOptions: SignOptions = {
+      ...this.signOptions,
+      expiresIn: Number(process.env.JWT_ACCESS_TTL),
+      subject: String(user.id)
+    };
+
+    return this.jwtService.signAsync({}, signOptions);
+  }
+
+  async createRefresh(request: Request, user: User): Promise<string> {
+    const token: Token = await this.prismaService.token.create({
+      data: {
+        ua: request.headers['user-agent'],
+        fingerprint: request.body.fingerprint,
+        ip: request.ip,
+        user: {
+          connect: {
+            id: user.id
+          }
+        }
+      }
+    });
+
+    const signOptions: SignOptions = {
+      ...this.signOptions,
+      expiresIn: Number(process.env.JWT_REFRESH_TTL),
+      subject: String(user.id),
+      jwtid: String(token.id)
+    };
+
+    return this.jwtService.signAsync({}, signOptions);
+  }
+
+  async upsertRefresh(request: Request, user: User): Promise<string> {
+    // prettier-ignore
+    const jwtDecodedPayload: JwtDecodedPayload = await this.jwtService.verifyAsync(request.signedCookies.refresh);
+
+    const payload: any = {
+      ua: request.headers['user-agent'],
+      fingerprint: request.body.fingerprint,
+      ip: request.ip,
+      user: {
+        connect: {
+          id: user.id
+        }
+      }
+    };
+
+    const token: Token = await this.prismaService.token.upsert({
+      where: {
+        id: Number(jwtDecodedPayload.jti)
+      },
+      update: payload,
+      create: payload
+    });
+
+    const signOptions: SignOptions = {
+      ...this.signOptions,
+      expiresIn: Number(process.env.JWT_REFRESH_TTL),
+      subject: String(user.id),
+      jwtid: String(token.id)
+    };
+
+    return this.jwtService.signAsync({}, signOptions);
   }
 }

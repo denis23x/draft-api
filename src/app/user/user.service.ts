@@ -5,14 +5,10 @@ import { GetAllUserDto, GetOneUserDto, UpdateUserDto } from './user.dto';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { User } from '@prisma/client';
-import { TokenService } from '../auth/token.service';
 
 @Injectable()
 export class UserService {
-  constructor(
-    private readonly tokenService: TokenService,
-    private readonly prismaService: PrismaService
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async getAll(request: Request, getAllUserDto: GetAllUserDto): Promise<User[]> {
     let userFindManyArgs: any = {

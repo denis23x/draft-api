@@ -106,7 +106,7 @@ export class AuthController {
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   async googleRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
-    return this.authService.getSocial(request, response, 'googleId');
+    return this.authService.social(request, response, 'googleId');
   }
 
   @ApiExcludeEndpoint()
@@ -119,6 +119,6 @@ export class AuthController {
   @Get('facebook/redirect')
   @UseGuards(AuthGuard('facebook'))
   async facebookRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
-    return this.authService.getSocial(request, response, 'facebookId');
+    return this.authService.social(request, response, 'facebookId');
   }
 }
