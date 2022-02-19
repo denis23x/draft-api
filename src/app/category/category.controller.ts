@@ -31,7 +31,7 @@ export class CategoryController {
 
   // prettier-ignore
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('custom'))
   async create(@Req() request: Request, @Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoryService.create(request, createCategoryDto);
   }
@@ -51,14 +51,14 @@ export class CategoryController {
 
   // prettier-ignore
   @Put(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('custom'))
   async update(@Req() request: Request, @Param('id') id: number, @Body() updateCategoryDto: UpdateCategoryDto
   ): Promise<Category> {
     return this.categoryService.update(request, id, updateCategoryDto);
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('custom'))
   async delete(@Req() request: Request, @Param('id') id: number): Promise<Category> {
     return this.categoryService.delete(request, id);
   }

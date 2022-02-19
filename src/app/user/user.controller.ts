@@ -27,14 +27,14 @@ export class UserController {
 
   // prettier-ignore
   @Put(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('custom'))
   async update(@Req() request: Request, @Param('id') id: number, @Body() updateUserDto: UpdateUserDto
   ): Promise<User> {
     return this.userService.update(request, id, updateUserDto);
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('custom'))
   async delete(@Req() request: Request, @Param('id') id: number): Promise<User> {
     return this.userService.delete(request, id);
   }
