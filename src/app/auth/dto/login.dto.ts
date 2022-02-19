@@ -5,7 +5,6 @@ import {
   IsNotEmpty,
   IsNumberString,
   IsOptional,
-  IsString,
   MaxLength,
   MinLength,
   ValidateIf
@@ -43,11 +42,4 @@ export class LoginDto {
   @IsOptional()
   @IsNumberString()
   facebookId?: string;
-
-  @ApiProperty({
-    description: 'Client unique identifier',
-    default: 'sPx5uhkrzLbrJNvtEbKl'
-  })
-  @IsString()
-  fingerprint: string;
 }

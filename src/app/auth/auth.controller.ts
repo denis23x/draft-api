@@ -4,7 +4,7 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, RegistrationDto, AccessDto } from './dto';
+import { LoginDto, RegistrationDto, AccessDto, FingerprintDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
@@ -33,7 +33,7 @@ export class AuthController {
     description: '## User authentication'
   })
   @ApiBody({
-    type: LoginDto
+    type: IntersectionType(LoginDto, FingerprintDto)
   })
   @ApiResponse({
     status: 201,
@@ -66,6 +66,9 @@ export class AuthController {
 
   @ApiOperation({
     description: '## Refresh tokens pair'
+  })
+  @ApiBody({
+    type: FingerprintDto
   })
   @ApiResponse({
     status: 201,

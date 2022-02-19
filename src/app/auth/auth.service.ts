@@ -1,6 +1,11 @@
 /** @format */
 
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { LoginDto, RegistrationDto } from './dto';
@@ -63,41 +68,15 @@ export class AuthService {
     });
   }
 
-  async refresh(request: Request, response: Response): Promise<User> {
-    const refreshToken: string = request.signedCookies.refreshToken;
-
-    if (!refreshToken) {
-      throw new ForbiddenException();
-    }
-
-    // prettier-ignore
-    // const jwtDecodedPayload: JwtDecodedPayload = await this.tokenService.decodeRefreshToken(refreshToken);
-
-    // TODO: update refresh auth
-
+  async refresh(request: Request, response: Response): Promise<any> {
     const user: User = await this.prismaService.user.findUnique({
+      ...this.prismaService.setNonSensitiveUserSelect(),
       where: {
-        // id: Number(jwtDecodedPayload.sub)
+        id: (request.user as any).id
       }
     });
 
     return this.setResponse(request, response, user);
-
-    // TODO: update refresh auth
-
-    // if ((request.user as any).id === Number(jwtDecodedPayload.sub)) {
-    //   const token: Token = await this.prismaService.token.delete({
-    //     where: {
-    //       id: Number(jwtDecodedPayload.jti)
-    //     }
-    //   });
-    //
-    //   if (!token) {
-    //     throw new UnprocessableEntityException('Refresh token not found');
-    //   }
-    // }
-    //
-    // return this.setResponse(request.user as any, response);
   }
 
   async me(request: Request): Promise<User> {
