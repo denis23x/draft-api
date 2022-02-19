@@ -58,25 +58,23 @@ export class TokenService {
     // prettier-ignore
     const jwtDecodedPayload: JwtDecodedPayload = await this.jwtService.verifyAsync(request.signedCookies.refresh);
 
+    const payload: any = {
+      ua: request.headers['user-agent'],
+      fingerprint: request.body.fingerprint,
+      ip: request.ip,
+      user: {
+        connect: {
+          id: user.id
+        }
+      }
+    };
+
     const token: Token = await this.prismaService.token.upsert({
       where: {
         id: Number(jwtDecodedPayload.jti)
       },
-      update: {
-        ua: request.headers['user-agent'],
-        fingerprint: request.body.fingerprint,
-        ip: request.ip
-      },
-      create: {
-        ua: request.headers['user-agent'],
-        fingerprint: request.body.fingerprint,
-        ip: request.ip,
-        user: {
-          connect: {
-            id: user.id
-          }
-        }
-      }
+      update: payload,
+      create: payload
     });
 
     const signOptions: SignOptions = {
