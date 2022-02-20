@@ -12,6 +12,8 @@ import { JwtModule } from '@nestjs/jwt';
     PassportModule,
     JwtModule.registerAsync({
       useFactory: async () => ({
+        issuer: process.env.JWT_ISSUER,
+        audience: process.env.JWT_AUDIENCE,
         secret: process.env.JWT_SECRET
       })
     })

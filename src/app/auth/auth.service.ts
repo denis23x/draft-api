@@ -5,11 +5,9 @@ import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { LoginDto, RegistrationDto } from './dto';
 import * as url from 'url';
-import { Token, User } from '@prisma/client';
+import { Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
-import { JwtService } from '@nestjs/jwt';
-import { SignOptions } from 'jsonwebtoken';
-import { JwtDecodedPayload, JwtDecodedPayload2 } from './auth.interface';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -109,21 +107,22 @@ export class AuthService {
   }
 
   async setResponse(request: Request, response: Response, user: User): Promise<User> {
-    /** REMOVE SENSITIVE DATA */
-
     const { select } = this.prismaService.setNonSensitiveUserSelect();
 
     for (const column in select) {
       !select[column] && delete user[column];
     }
 
-    const jwtDecodedPayload2: JwtDecodedPayload2 = await this.setTokens(request, user);
+    const session: Session = await this.setSession(request, user);
+
+    const access: string = await this.setToken(session, user, process.env.JWT_ACCESS_TTL);
+    const refresh: string = await this.setToken(session, user, process.env.JWT_REFRESH_TTL);
 
     // TODO: enable secure and sameSite (need HTTPS)
     // secure: true,
     // sameSite: 'none'
 
-    response.cookie('refresh', jwtDecodedPayload2.refresh, {
+    response.cookie('refresh', refresh, {
       domain: process.env.APP_COOKIE_DOMAIN,
       path: '/api/auth',
       signed: true,
@@ -134,14 +133,33 @@ export class AuthService {
     return {
       ...user,
       // @ts-ignore
-      access: jwtDecodedPayload2.access
+      access
     };
   }
 
-  async setTokens(request: Request, user: User): Promise<JwtDecodedPayload2> {
-    const createRefresh = async (): Promise<Token> => {
-      const refresh: string | undefined = request.signedCookies.refresh;
-      const refreshPayload: any = {
+  async setSession(request: Request, user: User): Promise<Session> {
+    const refresh: string | undefined = request.signedCookies.refresh;
+
+    if (!!refresh) {
+      const jwtDecodedPayload: any = await this.jwtService.verifyAsync(refresh);
+
+      const session: Session = await this.prismaService.session.findUnique({
+        where: {
+          id: Number(jwtDecodedPayload.jti)
+        }
+      });
+
+      if (!!session) {
+        await this.prismaService.session.delete({
+          where: {
+            id: Number(jwtDecodedPayload.jti)
+          }
+        });
+      }
+    }
+
+    return this.prismaService.session.create({
+      data: {
         ua: request.headers['user-agent'],
         fingerprint: request.body.fingerprint,
         ip: request.ip,
@@ -150,42 +168,18 @@ export class AuthService {
             id: user.id
           }
         }
-      };
-
-      if (!!refresh) {
-        const jwtDecodedPayload: JwtDecodedPayload = await this.jwtService.verifyAsync(refresh);
-
-        return this.prismaService.token.upsert({
-          where: {
-            id: Number(jwtDecodedPayload.jti)
-          },
-          update: refreshPayload,
-          create: refreshPayload
-        });
-      } else {
-        return this.prismaService.token.create({
-          data: refreshPayload
-        });
       }
+    });
+  }
+
+  async setToken(session: Session, user: User, expiresIn: string): Promise<string> {
+    const payload: any = {};
+    const options: JwtSignOptions = {
+      expiresIn: Number(expiresIn),
+      subject: String(user.id),
+      jwtid: String(session.id)
     };
 
-    const signToken = async (token: Token, expiresIn: string): Promise<string> => {
-      const signOptions: SignOptions = {
-        issuer: process.env.JWT_ISSUER,
-        audience: process.env.JWT_AUDIENCE,
-        expiresIn: Number(expiresIn),
-        subject: String(user.id),
-        jwtid: String(token.id)
-      };
-
-      return this.jwtService.signAsync({}, signOptions);
-    };
-
-    const token: Token = await createRefresh();
-
-    const access = await signToken(token, process.env.JWT_ACCESS_TTL);
-    const refresh = await signToken(token, process.env.JWT_REFRESH_TTL);
-
-    return { access, refresh };
+    return this.jwtService.signAsync(payload, options);
   }
 }

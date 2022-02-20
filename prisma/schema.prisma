@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Token {
+model Session {
   id          Int       @default(autoincrement()) @id
   user        User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   userId      Int?
@@ -16,6 +16,8 @@ model Token {
   ip          String    @db.VarChar(255)
   createdAt   DateTime  @db.DateTime(6) @default(now())
   updatedAt   DateTime  @db.DateTime(6) @default(now())
+
+  @@unique([fingerprint, userId])
 
   @@index([userId])
 }
@@ -31,7 +33,7 @@ model User {
   password   String?      @db.VarChar(255)
   categories Category[]
   posts      Post[]
-  tokens     Token[]
+  sessions   Session[]
   createdAt  DateTime     @db.DateTime(6) @default(now())
   updatedAt  DateTime     @db.DateTime(6) @default(now())
   deletedAt  DateTime?    @db.DateTime(6)

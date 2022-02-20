@@ -7,7 +7,7 @@ import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { PrismaService } from '../../core';
-import { Token } from '@prisma/client';
+import { Session } from '@prisma/client';
 
 @Injectable()
 export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
@@ -18,53 +18,78 @@ export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
     super();
   }
 
-  async validate(request: Request, callback: any): Promise<any> {
-    const access: string | undefined = request.headers.authorization;
-    const resolveCallback = (id: number) => {
+  /** AUTHENTICATION
+   *
+   * On login client provide credentials and fingerprint
+   * If credentials are valid server creates session and gives client a pair of tokens
+   * Pair of tokens are equal and contain only JwtSignOptions without user payload
+   *
+   * ACCESS token has lifetime 30 minutes and kept on client side (localStorage)
+   * Client using it for authenticated requests, putting it in authorization headers
+   *
+   * REFRESH token has lifetime 30 days and kept on client side (httpOnly cookie)
+   * Client can't use it, it will be automatically provided in any "/api/auth" request
+   *
+   * On every authenticated request, server verifying ACCESS token for availability, lifetime and trues
+   * If ACCESS token not provided, malformed or expired serves gives UnauthorizedException
+   *
+   * On UnauthorizedException client provide his fingerprint on "/api/auth/refresh"
+   * Server verifying REFRESH token for availability, lifetime and trues
+   * If REFRESH token not provided, malformed or expired serves gives UnauthorizedException
+   * If REFRESH token is correct server delete session and doing additional checking
+   *  - Comparing REFRESH id with ACCESS token id
+   *  - Comparing provided fingerprint with session fingerprint
+   * If ids or fingerprints not equal serves gives ForbiddenException
+   * If all good server pass request to refresh tokens method
+   */
+
+  async validate(request: Request, callback: any): Promise<void> {
+    const accessToken: string | undefined = request.headers.authorization;
+    const resolve = (id: number): void => {
       callback(null, {
         id
       });
     };
 
-    if (!access) {
+    if (!accessToken) {
       throw new UnauthorizedException();
     }
 
-    const decode3: any = await this.jwtService.decode(access.slice(7));
-
     try {
-      const decode1: any = await this.jwtService.verifyAsync(access.slice(7));
+      const accessDecoded: any = await this.jwtService.verifyAsync(accessToken.slice(7));
 
-      resolveCallback(Number(decode1.sub));
+      resolve(Number(accessDecoded.sub));
     } catch (error: any) {
       const isExpired: boolean = error instanceof TokenExpiredError;
       const isRefresh: boolean = request.url === '/api/auth/refresh';
 
       if (isExpired && isRefresh) {
-        const refresh: string | undefined = request.signedCookies.refresh;
+        const refreshToken: string | undefined = request.signedCookies.refresh;
 
-        if (!refresh) {
+        if (!refreshToken) {
           throw new UnauthorizedException();
         }
 
         try {
-          const decode2: any = await this.jwtService.verifyAsync(refresh);
-          const token: Token = await this.prismaService.token.delete({
+          const accessDecoded: any = await this.jwtService.decode(accessToken.slice(7));
+          const refreshDecoded: any = await this.jwtService.verifyAsync(refreshToken);
+
+          const session: Session = await this.prismaService.session.delete({
             where: {
-              id: Number(decode2.jti)
+              id: Number(refreshDecoded.jti)
             }
           });
 
-          const invalidJti: boolean = decode3.jti !== decode2.jti;
-          const invalidFingerprint: boolean = request.body.fingerprint !== token.fingerprint;
+          const invalidJti: boolean = accessDecoded.jti !== refreshDecoded.jti;
+          const invalidFingerprint: boolean = request.body.fingerprint !== session.fingerprint;
 
           if (invalidJti || invalidFingerprint) {
             throw new ForbiddenException();
           }
 
-          resolveCallback(Number(decode2.sub));
+          resolve(Number(refreshDecoded.sub));
         } catch (error: any) {
-          throw new ForbiddenException();
+          throw new UnauthorizedException();
         }
       }
     }
