@@ -17,7 +17,7 @@ const bootstrap = async () => {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: {
-      origin: [process.env.APP_SITE_ORIGIN].concat(process.env.APP_SITE_ORIGIN_CORS.split(',')),
+      origin: [process.env.APP_SITE_ORIGIN].concat(process.env.APP_SITE_CORS.split(',')),
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       preflightContinue: false,
       optionsSuccessStatus: 204,
@@ -52,7 +52,7 @@ const bootstrap = async () => {
   app.use(compression());
 
   try {
-    const description: string = readFileSync('md/swagger-ui-description.md', 'utf8');
+    const description: string = readFileSync('src/assets/md/swagger-ui-description.md', 'utf8');
 
     const config = new DocumentBuilder()
       .setTitle('Swagger UI')

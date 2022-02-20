@@ -97,10 +97,16 @@ export class AuthService {
       }
     });
 
-    return this.setRedirect(user, response, socialKey);
+    return response.redirect(
+      url.format({
+        pathname: process.env.APP_SITE_ORIGIN + '/auth/login',
+        query: {
+          email: user.email,
+          [socialKey]: user[socialKey]
+        }
+      })
+    );
   }
-
-  /** SHARED METHODS */
 
   async setResponse(request: Request, response: Response, user: User): Promise<User> {
     /** REMOVE SENSITIVE DATA */
@@ -131,20 +137,6 @@ export class AuthService {
       access: jwtDecodedPayload2.access
     };
   }
-
-  async setRedirect(user: User, response: Response, socialKey: string): Promise<void> {
-    return response.redirect(
-      url.format({
-        pathname: process.env.APP_SITE_ORIGIN + '/auth/login',
-        query: {
-          email: user.email,
-          [socialKey]: user[socialKey]
-        }
-      })
-    );
-  }
-
-  /** TOKEN METHODS */
 
   async setTokens(request: Request, user: User): Promise<JwtDecodedPayload2> {
     const createRefresh = async (): Promise<Token> => {
