@@ -64,7 +64,7 @@ export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
       const isRefresh: boolean = request.url === '/api/auth/refresh';
 
       if (isExpired && isRefresh) {
-        const refreshToken: string | undefined = request.signedCookies.refresh;
+        const refreshToken: string | undefined = request.signedCookies.refreshToken;
 
         if (!refreshToken) {
           throw new UnauthorizedException();

@@ -4,7 +4,7 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, RegistrationDto, AccessDto, FingerprintDto } from './dto';
+import { LoginDto, RegistrationDto, AccessTokenDto, FingerprintDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
@@ -37,7 +37,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 201,
-    type: IntersectionType(UserDto, AccessDto)
+    type: IntersectionType(UserDto, AccessTokenDto)
   })
   @Post('login')
   async login(@Req() request: Request, @Res(responseOptions) response: Response, @Body() loginDto: LoginDto): Promise<User> {
@@ -72,9 +72,9 @@ export class AuthController {
   })
   @ApiResponse({
     status: 201,
-    type: IntersectionType(UserDto, AccessDto)
+    type: IntersectionType(UserDto, AccessTokenDto)
   })
-  @ApiBearerAuth('access')
+  @ApiBearerAuth('accessToken')
   @Post('refresh')
   @UseGuards(AuthGuard('custom'))
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
@@ -90,7 +90,7 @@ export class AuthController {
     status: 200,
     type: UserDto
   })
-  @ApiBearerAuth('access')
+  @ApiBearerAuth('accessToken')
   @Get('me')
   @UseGuards(AuthGuard('custom'))
   async me(@Req() request: Request): Promise<User> {

@@ -115,14 +115,14 @@ export class AuthService {
 
     const session: Session = await this.setSession(request, user);
 
-    const access: string = await this.setToken(session, user, process.env.JWT_ACCESS_TTL);
-    const refresh: string = await this.setToken(session, user, process.env.JWT_REFRESH_TTL);
+    const accessToken: string = await this.setToken(session, user, process.env.JWT_ACCESS_TTL);
+    const refreshToken: string = await this.setToken(session, user, process.env.JWT_REFRESH_TTL);
 
     // TODO: enable secure and sameSite (need HTTPS)
     // secure: true,
     // sameSite: 'none'
 
-    response.cookie('refresh', refresh, {
+    response.cookie('refreshToken', refreshToken, {
       domain: process.env.APP_COOKIE_DOMAIN,
       path: '/api/auth',
       signed: true,
@@ -133,26 +133,26 @@ export class AuthService {
     return {
       ...user,
       // @ts-ignore
-      access
+      accessToken
     };
   }
 
   async setSession(request: Request, user: User): Promise<Session> {
-    const refresh: string | undefined = request.signedCookies.refresh;
+    const refreshToken: string | undefined = request.signedCookies.refreshToken;
 
-    if (!!refresh) {
-      const jwtDecodedPayload: any = await this.jwtService.verifyAsync(refresh);
+    if (!!refreshToken) {
+      const jwtDecoded: any = await this.jwtService.verifyAsync(refreshToken);
 
       const session: Session = await this.prismaService.session.findUnique({
         where: {
-          id: Number(jwtDecodedPayload.jti)
+          id: Number(jwtDecoded.jti)
         }
       });
 
       if (!!session) {
         await this.prismaService.session.delete({
           where: {
-            id: Number(jwtDecodedPayload.jti)
+            id: Number(jwtDecoded.jti)
           }
         });
       }

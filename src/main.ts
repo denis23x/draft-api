@@ -64,7 +64,7 @@ const bootstrap = async () => {
           scheme: 'bearer',
           bearerFormat: 'JWT'
         },
-        'access'
+        'accessToken'
       )
       .build();
 
