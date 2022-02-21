@@ -33,7 +33,7 @@ export class AuthController {
     description: '## User authentication'
   })
   @ApiBody({
-    type: IntersectionType(LoginDto, FingerprintDto)
+    type: LoginDto
   })
   @ApiResponse({
     status: 201,
@@ -64,6 +64,7 @@ export class AuthController {
 
   /** REFRESH */
 
+  // prettier-ignore
   @ApiOperation({
     description: '## Refresh tokens pair'
   })
@@ -77,8 +78,8 @@ export class AuthController {
   @ApiBearerAuth('accessToken')
   @Post('refresh')
   @UseGuards(AuthGuard('custom'))
-  async refresh(@Req() request: Request, @Res(responseOptions) response: Response): Promise<User> {
-    return this.authService.refresh(request, response);
+  async refresh(@Req() request: Request, @Res(responseOptions) response: Response, @Body() fingerprint: FingerprintDto): Promise<User> {
+    return this.authService.refresh(request, response, fingerprint);
   }
 
   /** ME */

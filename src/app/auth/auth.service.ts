@@ -3,7 +3,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
-import { LoginDto, RegistrationDto } from './dto';
+import { FingerprintDto, LoginDto, RegistrationDto } from './dto';
 import * as url from 'url';
 import { Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
@@ -25,18 +25,22 @@ export class AuthService {
       }
     });
 
+    const fingerprintDto: FingerprintDto = {
+      fingerprint: loginDto.fingerprint
+    };
+
     if (loginDto.hasOwnProperty('password')) {
       const password: boolean = await compare(loginDto.password, user.password);
 
       if (password) {
-        return this.setResponse(request, response, user);
+        return this.setResponse(request, response, user, fingerprintDto);
       }
     }
 
     for (const socialKey of ['googleId', 'facebookId']) {
       if (loginDto.hasOwnProperty(socialKey)) {
         if (loginDto[socialKey] === user[socialKey]) {
-          return this.setResponse(request, response, user);
+          return this.setResponse(request, response, user, fingerprintDto);
         }
       }
     }
@@ -56,7 +60,8 @@ export class AuthService {
     });
   }
 
-  async refresh(request: Request, response: Response): Promise<any> {
+  // prettier-ignore
+  async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<any> {
     const user: User = await this.prismaService.user.findUnique({
       ...this.prismaService.setNonSensitiveUserSelect(),
       where: {
@@ -64,7 +69,7 @@ export class AuthService {
       }
     });
 
-    return this.setResponse(request, response, user);
+    return this.setResponse(request, response, user, fingerprintDto);
   }
 
   async me(request: Request): Promise<User> {
@@ -106,14 +111,15 @@ export class AuthService {
     );
   }
 
-  async setResponse(request: Request, response: Response, user: User): Promise<User> {
+  // prettier-ignore
+  async setResponse(request: Request, response: Response, user: User, fingerprintDto: FingerprintDto): Promise<User> {
     const { select } = this.prismaService.setNonSensitiveUserSelect();
 
     for (const column in select) {
       !select[column] && delete user[column];
     }
 
-    const session: Session = await this.setSession(request, user);
+    const session: Session = await this.setSession(request, user, fingerprintDto);
 
     const accessToken: string = await this.setToken(session, user, process.env.JWT_ACCESS_TTL);
     const refreshToken: string = await this.setToken(session, user, process.env.JWT_REFRESH_TTL);
@@ -137,22 +143,24 @@ export class AuthService {
     };
   }
 
-  async setSession(request: Request, user: User): Promise<Session> {
+  // prettier-ignore
+  async setSession(request: Request, user: User, fingerprintDto?: FingerprintDto): Promise<Session> {
     const refreshToken: string | undefined = request.signedCookies.refreshToken;
 
     if (!!refreshToken) {
-      const jwtDecoded: any = await this.jwtService.verifyAsync(refreshToken);
-
       const session: Session = await this.prismaService.session.findUnique({
         where: {
-          id: Number(jwtDecoded.jti)
+          fingerprint_userId: {
+            fingerprint: fingerprintDto.fingerprint,
+            userId: user.id
+          }
         }
       });
 
       if (!!session) {
         await this.prismaService.session.delete({
           where: {
-            id: Number(jwtDecoded.jti)
+            id: session.id
           }
         });
       }
@@ -161,7 +169,7 @@ export class AuthService {
     return this.prismaService.session.create({
       data: {
         ua: request.headers['user-agent'],
-        fingerprint: request.body.fingerprint,
+        fingerprint: fingerprintDto.fingerprint,
         ip: request.ip,
         user: {
           connect: {
