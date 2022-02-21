@@ -74,11 +74,22 @@ export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
           const accessDecoded: any = await this.jwtService.decode(accessToken.slice(7));
           const refreshDecoded: any = await this.jwtService.verifyAsync(refreshToken);
 
-          const session: Session = await this.prismaService.session.delete({
+          const session: Session = await this.prismaService.session.findUnique({
             where: {
-              id: Number(refreshDecoded.jti)
+              fingerprint_userId: {
+                fingerprint: request.body.fingerprint,
+                userId: Number(refreshDecoded.sub)
+              }
             }
           });
+
+          if (!!session) {
+            await this.prismaService.session.delete({
+              where: {
+                id: session.id
+              }
+            });
+          }
 
           const invalidJti: boolean = accessDecoded.jti !== refreshDecoded.jti;
           const invalidFingerprint: boolean = request.body.fingerprint !== session.fingerprint;
