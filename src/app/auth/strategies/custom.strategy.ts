@@ -71,7 +71,7 @@ export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
         }
 
         try {
-          const accessDecoded: any = await this.jwtService.decode(accessToken.slice(7));
+          const accessDecoded: any = this.jwtService.decode(accessToken.slice(7));
           const refreshDecoded: any = await this.jwtService.verifyAsync(refreshToken);
 
           const session: Session = await this.prismaService.session.findUnique({
@@ -89,20 +89,29 @@ export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
                 id: session.id
               }
             });
+
+            this.validateFingerprint(request, session);
           }
 
-          const invalidJti: boolean = accessDecoded.jti !== refreshDecoded.jti;
-          const invalidFingerprint: boolean = request.body.fingerprint !== session.fingerprint;
-
-          if (invalidJti || invalidFingerprint) {
-            throw new ForbiddenException();
-          }
+          this.validateJti(accessDecoded, refreshDecoded);
 
           resolve(Number(refreshDecoded.sub));
         } catch (error: any) {
           throw new UnauthorizedException();
         }
       }
+    }
+  }
+
+  validateFingerprint(request: Request, session: Session): void {
+    if (request.body.fingerprint !== session.fingerprint) {
+      throw new ForbiddenException();
+    }
+  }
+
+  validateJti(accessDecoded: any, refreshDecoded: any): void {
+    if (accessDecoded.jti !== refreshDecoded.jti) {
+      throw new ForbiddenException();
     }
   }
 }
