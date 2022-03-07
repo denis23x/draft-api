@@ -145,25 +145,21 @@ export class AuthService {
 
   // prettier-ignore
   async setSession(request: Request, user: User, fingerprintDto?: FingerprintDto): Promise<Session> {
-    const refreshToken: string | undefined = request.signedCookies.refreshToken;
+    const session: Session = await this.prismaService.session.findUnique({
+      where: {
+        fingerprint_userId: {
+          fingerprint: fingerprintDto.fingerprint,
+          userId: user.id
+        }
+      }
+    });
 
-    if (!!refreshToken) {
-      const session: Session = await this.prismaService.session.findUnique({
+    if (!!session) {
+      await this.prismaService.session.delete({
         where: {
-          fingerprint_userId: {
-            fingerprint: fingerprintDto.fingerprint,
-            userId: user.id
-          }
+          id: session.id
         }
       });
-
-      if (!!session) {
-        await this.prismaService.session.delete({
-          where: {
-            id: session.id
-          }
-        });
-      }
     }
 
     return this.prismaService.session.create({

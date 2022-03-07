@@ -32,7 +32,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           case 'P2002': {
             return {
               statusCode: 422,
-              message: 'Already exist'
+              message: 'Already exists'
             };
           }
           default: {
