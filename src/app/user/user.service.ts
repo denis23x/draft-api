@@ -1,37 +1,37 @@
 /** @format */
 
 import { Injectable } from '@nestjs/common';
-import { GetAllUserDto, GetOneUserDto, UpdateUserDto } from './user.dto';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { User } from '@prisma/client';
+import { GetAllDto, GetOneDto, UpdateDto } from './dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getAll(request: Request, getAllUserDto: GetAllUserDto): Promise<User[]> {
+  async getAll(request: Request, getAllDto: GetAllDto): Promise<User[]> {
     let userFindManyArgs: any = {
       ...this.prismaService.setNonSensitiveUserSelect(),
       ...this.prismaService.setOrder(),
       ...this.prismaService.setPagination()
     };
 
-    if (!!getAllUserDto) {
+    if (!!getAllDto) {
       /** Search */
 
-      if (getAllUserDto.hasOwnProperty('name')) {
-        userFindManyArgs = this.prismaService.setWhere(userFindManyArgs, getAllUserDto, 'name');
+      if (getAllDto.hasOwnProperty('name')) {
+        userFindManyArgs = this.prismaService.setWhere(userFindManyArgs, getAllDto, 'name');
       }
 
-      if (getAllUserDto.hasOwnProperty('email')) {
-        userFindManyArgs = this.prismaService.setWhere(userFindManyArgs, getAllUserDto, 'email');
+      if (getAllDto.hasOwnProperty('email')) {
+        userFindManyArgs = this.prismaService.setWhere(userFindManyArgs, getAllDto, 'email');
       }
 
       /** Scope */
 
-      if (getAllUserDto.hasOwnProperty('scope')) {
-        if (getAllUserDto.scope.includes('categories')) {
+      if (getAllDto.hasOwnProperty('scope')) {
+        if (getAllDto.scope.includes('categories')) {
           userFindManyArgs.select = {
             ...userFindManyArgs.select,
             categories: {
@@ -41,14 +41,14 @@ export class UserService {
           };
         }
 
-        if (getAllUserDto.scope.includes('posts')) {
+        if (getAllDto.scope.includes('posts')) {
         }
       }
 
       /** Pagination */
 
-      if (getAllUserDto.hasOwnProperty('page') && getAllUserDto.hasOwnProperty('size')) {
-        userFindManyArgs = this.prismaService.setPagination(userFindManyArgs, getAllUserDto);
+      if (getAllDto.hasOwnProperty('page') && getAllDto.hasOwnProperty('size')) {
+        userFindManyArgs = this.prismaService.setPagination(userFindManyArgs, getAllDto);
       }
     }
 
@@ -56,7 +56,7 @@ export class UserService {
     return this.prismaService.user.findMany(userFindManyArgs);
   }
 
-  async getOne(request: Request, id: number, getOneUserDto: GetOneUserDto): Promise<User> {
+  async getOne(request: Request, id: number, getOneDto: GetOneDto): Promise<User> {
     // @ts-ignore
     return this.prismaService.user.findUnique({
       ...this.prismaService.setNonSensitiveUserSelect(),
@@ -66,14 +66,14 @@ export class UserService {
     });
   }
 
-  async update(request: Request, id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(request: Request, id: number, updateDto: UpdateDto): Promise<User> {
     // @ts-ignore
     return this.prismaService.user.update({
       ...this.prismaService.setNonSensitiveUserSelect(),
       where: {
         id
       },
-      data: updateUserDto
+      data: updateDto
     });
   }
 

@@ -32,9 +32,6 @@ export class AuthController {
   @ApiOperation({
     description: '## User authentication'
   })
-  @ApiBody({
-    type: LoginDto
-  })
   @ApiResponse({
     status: 201,
     type: IntersectionType(UserDto, AccessTokenDto)
@@ -50,9 +47,6 @@ export class AuthController {
   @ApiOperation({
     description: '## User registration'
   })
-  @ApiBody({
-    type: RegistrationDto
-  })
   @ApiResponse({
     status: 201,
     type: UserDto
@@ -67,9 +61,6 @@ export class AuthController {
   // prettier-ignore
   @ApiOperation({
     description: '## Refresh tokens pair'
-  })
-  @ApiBody({
-    type: FingerprintDto
   })
   @ApiResponse({
     status: 201,

@@ -5,20 +5,20 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
-  IsNumberString,
   IsOptional,
   IsPositive,
   MaxLength,
   MinLength
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UserDto {
   @ApiProperty({
     default: 1
   })
-  @IsNumberString()
   @IsNumber()
   @IsPositive()
+  @Type(() => Number)
   id: number;
 
   @ApiProperty({

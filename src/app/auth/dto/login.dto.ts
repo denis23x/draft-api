@@ -3,7 +3,7 @@
 import {
   IsEmail,
   IsNotEmpty,
-  IsNumberString,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -11,6 +11,7 @@ import {
   ValidateIf
 } from 'class-validator';
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class LoginDto {
   @ApiProperty({
@@ -36,12 +37,14 @@ export class LoginDto {
 
   @ApiHideProperty()
   @IsOptional()
-  @IsNumberString()
+  @IsNumber()
+  @Type(() => Number)
   googleId?: string;
 
   @ApiHideProperty()
   @IsOptional()
-  @IsNumberString()
+  @IsNumber()
+  @Type(() => Number)
   facebookId?: string;
 
   @ApiProperty({
