@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
 import { CoreModule } from './core';
+import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
 
 @Global()
@@ -17,8 +18,9 @@ import { UserModule } from './user/user.module';
     AuthModule,
     CategoryModule,
     CoreModule,
+    PostModule,
     UserModule
   ],
-  exports: [AuthModule, CategoryModule, CoreModule, UserModule]
+  exports: [AuthModule, CategoryModule, CoreModule, PostModule, UserModule]
 })
 export class AppModule {}

@@ -58,6 +58,23 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     };
   }
 
+  setPostSelect(args?: any): any {
+    return {
+      ...args,
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        image: true,
+        userId: false,
+        categoryId: false,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: false
+      }
+    };
+  }
+
   setWhere(args: any, dto: any, key: string): any {
     const getWhere = () => {
       const and: boolean = args.hasOwnProperty('where');

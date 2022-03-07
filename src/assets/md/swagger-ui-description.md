@@ -2,8 +2,6 @@
 
 Repository [github.com/denis23x/draft-api](https://github.com/denis23x/draft-api)
 
-### Description
-
 OpenAPI JSON [http://localhost:3323/docs-json](http://localhost:3323/docs-json)
 
 Register user then login and copy **access** token to Authorize
