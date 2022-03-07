@@ -14,15 +14,10 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CategoryService } from './category.service';
-import {
-  CreateCategoryDto,
-  GetAllCategoryDto,
-  GetOneCategoryDto,
-  UpdateCategoryDto
-} from './category.dto';
+import { CreateDto, CategoryDto, GetAllDto, GetOneDto, UpdateDto } from './dto';
 import { Request } from 'express';
 import { Category } from '@prisma/client';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -30,33 +25,70 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   // prettier-ignore
+  @ApiOperation({
+    description: '## Create category'
+  })
+  @ApiResponse({
+    status: 201,
+    type: CategoryDto
+  })
+  @ApiBearerAuth('accessToken')
   @Post()
   @UseGuards(AuthGuard('custom'))
-  async create(@Req() request: Request, @Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
-    return this.categoryService.create(request, createCategoryDto);
+  async create(@Req() request: Request, @Body() createDto: CreateDto): Promise<Category> {
+    return this.categoryService.create(request, createDto);
   }
 
   // prettier-ignore
+  @ApiOperation({
+    description: '## Get all categories'
+  })
+  @ApiResponse({
+    status: 200,
+    type: CategoryDto,
+    isArray: true
+  })
   @Get()
-  async getAll(@Req() request: Request, @Query() cetAllCategoryDto: GetAllCategoryDto): Promise<Category[]> {
-    return this.categoryService.getAll(request, cetAllCategoryDto);
+  async getAll(@Req() request: Request, @Query() getAllDto: GetAllDto): Promise<Category[]> {
+    return this.categoryService.getAll(request, getAllDto);
   }
 
   // prettier-ignore
+  @ApiOperation({
+    description: '## Get category'
+  })
+  @ApiResponse({
+    status: 200,
+    type: CategoryDto
+  })
   @Get(':id')
-  async getOne(@Req() request: Request, @Param('id') id: number, @Query() cetOneCategoryDto: GetOneCategoryDto
-  ): Promise<Category> {
-    return this.categoryService.getOne(request, id, cetOneCategoryDto);
+  async getOne(@Req() request: Request, @Param('id') id: number, @Query() getOneDto: GetOneDto): Promise<Category> {
+    return this.categoryService.getOne(request, id, getOneDto);
   }
 
   // prettier-ignore
+  @ApiOperation({
+    description: '## Update category'
+  })
+  @ApiResponse({
+    status: 200,
+    type: CategoryDto
+  })
+  @ApiBearerAuth('accessToken')
   @Put(':id')
   @UseGuards(AuthGuard('custom'))
-  async update(@Req() request: Request, @Param('id') id: number, @Body() updateCategoryDto: UpdateCategoryDto
-  ): Promise<Category> {
-    return this.categoryService.update(request, id, updateCategoryDto);
+  async update(@Req() request: Request, @Param('id') id: number, @Body() updateDto: UpdateDto): Promise<Category> {
+    return this.categoryService.update(request, id, updateDto);
   }
 
+  @ApiOperation({
+    description: '## Delete category'
+  })
+  @ApiResponse({
+    status: 200,
+    type: CategoryDto
+  })
+  @ApiBearerAuth('accessToken')
   @Delete(':id')
   @UseGuards(AuthGuard('custom'))
   async delete(@Req() request: Request, @Param('id') id: number): Promise<Category> {

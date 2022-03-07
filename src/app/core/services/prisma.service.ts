@@ -50,8 +50,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       select: {
         id: true,
         name: true,
+        userId: false,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        deletedAt: false
       }
     };
   }
