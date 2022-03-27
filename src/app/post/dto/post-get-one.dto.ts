@@ -1,14 +1,9 @@
 /** @format */
 
+import { IsIn, IsOptional } from 'class-validator';
 import { ApiHideProperty } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsOptional } from 'class-validator';
 
-export class GetOneDto {
-  @ApiHideProperty()
-  @IsOptional()
-  @IsEmail()
-  readonly email?: string;
-
+export class PostGetOneDto {
   @ApiHideProperty()
   @IsOptional()
   @IsIn(['categories', 'posts'], {

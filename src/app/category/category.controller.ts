@@ -14,7 +14,13 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CategoryService } from './category.service';
-import { CreateDto, CategoryDto, GetAllDto, GetOneDto, UpdateDto } from './dto';
+import {
+  CategoryCreateDto,
+  CategoryDto,
+  CategoryGetAllDto,
+  CategoryGetOneDto,
+  CategoryUpdateDto
+} from './dto';
 import { Request } from 'express';
 import { Category } from '@prisma/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -35,8 +41,8 @@ export class CategoryController {
   @ApiBearerAuth('accessToken')
   @Post()
   @UseGuards(AuthGuard('custom'))
-  async create(@Req() request: Request, @Body() createDto: CreateDto): Promise<Category> {
-    return this.categoryService.create(request, createDto);
+  async create(@Req() request: Request, @Body() categoryCreateDto: CategoryCreateDto): Promise<Category> {
+    return this.categoryService.create(request, categoryCreateDto);
   }
 
   // prettier-ignore
@@ -49,8 +55,8 @@ export class CategoryController {
     isArray: true
   })
   @Get()
-  async getAll(@Req() request: Request, @Query() getAllDto: GetAllDto): Promise<Category[]> {
-    return this.categoryService.getAll(request, getAllDto);
+  async getAll(@Req() request: Request, @Query() categoryGetAllDto: CategoryGetAllDto): Promise<Category[]> {
+    return this.categoryService.getAll(request, categoryGetAllDto);
   }
 
   // prettier-ignore
@@ -62,8 +68,8 @@ export class CategoryController {
     type: CategoryDto
   })
   @Get(':id')
-  async getOne(@Req() request: Request, @Param('id') id: number, @Query() getOneDto: GetOneDto): Promise<Category> {
-    return this.categoryService.getOne(request, id, getOneDto);
+  async getOne(@Req() request: Request, @Param('id') id: number, @Query() categoryGetOneDto: CategoryGetOneDto): Promise<Category> {
+    return this.categoryService.getOne(request, id, categoryGetOneDto);
   }
 
   // prettier-ignore
@@ -77,8 +83,8 @@ export class CategoryController {
   @ApiBearerAuth('accessToken')
   @Put(':id')
   @UseGuards(AuthGuard('custom'))
-  async update(@Req() request: Request, @Param('id') id: number, @Body() updateDto: UpdateDto): Promise<Category> {
-    return this.categoryService.update(request, id, updateDto);
+  async update(@Req() request: Request, @Param('id') id: number, @Body() categoryUpdateDto: CategoryUpdateDto): Promise<Category> {
+    return this.categoryService.update(request, id, categoryUpdateDto);
   }
 
   @ApiOperation({

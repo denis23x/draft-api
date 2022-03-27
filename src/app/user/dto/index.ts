@@ -1,6 +1,6 @@
 /** @format */
 
-export { GetAllDto } from './get-all.dto';
-export { GetOneDto } from './get-one.dto';
-export { UpdateDto } from './update.dto';
 export { UserDto } from './user.dto';
+export { UserGetAllDto } from './user-get-all.dto';
+export { UserGetOneDto } from './user-get-one.dto';
+export { UserUpdateDto } from './user-update.dto';

@@ -4,14 +4,14 @@ import { IsIn, IsNumber, IsOptional, IsPositive, MaxLength, MinLength } from 'cl
 import { ApiHideProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-export class GetAllDto {
+export class PostGetAllDto {
   @ApiPropertyOptional({
-    description: 'Name'
+    description: 'Title'
   })
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly name?: string;
+  readonly title?: string;
 
   @ApiHideProperty()
   @IsOptional()
@@ -25,6 +25,13 @@ export class GetAllDto {
   @IsPositive()
   @Type(() => Number)
   readonly userId?: number;
+
+  @ApiHideProperty()
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Type(() => Number)
+  readonly categoryId?: number;
 
   @ApiPropertyOptional({
     description: 'Page',
@@ -48,7 +55,7 @@ export class GetAllDto {
 
   @ApiHideProperty()
   @IsOptional()
-  @IsIn(['user', 'posts'], {
+  @IsIn(['categories', 'posts'], {
     each: true
   })
   readonly scope?: string[];

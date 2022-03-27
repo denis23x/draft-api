@@ -4,14 +4,14 @@ import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Post } from '@prisma/client';
-import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './dto';
+import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostUpdateDto } from './dto';
 
 @Injectable()
 export class PostService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(request: Request, createDto: CreateDto): Promise<Post> {
-    const { categoryId, ...rest } = createDto;
+  async create(request: Request, postCreateDto: PostCreateDto): Promise<Post> {
+    const { categoryId, ...rest } = postCreateDto;
 
     // @ts-ignore
     return this.prismaService.post.create({
@@ -33,34 +33,34 @@ export class PostService {
     });
   }
 
-  async getAll(request: Request, getAllDto: GetAllDto): Promise<Post[]> {
+  async getAll(request: Request, postGetAllDto: PostGetAllDto): Promise<Post[]> {
     let postFindManyArgs: any = {
       ...this.prismaService.setPostSelect(),
       ...this.prismaService.setOrder(),
       ...this.prismaService.setPagination()
     };
 
-    if (!!getAllDto) {
+    if (!!postGetAllDto) {
       /** Search */
 
-      if (getAllDto.hasOwnProperty('title')) {
-        postFindManyArgs = this.prismaService.setWhere(postFindManyArgs, getAllDto, 'title');
+      if (postGetAllDto.hasOwnProperty('title')) {
+        postFindManyArgs = this.prismaService.setWhere(postFindManyArgs, postGetAllDto, 'title');
       }
 
       /** Scope */
 
-      if (getAllDto.hasOwnProperty('scope')) {
-        if (getAllDto.scope.includes('categories')) {
+      if (postGetAllDto.hasOwnProperty('scope')) {
+        if (postGetAllDto.scope.includes('categories')) {
         }
 
-        if (getAllDto.scope.includes('posts')) {
+        if (postGetAllDto.scope.includes('posts')) {
         }
       }
 
       /** Pagination */
 
-      if (getAllDto.hasOwnProperty('page') && getAllDto.hasOwnProperty('size')) {
-        postFindManyArgs = this.prismaService.setPagination(postFindManyArgs, getAllDto);
+      if (postGetAllDto.hasOwnProperty('page') && postGetAllDto.hasOwnProperty('size')) {
+        postFindManyArgs = this.prismaService.setPagination(postFindManyArgs, postGetAllDto);
       }
     }
 
@@ -68,7 +68,7 @@ export class PostService {
     return this.prismaService.post.findMany(postFindManyArgs);
   }
 
-  async getOne(request: Request, id: number, getOneDto: GetOneDto): Promise<Post> {
+  async getOne(request: Request, id: number, postGetOneDto: PostGetOneDto): Promise<Post> {
     // @ts-ignore
     return this.prismaService.post.findUnique({
       ...this.prismaService.setPostSelect(),
@@ -78,14 +78,14 @@ export class PostService {
     });
   }
 
-  async update(request: Request, id: number, updateDto: UpdateDto): Promise<Post> {
+  async update(request: Request, id: number, postUpdateDto: PostUpdateDto): Promise<Post> {
     // @ts-ignore
     return this.prismaService.post.update({
       ...this.prismaService.setPostSelect(),
       where: {
         id
       },
-      data: updateDto
+      data: postUpdateDto
     });
   }
 

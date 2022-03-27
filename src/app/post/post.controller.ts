@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostService } from './post.service';
-import { CreateDto, GetAllDto, GetOneDto, PostDto, UpdateDto } from './dto';
+import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostDto, PostUpdateDto } from './dto';
 import { Request } from 'express';
 import { Post as PostModel } from '@prisma/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -35,8 +35,8 @@ export class PostController {
   @ApiBearerAuth('accessToken')
   @Post()
   @UseGuards(AuthGuard('custom'))
-  async create(@Req() request: Request, @Body() createDto: CreateDto): Promise<PostModel> {
-    return this.postService.create(request, createDto);
+  async create(@Req() request: Request, @Body() postCreateDto: PostCreateDto): Promise<PostModel> {
+    return this.postService.create(request, postCreateDto);
   }
 
   // prettier-ignore
@@ -49,8 +49,8 @@ export class PostController {
     isArray: true
   })
   @Get()
-  async getAll(@Req() request: Request, @Query() getAllDto: GetAllDto): Promise<PostModel[]> {
-    return this.postService.getAll(request, getAllDto);
+  async getAll(@Req() request: Request, @Query() postGetAllDto: PostGetAllDto): Promise<PostModel[]> {
+    return this.postService.getAll(request, postGetAllDto);
   }
 
   // prettier-ignore
@@ -62,8 +62,8 @@ export class PostController {
     type: PostDto
   })
   @Get(':id')
-  async getOne(@Req() request: Request, @Param('id') id: number, @Query() getOneDto: GetOneDto): Promise<PostModel> {
-    return this.postService.getOne(request, id, getOneDto);
+  async getOne(@Req() request: Request, @Param('id') id: number, @Query() postGetOneDto: PostGetOneDto): Promise<PostModel> {
+    return this.postService.getOne(request, id, postGetOneDto);
   }
 
   // prettier-ignore
@@ -77,8 +77,8 @@ export class PostController {
   @ApiBearerAuth('accessToken')
   @Put(':id')
   @UseGuards(AuthGuard('custom'))
-  async update(@Req() request: Request, @Param('id') id: number, @Body() updateDto: UpdateDto): Promise<PostModel> {
-    return this.postService.update(request, id, updateDto);
+  async update(@Req() request: Request, @Param('id') id: number, @Body() postUpdateDto: PostUpdateDto): Promise<PostModel> {
+    return this.postService.update(request, id, postUpdateDto);
   }
 
   @ApiOperation({

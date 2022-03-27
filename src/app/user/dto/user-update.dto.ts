@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsOptional, MaxLength, MinLength } from 'class-validator';
 
-export class UpdateDto {
+export class UserUpdateDto {
   @ApiProperty({
     default: 'moderator'
   })

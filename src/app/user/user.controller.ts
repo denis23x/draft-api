@@ -3,7 +3,7 @@
 import { Body, Controller, Delete, Get, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
-import { GetAllDto, GetOneDto, UpdateDto, UserDto } from './dto';
+import { UserGetAllDto, UserGetOneDto, UserUpdateDto, UserDto } from './dto';
 import { Request } from 'express';
 import { User } from '@prisma/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -22,8 +22,8 @@ export class UserController {
     isArray: true
   })
   @Get()
-  async getAll(@Req() request: Request, @Query() getAllDto: GetAllDto): Promise<User[]> {
-    return this.userService.getAll(request, getAllDto);
+  async getAll(@Req() request: Request, @Query() userGetAllDto: UserGetAllDto): Promise<User[]> {
+    return this.userService.getAll(request, userGetAllDto);
   }
 
   // prettier-ignore
@@ -35,8 +35,8 @@ export class UserController {
     type: UserDto
   })
   @Get(':id')
-  async getOne(@Req() request: Request, @Param('id') id: number, @Query() getOneDto: GetOneDto): Promise<User> {
-    return this.userService.getOne(request, id, getOneDto);
+  async getOne(@Req() request: Request, @Param('id') id: number, @Query() userGetOneDto: UserGetOneDto): Promise<User> {
+    return this.userService.getOne(request, id, userGetOneDto);
   }
 
   // prettier-ignore
@@ -50,8 +50,8 @@ export class UserController {
   @ApiBearerAuth('accessToken')
   @Put(':id')
   @UseGuards(AuthGuard('custom'))
-  async update(@Req() request: Request, @Param('id') id: number, @Body() updateDto: UpdateDto): Promise<User> {
-    return this.userService.update(request, id, updateDto);
+  async update(@Req() request: Request, @Param('id') id: number, @Body() userUpdateDto: UserUpdateDto): Promise<User> {
+    return this.userService.update(request, id, userUpdateDto);
   }
 
   @ApiOperation({

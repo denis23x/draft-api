@@ -1,7 +1,7 @@
 /** @format */
 
-export { CreateDto } from './create.dto';
-export { GetAllDto } from './get-all.dto';
-export { GetOneDto } from './get-one.dto';
 export { PostDto } from './post.dto';
-export { UpdateDto } from './update.dto';
+export { PostCreateDto } from './post-create.dto';
+export { PostGetAllDto } from './post-get-all.dto';
+export { PostGetOneDto } from './post-get-one.dto';
+export { PostUpdateDto } from './post-update.dto';

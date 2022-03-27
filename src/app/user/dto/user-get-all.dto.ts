@@ -1,37 +1,36 @@
 /** @format */
 
-import { IsIn, IsNumber, IsOptional, IsPositive, MaxLength, MinLength } from 'class-validator';
 import { ApiHideProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  MaxLength,
+  MinLength
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class GetAllDto {
+export class UserGetAllDto {
   @ApiPropertyOptional({
-    description: 'Title'
+    description: 'Name'
   })
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly title?: string;
+  readonly name?: string;
+
+  @ApiHideProperty()
+  @IsOptional()
+  @IsEmail()
+  readonly email?: string;
 
   @ApiHideProperty()
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   readonly exact?: number;
-
-  @ApiHideProperty()
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  readonly userId?: number;
-
-  @ApiHideProperty()
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  readonly categoryId?: number;
 
   @ApiPropertyOptional({
     description: 'Page',

@@ -4,18 +4,18 @@ import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Category } from '@prisma/client';
-import { CreateDto, GetAllDto, GetOneDto, UpdateDto } from './dto';
+import { CategoryCreateDto, CategoryGetAllDto, CategoryGetOneDto, CategoryUpdateDto } from './dto';
 
 @Injectable()
 export class CategoryService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(request: Request, createDto: CreateDto): Promise<Category> {
+  async create(request: Request, categoryCreateDto: CategoryCreateDto): Promise<Category> {
     // @ts-ignore
     return this.prismaService.category.create({
       ...this.prismaService.setCategorySelect(),
       data: {
-        ...createDto,
+        ...categoryCreateDto,
         user: {
           connect: {
             // @ts-ignore
@@ -26,34 +26,36 @@ export class CategoryService {
     });
   }
 
-  async getAll(request: Request, getAllDto: GetAllDto): Promise<Category[]> {
+  async getAll(request: Request, categoryGetAllDto: CategoryGetAllDto): Promise<Category[]> {
     let categoryFindManyArgs: any = {
       ...this.prismaService.setCategorySelect(),
       ...this.prismaService.setOrder(),
       ...this.prismaService.setPagination()
     };
 
-    if (!!getAllDto) {
+    if (!!categoryGetAllDto) {
       /** Search */
 
-      if (getAllDto.hasOwnProperty('name')) {
-        categoryFindManyArgs = this.prismaService.setWhere(categoryFindManyArgs, getAllDto, 'name');
+      if (categoryGetAllDto.hasOwnProperty('name')) {
+        // prettier-ignore
+        categoryFindManyArgs = this.prismaService.setWhere(categoryFindManyArgs, categoryGetAllDto, 'name');
       }
 
       /** Scope */
 
-      if (getAllDto.hasOwnProperty('scope')) {
-        if (getAllDto.scope.includes('user')) {
+      if (categoryGetAllDto.hasOwnProperty('scope')) {
+        if (categoryGetAllDto.scope.includes('user')) {
         }
 
-        if (getAllDto.scope.includes('posts')) {
+        if (categoryGetAllDto.scope.includes('posts')) {
         }
       }
 
       /** Pagination */
 
-      if (getAllDto.hasOwnProperty('page') && getAllDto.hasOwnProperty('size')) {
-        categoryFindManyArgs = this.prismaService.setPagination(categoryFindManyArgs, getAllDto);
+      if (categoryGetAllDto.hasOwnProperty('page') && categoryGetAllDto.hasOwnProperty('size')) {
+        // prettier-ignore
+        categoryFindManyArgs = this.prismaService.setPagination(categoryFindManyArgs, categoryGetAllDto);
       }
     }
 
@@ -61,7 +63,8 @@ export class CategoryService {
     return this.prismaService.category.findMany(categoryFindManyArgs);
   }
 
-  async getOne(request: Request, id: number, getOneDto: GetOneDto): Promise<Category> {
+  // prettier-ignore
+  async getOne(request: Request, id: number, categoryGetOneDto: CategoryGetOneDto): Promise<Category> {
     // @ts-ignore
     return this.prismaService.category.findUnique({
       ...this.prismaService.setCategorySelect(),
@@ -71,14 +74,15 @@ export class CategoryService {
     });
   }
 
-  async update(request: Request, id: number, updateDto: UpdateDto): Promise<Category> {
+  // prettier-ignore
+  async update(request: Request, id: number, categoryUpdateDto: CategoryUpdateDto): Promise<Category> {
     // @ts-ignore
     return this.prismaService.category.update({
       ...this.prismaService.setCategorySelect(),
       where: {
         id
       },
-      data: updateDto
+      data: categoryUpdateDto
     });
   }
 
