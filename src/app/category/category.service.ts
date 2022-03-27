@@ -45,9 +45,22 @@ export class CategoryService {
 
       if (categoryGetAllDto.hasOwnProperty('scope')) {
         if (categoryGetAllDto.scope.includes('user')) {
+          categoryFindManyArgs.select = {
+            ...categoryFindManyArgs.select,
+            user: {
+              ...this.prismaService.setNonSensitiveUserSelect()
+            }
+          };
         }
 
         if (categoryGetAllDto.scope.includes('posts')) {
+          categoryFindManyArgs.select = {
+            ...categoryFindManyArgs.select,
+            posts: {
+              ...this.prismaService.setPostSelect(),
+              ...this.prismaService.setOrder()
+            }
+          };
         }
       }
 
@@ -65,6 +78,35 @@ export class CategoryService {
 
   // prettier-ignore
   async getOne(request: Request, id: number, categoryGetOneDto: CategoryGetOneDto): Promise<Category> {
+    let categoryFindUniqueArgs: any = {
+      ...this.prismaService.setCategorySelect(),
+    };
+
+    if (!!categoryGetOneDto) {
+      /** Scope */
+
+      if (categoryGetOneDto.hasOwnProperty('scope')) {
+        if (categoryGetOneDto.scope.includes('user')) {
+          categoryFindUniqueArgs.select = {
+            ...categoryFindUniqueArgs.select,
+            user: {
+              ...this.prismaService.setNonSensitiveUserSelect()
+            }
+          };
+        }
+
+        if (categoryGetOneDto.scope.includes('posts')) {
+          categoryFindUniqueArgs.select = {
+            ...categoryFindUniqueArgs.select,
+            posts: {
+              ...this.prismaService.setPostSelect(),
+              ...this.prismaService.setOrder()
+            }
+          };
+        }
+      }
+    }
+
     // @ts-ignore
     return this.prismaService.category.findUnique({
       ...this.prismaService.setCategorySelect(),

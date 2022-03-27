@@ -55,7 +55,7 @@ export class PostGetAllDto {
 
   @ApiHideProperty()
   @IsOptional()
-  @IsIn(['categories', 'posts'], {
+  @IsIn(['category', 'user'], {
     each: true
   })
   readonly scope?: string[];

@@ -42,6 +42,13 @@ export class UserService {
         }
 
         if (userGetAllDto.scope.includes('posts')) {
+          userFindManyArgs.select = {
+            ...userFindManyArgs.select,
+            posts: {
+              ...this.prismaService.setPostSelect(),
+              ...this.prismaService.setOrder()
+            }
+          };
         }
       }
 
@@ -57,13 +64,41 @@ export class UserService {
   }
 
   async getOne(request: Request, id: number, userGetOneDto: UserGetOneDto): Promise<User> {
-    // @ts-ignore
-    return this.prismaService.user.findUnique({
+    let userFindUniqueArgs: any = {
       ...this.prismaService.setNonSensitiveUserSelect(),
       where: {
         id
       }
-    });
+    };
+
+    if (!!userGetOneDto) {
+      /** Scope */
+
+      if (userGetOneDto.hasOwnProperty('scope')) {
+        if (userGetOneDto.scope.includes('categories')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            categories: {
+              ...this.prismaService.setCategorySelect(),
+              ...this.prismaService.setOrder()
+            }
+          };
+        }
+
+        if (userGetOneDto.scope.includes('posts')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            posts: {
+              ...this.prismaService.setPostSelect(),
+              ...this.prismaService.setOrder()
+            }
+          };
+        }
+      }
+    }
+
+    // @ts-ignore
+    return this.prismaService.user.findUnique(userFindOneArgs);
   }
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {

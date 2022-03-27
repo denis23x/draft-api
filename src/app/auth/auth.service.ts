@@ -73,14 +73,22 @@ export class AuthService {
   }
 
   async me(request: Request): Promise<User> {
-    // TODO: add categories
-
-    return this.prismaService.user.findUnique({
+    let userFindUniqueArgs: any = {
       ...this.prismaService.setNonSensitiveUserSelect(),
       where: {
         id: (request.user as any).id
       }
-    });
+    };
+
+    userFindUniqueArgs.select = {
+      ...userFindUniqueArgs.select,
+      categories: {
+        ...this.prismaService.setCategorySelect(),
+        ...this.prismaService.setOrder()
+      }
+    };
+
+    return this.prismaService.user.findUnique(userFindUniqueArgs);
   }
 
   async social(request: Request, response: Response, socialKey: string): Promise<void> {

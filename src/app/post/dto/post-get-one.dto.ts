@@ -6,7 +6,7 @@ import { ApiHideProperty } from '@nestjs/swagger';
 export class PostGetOneDto {
   @ApiHideProperty()
   @IsOptional()
-  @IsIn(['categories', 'posts'], {
+  @IsIn(['category', 'user'], {
     each: true
   })
   readonly scope?: string[];

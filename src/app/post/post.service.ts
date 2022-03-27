@@ -50,10 +50,22 @@ export class PostService {
       /** Scope */
 
       if (postGetAllDto.hasOwnProperty('scope')) {
-        if (postGetAllDto.scope.includes('categories')) {
+        if (postGetAllDto.scope.includes('category')) {
+          postFindManyArgs.select = {
+            ...postFindManyArgs.select,
+            category: {
+              ...this.prismaService.setCategorySelect()
+            }
+          };
         }
 
-        if (postGetAllDto.scope.includes('posts')) {
+        if (postGetAllDto.scope.includes('user')) {
+          postFindManyArgs.select = {
+            ...postFindManyArgs.select,
+            user: {
+              ...this.prismaService.setNonSensitiveUserSelect()
+            }
+          };
         }
       }
 
@@ -69,13 +81,39 @@ export class PostService {
   }
 
   async getOne(request: Request, id: number, postGetOneDto: PostGetOneDto): Promise<Post> {
-    // @ts-ignore
-    return this.prismaService.post.findUnique({
+    let postFindUniqueArgs: any = {
       ...this.prismaService.setPostSelect(),
       where: {
         id
       }
-    });
+    };
+
+    if (!!postGetOneDto) {
+      /** Scope */
+
+      if (postGetOneDto.hasOwnProperty('scope')) {
+        if (postGetOneDto.scope.includes('category')) {
+          postFindUniqueArgs.select = {
+            ...postFindUniqueArgs.select,
+            category: {
+              ...this.prismaService.setCategorySelect()
+            }
+          };
+        }
+
+        if (postGetOneDto.scope.includes('user')) {
+          postFindUniqueArgs.select = {
+            ...postFindUniqueArgs.select,
+            user: {
+              ...this.prismaService.setNonSensitiveUserSelect()
+            }
+          };
+        }
+      }
+    }
+
+    // @ts-ignore
+    return this.prismaService.post.findUnique(postFindUniqueArgs);
   }
 
   async update(request: Request, id: number, postUpdateDto: PostUpdateDto): Promise<Post> {

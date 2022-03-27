@@ -23,7 +23,7 @@ export const postRaw = async () => {
     const category = categoriesDB[faker.datatype.number({ min: 0, max: categoriesDB.length - 1 })];
 
     const imagePath = process.env.APP_ORIGIN + '/images/';
-    const imageFile = faker.datatype.number({ min: 0, max: 667 }) + '.jpg';
+    const imageFile = faker.datatype.number({ min: 0, max: 199 }) + '.jpg';
 
     raw.push({
       title: faker.lorem.sentence() + i,
