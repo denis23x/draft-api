@@ -12,9 +12,12 @@ export class UserService {
 
   async getAll(request: Request, userGetAllDto: UserGetAllDto): Promise<User[]> {
     const userFindManyArgs: Prisma.UserFindManyArgs = {
-      ...this.prismaService.setUserSelect(),
-      ...this.prismaService.setOrder(),
-      ...this.prismaService.setPagination()
+      select: this.prismaService.setUserSelect(),
+      orderBy: {
+        id: 'desc'
+      },
+      skip: 0,
+      take: 10
     };
 
     if (!!userGetAllDto) {
@@ -44,8 +47,10 @@ export class UserService {
           userFindManyArgs.select = {
             ...userFindManyArgs.select,
             categories: {
-              ...this.prismaService.setCategorySelect(),
-              ...this.prismaService.setOrder()
+              select: this.prismaService.setCategorySelect(),
+              orderBy: {
+                id: 'desc'
+              }
             }
           };
         }
@@ -54,8 +59,10 @@ export class UserService {
           userFindManyArgs.select = {
             ...userFindManyArgs.select,
             posts: {
-              ...this.prismaService.setPostSelect(),
-              ...this.prismaService.setOrder()
+              select: this.prismaService.setPostSelect(),
+              orderBy: {
+                id: 'desc'
+              }
             }
           };
         }
@@ -71,13 +78,12 @@ export class UserService {
       }
     }
 
-    // @ts-ignore
     return this.prismaService.user.findMany(userFindManyArgs);
   }
 
   async getOne(request: Request, id: number, userGetOneDto: UserGetOneDto): Promise<User> {
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      ...this.prismaService.setUserSelect(),
+      select: this.prismaService.setUserSelect(),
       where: {
         id
       }
@@ -91,8 +97,10 @@ export class UserService {
           userFindUniqueArgs.select = {
             ...userFindUniqueArgs.select,
             categories: {
-              ...this.prismaService.setCategorySelect(),
-              ...this.prismaService.setOrder()
+              select: this.prismaService.setCategorySelect(),
+              orderBy: {
+                id: 'desc'
+              }
             }
           };
         }
@@ -101,40 +109,39 @@ export class UserService {
           userFindUniqueArgs.select = {
             ...userFindUniqueArgs.select,
             posts: {
-              ...this.prismaService.setPostSelect(),
-              ...this.prismaService.setOrder()
+              select: this.prismaService.setPostSelect(),
+              orderBy: {
+                id: 'desc'
+              }
             }
           };
         }
       }
     }
 
-    // @ts-ignore
-    return this.prismaService.user.findUnique(userFindOneArgs);
+    return this.prismaService.user.findUnique(userFindUniqueArgs);
   }
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
     const userUpdateArgs: Prisma.UserUpdateArgs = {
-      ...this.prismaService.setUserSelect(),
+      select: this.prismaService.setUserSelect(),
       where: {
         id
       },
       data: userUpdateDto
     };
 
-    // @ts-ignore
     return this.prismaService.user.update(userUpdateArgs);
   }
 
   async delete(request: Request, id: number): Promise<User> {
     const userDeleteArgs: Prisma.UserDeleteArgs = {
-      ...this.prismaService.setUserSelect(),
+      select: this.prismaService.setUserSelect(),
       where: {
         id
       }
     };
 
-    // @ts-ignore
     return this.prismaService.user.delete(userDeleteArgs);
   }
 }

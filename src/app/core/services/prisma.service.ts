@@ -24,75 +24,58 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     });
   }
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     await this.$connect();
   }
 
-  async onModuleDestroy() {
+  async onModuleDestroy(): Promise<void> {
     await this.$disconnect();
   }
 
-  setCategorySelect(): any {
+  setCategorySelect(): Prisma.CategorySelect {
     return {
-      select: {
-        id: true,
-        name: true,
-        userId: false,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: false
-      }
+      id: true,
+      name: true,
+      userId: false,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: false
     };
   }
 
-  setPostSelect(): any {
+  setPostSelect(): Prisma.PostSelect {
     return {
-      select: {
-        id: true,
-        title: true,
-        body: true,
-        image: true,
-        userId: false,
-        categoryId: false,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: false
-      }
+      id: true,
+      title: true,
+      body: true,
+      image: true,
+      userId: false,
+      categoryId: false,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: false
     };
   }
 
-  setUserSelect(): any {
+  setUserSelect(): Prisma.UserSelect {
     return {
-      select: {
-        id: true,
-        googleId: false,
-        facebookId: false,
-        name: true,
-        biography: true,
-        avatar: true,
-        email: true,
-        password: false,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: false
-      }
+      id: true,
+      googleId: false,
+      facebookId: false,
+      name: true,
+      biography: true,
+      avatar: true,
+      email: true,
+      password: false,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: false
     };
   }
 
-  setOrder(): any {
-    return {
-      orderBy: {
-        id: 'desc'
-      }
-    };
-  }
-
-  setPagination(dto?: any): any {
-    const page: number = dto?.page || 1;
-    const size: number = dto?.size || 10;
-
-    const skip: number = (page - 1) * size;
-    const take: number = size;
+  setPagination(dto: any): any {
+    const skip: number = (dto.page - 1) * dto.size;
+    const take: number = dto.size;
 
     return {
       skip,

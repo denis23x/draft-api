@@ -12,7 +12,7 @@ export class CategoryService {
 
   async create(request: Request, categoryCreateDto: CategoryCreateDto): Promise<Category> {
     const categoryCreateArgs: Prisma.CategoryCreateArgs = {
-      ...this.prismaService.setCategorySelect(),
+      select: this.prismaService.setCategorySelect(),
       data: {
         ...categoryCreateDto,
         user: {
@@ -23,15 +23,17 @@ export class CategoryService {
       }
     };
 
-    // @ts-ignore
     return this.prismaService.category.create(categoryCreateArgs);
   }
 
   async getAll(request: Request, categoryGetAllDto: CategoryGetAllDto): Promise<Category[]> {
     const categoryFindManyArgs: Prisma.CategoryFindManyArgs = {
-      ...this.prismaService.setCategorySelect(),
-      ...this.prismaService.setOrder(),
-      ...this.prismaService.setPagination()
+      select: this.prismaService.setCategorySelect(),
+      orderBy: {
+        id: 'desc'
+      },
+      skip: 0,
+      take: 10
     };
 
     if (!!categoryGetAllDto) {
@@ -51,7 +53,9 @@ export class CategoryService {
         if (categoryGetAllDto.scope.includes('user')) {
           categoryFindManyArgs.select = {
             ...categoryFindManyArgs.select,
-            user: this.prismaService.setUserSelect()
+            user: {
+              select: this.prismaService.setUserSelect()
+            }
           };
         }
 
@@ -59,8 +63,10 @@ export class CategoryService {
           categoryFindManyArgs.select = {
             ...categoryFindManyArgs.select,
             posts: {
-              ...this.prismaService.setPostSelect(),
-              ...this.prismaService.setOrder()
+              select: this.prismaService.setPostSelect(),
+              orderBy: {
+                id: 'desc'
+              }
             }
           };
         }
@@ -77,14 +83,13 @@ export class CategoryService {
       }
     }
 
-    // @ts-ignore
     return this.prismaService.category.findMany(categoryFindManyArgs);
   }
 
   // prettier-ignore
   async getOne(request: Request, id: number, categoryGetOneDto: CategoryGetOneDto): Promise<Category> {
     const categoryFindUniqueArgs: Prisma.CategoryFindUniqueArgs = {
-      ...this.prismaService.setCategorySelect(),
+      select: this.prismaService.setCategorySelect(),
       where: {
         id
       }
@@ -97,7 +102,9 @@ export class CategoryService {
         if (categoryGetOneDto.scope.includes('user')) {
           categoryFindUniqueArgs.select = {
             ...categoryFindUniqueArgs.select,
-            user: this.prismaService.setUserSelect()
+            user: {
+              select: this.prismaService.setUserSelect()
+            }
           };
         }
 
@@ -105,41 +112,40 @@ export class CategoryService {
           categoryFindUniqueArgs.select = {
             ...categoryFindUniqueArgs.select,
             posts: {
-              ...this.prismaService.setPostSelect(),
-              ...this.prismaService.setOrder()
+              select: this.prismaService.setPostSelect(),
+              orderBy: {
+                id: 'desc'
+              }
             }
           };
         }
       }
     }
 
-    // @ts-ignore
     return this.prismaService.category.findUnique(categoryFindUniqueArgs);
   }
 
   // prettier-ignore
   async update(request: Request, id: number, categoryUpdateDto: CategoryUpdateDto): Promise<Category> {
     const categoryUpdateArgs: Prisma.CategoryUpdateArgs = {
-      ...this.prismaService.setCategorySelect(),
+      select: this.prismaService.setCategorySelect(),
       where: {
         id
       },
       data: categoryUpdateDto
     };
 
-    // @ts-ignore
     return this.prismaService.category.update(categoryUpdateArgs);
   }
 
   async delete(request: Request, id: number): Promise<Category> {
     const categoryDeleteArgs: Prisma.CategoryDeleteArgs = {
-      ...this.prismaService.setCategorySelect(),
+      select: this.prismaService.setCategorySelect(),
       where: {
         id
       }
     };
 
-    // @ts-ignore
     return this.prismaService.category.delete(categoryDeleteArgs);
   }
 }

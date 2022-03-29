@@ -14,7 +14,7 @@ export class PostService {
     const { categoryId, ...rest } = postCreateDto;
 
     const postCreateArgs: Prisma.PostCreateArgs = {
-      ...this.prismaService.setPostSelect(),
+      select: this.prismaService.setPostSelect(),
       data: {
         ...rest,
         user: {
@@ -30,15 +30,17 @@ export class PostService {
       }
     };
 
-    // @ts-ignore
     return this.prismaService.post.create(postCreateArgs);
   }
 
   async getAll(request: Request, postGetAllDto: PostGetAllDto): Promise<Post[]> {
     const postFindManyArgs: Prisma.PostFindManyArgs = {
-      ...this.prismaService.setPostSelect(),
-      ...this.prismaService.setOrder(),
-      ...this.prismaService.setPagination()
+      select: this.prismaService.setPostSelect(),
+      orderBy: {
+        id: 'desc'
+      },
+      skip: 0,
+      take: 10
     };
 
     if (!!postGetAllDto) {
@@ -72,14 +74,18 @@ export class PostService {
         if (postGetAllDto.scope.includes('category')) {
           postFindManyArgs.select = {
             ...postFindManyArgs.select,
-            category: this.prismaService.setCategorySelect()
+            category: {
+              select: this.prismaService.setCategorySelect()
+            }
           };
         }
 
         if (postGetAllDto.scope.includes('user')) {
           postFindManyArgs.select = {
             ...postFindManyArgs.select,
-            user: this.prismaService.setUserSelect()
+            user: {
+              select: this.prismaService.setUserSelect()
+            }
           };
         }
       }
@@ -94,13 +100,12 @@ export class PostService {
       }
     }
 
-    // @ts-ignore
     return this.prismaService.post.findMany(postFindManyArgs);
   }
 
   async getOne(request: Request, id: number, postGetOneDto: PostGetOneDto): Promise<Post> {
     const postFindUniqueArgs: Prisma.PostFindUniqueArgs = {
-      ...this.prismaService.setPostSelect(),
+      select: this.prismaService.setPostSelect(),
       where: {
         id
       }
@@ -113,45 +118,47 @@ export class PostService {
         if (postGetOneDto.scope.includes('category')) {
           postFindUniqueArgs.select = {
             ...postFindUniqueArgs.select,
-            category: this.prismaService.setCategorySelect()
+            category: {
+              select: this.prismaService.setCategorySelect()
+            }
           };
         }
 
         if (postGetOneDto.scope.includes('user')) {
           postFindUniqueArgs.select = {
             ...postFindUniqueArgs.select,
-            user: this.prismaService.setUserSelect()
+            user: {
+              select: this.prismaService.setUserSelect()
+            }
           };
         }
       }
     }
 
-    // @ts-ignore
     return this.prismaService.post.findUnique(postFindUniqueArgs);
   }
 
   async update(request: Request, id: number, postUpdateDto: PostUpdateDto): Promise<Post> {
     const postUpdateArgs: Prisma.PostUpdateArgs = {
-      ...this.prismaService.setPostSelect(),
+      select: this.prismaService.setPostSelect(),
       where: {
         id
       },
+      // @ts-ignore
       data: postUpdateDto
     };
 
-    // @ts-ignore
     return this.prismaService.post.update(postUpdateArgs);
   }
 
   async delete(request: Request, id: number): Promise<Post> {
     const postDeleteArgs: Prisma.PostDeleteArgs = {
-      ...this.prismaService.setPostSelect(),
+      select: this.prismaService.setPostSelect(),
       where: {
         id
       }
     };
 
-    // @ts-ignore
     return this.prismaService.post.delete(postDeleteArgs);
   }
 }

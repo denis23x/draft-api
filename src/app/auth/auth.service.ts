@@ -19,9 +19,13 @@ export class AuthService {
   async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       select: {
+        ...this.prismaService.setUserSelect(),
+        password: true,
         categories: {
-          ...this.prismaService.setCategorySelect(),
-          ...this.prismaService.setOrder()
+          select: this.prismaService.setCategorySelect(),
+          orderBy: {
+            id: 'desc'
+          }
         }
       },
       where: {
@@ -29,7 +33,6 @@ export class AuthService {
       }
     };
 
-    // @ts-ignore
     const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
     const fingerprintDto: FingerprintDto = {
@@ -58,7 +61,7 @@ export class AuthService {
   // prettier-ignore
   async registration(request: Request, response: Response, registrationDto: RegistrationDto): Promise<User> {
     const userCreateArgs: Prisma.UserCreateArgs = {
-      ...this.prismaService.setUserSelect(),
+      select: this.prismaService.setUserSelect(),
       data: registrationDto
     };
 
@@ -66,34 +69,32 @@ export class AuthService {
       registrationDto.password = await hash(registrationDto.password, 10);
     }
 
-    // @ts-ignore
     return this.prismaService.user.create(userCreateArgs);
   }
 
   // prettier-ignore
   async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<User> {
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      ...this.prismaService.setUserSelect(),
+      select: this.prismaService.setUserSelect(),
       where: {
         id: (request.user as any).id
       }
     };
 
-    // @ts-ignore
     const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
     return this.setResponse(request, response, user, fingerprintDto);
   }
 
   async me(request: Request): Promise<User> {
-    const { select } = this.prismaService.setUserSelect();
-
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       select: {
-        ...select,
+        ...this.prismaService.setUserSelect(),
         categories: {
-          ...this.prismaService.setCategorySelect(),
-          ...this.prismaService.setOrder()
+          select: this.prismaService.setCategorySelect(),
+          orderBy: {
+            id: 'desc'
+          }
         }
       },
       where: {
@@ -101,7 +102,6 @@ export class AuthService {
       }
     };
 
-    // @ts-ignore
     return this.prismaService.user.findUnique(userFindUniqueArgs);
   }
 
@@ -122,7 +122,6 @@ export class AuthService {
       }
     };
 
-    // @ts-ignore
     const user: User = await this.prismaService.user.upsert(userUpsertArgs);
 
     return response.redirect(
@@ -138,10 +137,10 @@ export class AuthService {
 
   // prettier-ignore
   async setResponse(request: Request, response: Response, user: User, fingerprintDto: FingerprintDto): Promise<User> {
-    const { select } = this.prismaService.setUserSelect();
+    const userSelect: Prisma.UserSelect = this.prismaService.setUserSelect();
 
-    for (const column in select) {
-      !select[column] && delete user[column];
+    for (const column in userSelect) {
+      !userSelect[column] && delete user[column];
     }
 
     const session: Session = await this.setSession(request, user, fingerprintDto);
@@ -181,7 +180,6 @@ export class AuthService {
       }
     };
 
-    // @ts-ignore
     const session: Session = await this.prismaService.session.findUnique(sessionFindUniqueArgs);
 
     if (!!session) {
@@ -191,7 +189,6 @@ export class AuthService {
         }
       };
 
-      // @ts-ignore
       await this.prismaService.session.delete(sessionDeleteArgs);
     }
 
@@ -208,7 +205,6 @@ export class AuthService {
       }
     };
 
-    // @ts-ignore
     return this.prismaService.session.create(sessionCreateArgs);
   }
 
