@@ -5,7 +5,7 @@ import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { FingerprintDto, LoginDto, RegistrationDto } from './dto';
 import * as url from 'url';
-import { Session, User } from '@prisma/client';
+import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 
@@ -17,13 +17,19 @@ export class AuthService {
   ) {}
 
   async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
-    // TODO: add categories
-
-    const user: User = await this.prismaService.user.findUnique({
+    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
+      select: {
+        categories: {
+          ...this.prismaService.setCategorySelect(),
+          ...this.prismaService.setOrder()
+        }
+      },
       where: {
         email: loginDto.email
       }
-    });
+    };
+
+    const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
     const fingerprintDto: FingerprintDto = {
       fingerprint: loginDto.fingerprint
@@ -55,15 +61,15 @@ export class AuthService {
     }
 
     return this.prismaService.user.create({
-      ...this.prismaService.setNonSensitiveUserSelect(),
+      ...this.prismaService.setUserSelect(),
       data: registrationDto
     });
   }
 
   // prettier-ignore
-  async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<any> {
+  async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<User> {
     const user: User = await this.prismaService.user.findUnique({
-      ...this.prismaService.setNonSensitiveUserSelect(),
+      ...this.prismaService.setUserSelect(),
       where: {
         id: (request.user as any).id
       }
@@ -73,18 +79,18 @@ export class AuthService {
   }
 
   async me(request: Request): Promise<User> {
-    let userFindUniqueArgs: any = {
-      ...this.prismaService.setNonSensitiveUserSelect(),
+    const { select } = this.prismaService.setUserSelect();
+
+    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
+      select: {
+        ...select,
+        categories: {
+          ...this.prismaService.setCategorySelect(),
+          ...this.prismaService.setOrder()
+        }
+      },
       where: {
         id: (request.user as any).id
-      }
-    };
-
-    userFindUniqueArgs.select = {
-      ...userFindUniqueArgs.select,
-      categories: {
-        ...this.prismaService.setCategorySelect(),
-        ...this.prismaService.setOrder()
       }
     };
 
@@ -121,7 +127,7 @@ export class AuthService {
 
   // prettier-ignore
   async setResponse(request: Request, response: Response, user: User, fingerprintDto: FingerprintDto): Promise<User> {
-    const { select } = this.prismaService.setNonSensitiveUserSelect();
+    const { select } = this.prismaService.setUserSelect();
 
     for (const column in select) {
       !select[column] && delete user[column];

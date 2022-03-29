@@ -16,12 +16,6 @@ export class PostGetAllDto {
   @ApiHideProperty()
   @IsOptional()
   @IsNumber()
-  @Type(() => Number)
-  readonly exact?: number;
-
-  @ApiHideProperty()
-  @IsOptional()
-  @IsNumber()
   @IsPositive()
   @Type(() => Number)
   readonly userId?: number;

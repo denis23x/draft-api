@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
-import { Post } from '@prisma/client';
+import { Post, Prisma } from '@prisma/client';
 import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostUpdateDto } from './dto';
 
 @Injectable()
@@ -13,15 +13,13 @@ export class PostService {
   async create(request: Request, postCreateDto: PostCreateDto): Promise<Post> {
     const { categoryId, ...rest } = postCreateDto;
 
-    // @ts-ignore
-    return this.prismaService.post.create({
+    const postCreateArgs: Prisma.PostCreateArgs = {
       ...this.prismaService.setPostSelect(),
       data: {
         ...rest,
         user: {
           connect: {
-            // @ts-ignore
-            id: request.user.id
+            id: (request.user as any).id
           }
         },
         category: {
@@ -30,11 +28,14 @@ export class PostService {
           }
         }
       }
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.post.create(postCreateArgs);
   }
 
   async getAll(request: Request, postGetAllDto: PostGetAllDto): Promise<Post[]> {
-    let postFindManyArgs: any = {
+    const postFindManyArgs: Prisma.PostFindManyArgs = {
       ...this.prismaService.setPostSelect(),
       ...this.prismaService.setOrder(),
       ...this.prismaService.setPagination()
@@ -44,7 +45,25 @@ export class PostService {
       /** Search */
 
       if (postGetAllDto.hasOwnProperty('title')) {
-        postFindManyArgs = this.prismaService.setWhere(postFindManyArgs, postGetAllDto, 'title');
+        postFindManyArgs.where = {
+          title: {
+            contains: postGetAllDto.title
+          }
+        };
+      }
+
+      if (postGetAllDto.hasOwnProperty('userId')) {
+        postFindManyArgs.where = {
+          ...postFindManyArgs.where,
+          userId: postGetAllDto.userId
+        };
+      }
+
+      if (postGetAllDto.hasOwnProperty('categoryId')) {
+        postFindManyArgs.where = {
+          ...postFindManyArgs.where,
+          categoryId: postGetAllDto.categoryId
+        };
       }
 
       /** Scope */
@@ -63,7 +82,7 @@ export class PostService {
           postFindManyArgs.select = {
             ...postFindManyArgs.select,
             user: {
-              ...this.prismaService.setNonSensitiveUserSelect()
+              ...this.prismaService.setUserSelect()
             }
           };
         }
@@ -72,7 +91,10 @@ export class PostService {
       /** Pagination */
 
       if (postGetAllDto.hasOwnProperty('page') && postGetAllDto.hasOwnProperty('size')) {
-        postFindManyArgs = this.prismaService.setPagination(postFindManyArgs, postGetAllDto);
+        const { skip, take } = this.prismaService.setPagination(postGetAllDto);
+
+        postFindManyArgs.skip = skip;
+        postFindManyArgs.take = take;
       }
     }
 
@@ -81,7 +103,7 @@ export class PostService {
   }
 
   async getOne(request: Request, id: number, postGetOneDto: PostGetOneDto): Promise<Post> {
-    let postFindUniqueArgs: any = {
+    const postFindUniqueArgs: Prisma.PostFindUniqueArgs = {
       ...this.prismaService.setPostSelect(),
       where: {
         id
@@ -105,7 +127,7 @@ export class PostService {
           postFindUniqueArgs.select = {
             ...postFindUniqueArgs.select,
             user: {
-              ...this.prismaService.setNonSensitiveUserSelect()
+              ...this.prismaService.setUserSelect()
             }
           };
         }
@@ -117,23 +139,27 @@ export class PostService {
   }
 
   async update(request: Request, id: number, postUpdateDto: PostUpdateDto): Promise<Post> {
-    // @ts-ignore
-    return this.prismaService.post.update({
+    const postUpdateArgs: Prisma.PostUpdateArgs = {
       ...this.prismaService.setPostSelect(),
       where: {
         id
       },
       data: postUpdateDto
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.post.update(postUpdateArgs);
   }
 
   async delete(request: Request, id: number): Promise<Post> {
-    // @ts-ignore
-    return this.prismaService.post.delete({
+    const postDeleteArgs: Prisma.PostDeleteArgs = {
       ...this.prismaService.setPostSelect(),
       where: {
         id
       }
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.post.delete(postDeleteArgs);
   }
 }

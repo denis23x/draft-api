@@ -29,8 +29,8 @@ export class CategoryService {
   async getAll(request: Request, categoryGetAllDto: CategoryGetAllDto): Promise<Category[]> {
     let categoryFindManyArgs: any = {
       ...this.prismaService.setCategorySelect(),
-      ...this.prismaService.setOrder(),
-      ...this.prismaService.setPagination()
+      ...this.prismaService.setOrder()
+      // ...this.prismaService.setPagination()
     };
 
     if (!!categoryGetAllDto) {
@@ -48,7 +48,7 @@ export class CategoryService {
           categoryFindManyArgs.select = {
             ...categoryFindManyArgs.select,
             user: {
-              ...this.prismaService.setNonSensitiveUserSelect()
+              ...this.prismaService.setUserSelect()
             }
           };
         }
@@ -66,9 +66,12 @@ export class CategoryService {
 
       /** Pagination */
 
-      if (categoryGetAllDto.hasOwnProperty('page') && categoryGetAllDto.hasOwnProperty('size')) {
+      if (
+        categoryGetAllDto.hasOwnProperty('page') &&
+        categoryGetAllDto.hasOwnProperty('size')
+      ) {
         // prettier-ignore
-        categoryFindManyArgs = this.prismaService.setPagination(categoryFindManyArgs, categoryGetAllDto);
+        // categoryFindManyArgs = this.prismaService.setPagination(categoryFindManyArgs, categoryGetAllDto);
       }
     }
 
@@ -90,7 +93,7 @@ export class CategoryService {
           categoryFindUniqueArgs.select = {
             ...categoryFindUniqueArgs.select,
             user: {
-              ...this.prismaService.setNonSensitiveUserSelect()
+              ...this.prismaService.setUserSelect()
             }
           };
         }

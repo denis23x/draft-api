@@ -12,9 +12,9 @@ export class UserService {
 
   async getAll(request: Request, userGetAllDto: UserGetAllDto): Promise<User[]> {
     let userFindManyArgs: any = {
-      ...this.prismaService.setNonSensitiveUserSelect(),
-      ...this.prismaService.setOrder(),
-      ...this.prismaService.setPagination()
+      ...this.prismaService.setUserSelect(),
+      ...this.prismaService.setOrder()
+      // ...this.prismaService.setPagination()
     };
 
     if (!!userGetAllDto) {
@@ -55,7 +55,7 @@ export class UserService {
       /** Pagination */
 
       if (userGetAllDto.hasOwnProperty('page') && userGetAllDto.hasOwnProperty('size')) {
-        userFindManyArgs = this.prismaService.setPagination(userFindManyArgs, userGetAllDto);
+        // userFindManyArgs = this.prismaService.setPagination(userFindManyArgs, userGetAllDto);
       }
     }
 
@@ -65,7 +65,7 @@ export class UserService {
 
   async getOne(request: Request, id: number, userGetOneDto: UserGetOneDto): Promise<User> {
     let userFindUniqueArgs: any = {
-      ...this.prismaService.setNonSensitiveUserSelect(),
+      ...this.prismaService.setUserSelect(),
       where: {
         id
       }
@@ -104,7 +104,7 @@ export class UserService {
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
     // @ts-ignore
     return this.prismaService.user.update({
-      ...this.prismaService.setNonSensitiveUserSelect(),
+      ...this.prismaService.setUserSelect(),
       where: {
         id
       },
@@ -115,7 +115,7 @@ export class UserService {
   async delete(request: Request, id: number): Promise<User> {
     // @ts-ignore
     return this.prismaService.user.delete({
-      ...this.prismaService.setNonSensitiveUserSelect(),
+      ...this.prismaService.setUserSelect(),
       where: {
         id
       }

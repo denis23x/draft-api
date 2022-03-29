@@ -32,9 +32,37 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
   }
 
-  setNonSensitiveUserSelect(args?: any): any {
+  setCategorySelect(): any {
     return {
-      ...args,
+      select: {
+        id: true,
+        name: true,
+        userId: false,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: false
+      }
+    };
+  }
+
+  setPostSelect(): any {
+    return {
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        image: true,
+        userId: false,
+        categoryId: false,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: false
+      }
+    };
+  }
+
+  setUserSelect(): any {
+    return {
       select: {
         id: true,
         googleId: false,
@@ -44,37 +72,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         avatar: true,
         email: true,
         password: false,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: false
-      }
-    };
-  }
-
-  setCategorySelect(args?: any): any {
-    return {
-      ...args,
-      select: {
-        id: true,
-        name: true,
-        userId: false,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: false
-      }
-    };
-  }
-
-  setPostSelect(args?: any): any {
-    return {
-      ...args,
-      select: {
-        id: true,
-        title: true,
-        body: true,
-        image: true,
-        userId: false,
-        categoryId: false,
         createdAt: true,
         updatedAt: true,
         deletedAt: false
@@ -106,16 +103,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     };
   }
 
-  setOrder(args?: any): any {
+  setOrder(): any {
     return {
-      ...args,
       orderBy: {
         id: 'desc'
       }
     };
   }
 
-  setPagination(args?: any, dto?: any): any {
+  setPagination(dto?: any): any {
     const page: number = dto?.page || 1;
     const size: number = dto?.size || 10;
 
@@ -123,7 +119,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const take: number = size;
 
     return {
-      ...args,
       skip,
       take
     };
