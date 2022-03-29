@@ -29,6 +29,7 @@ export class AuthService {
       }
     };
 
+    // @ts-ignore
     const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
     const fingerprintDto: FingerprintDto = {
@@ -56,24 +57,30 @@ export class AuthService {
 
   // prettier-ignore
   async registration(request: Request, response: Response, registrationDto: RegistrationDto): Promise<User> {
+    const userCreateArgs: Prisma.UserCreateArgs = {
+      ...this.prismaService.setUserSelect(),
+      data: registrationDto
+    };
+
     if (registrationDto.hasOwnProperty('password')) {
       registrationDto.password = await hash(registrationDto.password, 10);
     }
 
-    return this.prismaService.user.create({
-      ...this.prismaService.setUserSelect(),
-      data: registrationDto
-    });
+    // @ts-ignore
+    return this.prismaService.user.create(userCreateArgs);
   }
 
   // prettier-ignore
   async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<User> {
-    const user: User = await this.prismaService.user.findUnique({
+    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       ...this.prismaService.setUserSelect(),
       where: {
         id: (request.user as any).id
       }
-    });
+    };
+
+    // @ts-ignore
+    const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
     return this.setResponse(request, response, user, fingerprintDto);
   }
@@ -94,6 +101,7 @@ export class AuthService {
       }
     };
 
+    // @ts-ignore
     return this.prismaService.user.findUnique(userFindUniqueArgs);
   }
 
@@ -102,7 +110,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const user: User = await this.prismaService.user.upsert({
+    const userUpsertArgs: Prisma.UserUpsertArgs = {
       where: {
         email: (request.user as any).email
       },
@@ -112,7 +120,10 @@ export class AuthService {
       create: {
         ...(request.user as any)
       }
-    });
+    };
+
+    // @ts-ignore
+    const user: User = await this.prismaService.user.upsert(userUpsertArgs);
 
     return response.redirect(
       url.format({
@@ -134,6 +145,8 @@ export class AuthService {
     }
 
     const session: Session = await this.setSession(request, user, fingerprintDto);
+
+    /** Generate tokens */
 
     const accessToken: string = await this.setToken(session, user, process.env.JWT_ACCESS_TTL);
     const refreshToken: string = await this.setToken(session, user, process.env.JWT_REFRESH_TTL);
@@ -159,24 +172,30 @@ export class AuthService {
 
   // prettier-ignore
   async setSession(request: Request, user: User, fingerprintDto?: FingerprintDto): Promise<Session> {
-    const session: Session = await this.prismaService.session.findUnique({
+    const sessionFindUniqueArgs: Prisma.SessionFindUniqueArgs = {
       where: {
         fingerprint_userId: {
           fingerprint: fingerprintDto.fingerprint,
           userId: user.id
         }
       }
-    });
+    };
+
+    // @ts-ignore
+    const session: Session = await this.prismaService.session.findUnique(sessionFindUniqueArgs);
 
     if (!!session) {
-      await this.prismaService.session.delete({
+      const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
         where: {
           id: session.id
         }
-      });
+      };
+
+      // @ts-ignore
+      await this.prismaService.session.delete(sessionDeleteArgs);
     }
 
-    return this.prismaService.session.create({
+    const sessionCreateArgs: Prisma.SessionCreateArgs = {
       data: {
         ua: request.headers['user-agent'],
         fingerprint: fingerprintDto.fingerprint,
@@ -187,7 +206,10 @@ export class AuthService {
           }
         }
       }
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.session.create(sessionCreateArgs);
   }
 
   async setToken(session: Session, user: User, expiresIn: string): Promise<string> {
