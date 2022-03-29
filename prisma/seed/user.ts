@@ -25,7 +25,7 @@ export const userRaw = async () => {
     const avatarFile = faker.datatype.number({ min: 0, max: 200 }) + '.jpg';
 
     raw.push({
-      name: faker.internet.userName(),
+      name: faker.internet.userName() + (i + 1),
       email,
       biography: faker.name.jobTitle(),
       avatar: faker.datatype.boolean() ? avatarPath + avatarFile : null,

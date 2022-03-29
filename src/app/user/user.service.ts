@@ -24,20 +24,17 @@ export class UserService {
       /** Search */
 
       if (userGetAllDto.hasOwnProperty('name')) {
-        userFindManyArgs.where = {
-          name: {
-            contains: userGetAllDto.name
-          }
-        };
-      }
-
-      if (userGetAllDto.hasOwnProperty('email')) {
-        userFindManyArgs.where = {
-          ...userFindManyArgs.where,
-          email: {
-            contains: userGetAllDto.email
-          }
-        };
+        if (userGetAllDto.hasOwnProperty('exact')) {
+          userFindManyArgs.where = {
+            name: userGetAllDto.name
+          };
+        } else {
+          userFindManyArgs.where = {
+            name: {
+              contains: userGetAllDto.name
+            }
+          };
+        }
       }
 
       /** Scope */
