@@ -79,30 +79,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     };
   }
 
-  setWhere(args: any, dto: any, key: string): any {
-    const getWhere = () => {
-      const and: boolean = args.hasOwnProperty('where');
-      const exact: boolean = dto.hasOwnProperty('exact') && !!dto.exact;
-
-      const where = {
-        [key]: exact
-          ? dto[key]
-          : {
-              contains: dto[key]
-            }
-      };
-
-      return {
-        where: and ? { ...args.where, AND: [where] } : where
-      };
-    };
-
-    return {
-      ...args,
-      ...getWhere()
-    };
-  }
-
   setOrder(): any {
     return {
       orderBy: {

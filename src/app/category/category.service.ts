@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
-import { Category } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 import { CategoryCreateDto, CategoryGetAllDto, CategoryGetOneDto, CategoryUpdateDto } from './dto';
 
 @Injectable()
@@ -11,34 +11,38 @@ export class CategoryService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(request: Request, categoryCreateDto: CategoryCreateDto): Promise<Category> {
-    // @ts-ignore
-    return this.prismaService.category.create({
+    const categoryCreateArgs: Prisma.CategoryCreateArgs = {
       ...this.prismaService.setCategorySelect(),
       data: {
         ...categoryCreateDto,
         user: {
           connect: {
-            // @ts-ignore
-            id: request.user.id
+            id: (request.user as any).id
           }
         }
       }
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.category.create(categoryCreateArgs);
   }
 
   async getAll(request: Request, categoryGetAllDto: CategoryGetAllDto): Promise<Category[]> {
-    let categoryFindManyArgs: any = {
+    const categoryFindManyArgs: Prisma.CategoryFindManyArgs = {
       ...this.prismaService.setCategorySelect(),
-      ...this.prismaService.setOrder()
-      // ...this.prismaService.setPagination()
+      ...this.prismaService.setOrder(),
+      ...this.prismaService.setPagination()
     };
 
     if (!!categoryGetAllDto) {
       /** Search */
 
       if (categoryGetAllDto.hasOwnProperty('name')) {
-        // prettier-ignore
-        categoryFindManyArgs = this.prismaService.setWhere(categoryFindManyArgs, categoryGetAllDto, 'name');
+        categoryFindManyArgs.where = {
+          name: {
+            contains: categoryGetAllDto.name
+          }
+        };
       }
 
       /** Scope */
@@ -47,9 +51,7 @@ export class CategoryService {
         if (categoryGetAllDto.scope.includes('user')) {
           categoryFindManyArgs.select = {
             ...categoryFindManyArgs.select,
-            user: {
-              ...this.prismaService.setUserSelect()
-            }
+            user: this.prismaService.setUserSelect()
           };
         }
 
@@ -66,12 +68,12 @@ export class CategoryService {
 
       /** Pagination */
 
-      if (
-        categoryGetAllDto.hasOwnProperty('page') &&
-        categoryGetAllDto.hasOwnProperty('size')
-      ) {
-        // prettier-ignore
-        // categoryFindManyArgs = this.prismaService.setPagination(categoryFindManyArgs, categoryGetAllDto);
+      // prettier-ignore
+      if (categoryGetAllDto.hasOwnProperty('page') && categoryGetAllDto.hasOwnProperty('size')) {
+        const { skip, take } = this.prismaService.setPagination(categoryGetAllDto);
+
+        categoryFindManyArgs.skip = skip;
+        categoryFindManyArgs.take = take;
       }
     }
 
@@ -81,8 +83,11 @@ export class CategoryService {
 
   // prettier-ignore
   async getOne(request: Request, id: number, categoryGetOneDto: CategoryGetOneDto): Promise<Category> {
-    let categoryFindUniqueArgs: any = {
+    const categoryFindUniqueArgs: Prisma.CategoryFindUniqueArgs = {
       ...this.prismaService.setCategorySelect(),
+      where: {
+        id
+      }
     };
 
     if (!!categoryGetOneDto) {
@@ -92,9 +97,7 @@ export class CategoryService {
         if (categoryGetOneDto.scope.includes('user')) {
           categoryFindUniqueArgs.select = {
             ...categoryFindUniqueArgs.select,
-            user: {
-              ...this.prismaService.setUserSelect()
-            }
+            user: this.prismaService.setUserSelect()
           };
         }
 
@@ -111,33 +114,32 @@ export class CategoryService {
     }
 
     // @ts-ignore
-    return this.prismaService.category.findUnique({
-      ...this.prismaService.setCategorySelect(),
-      where: {
-        id
-      }
-    });
+    return this.prismaService.category.findUnique(categoryFindUniqueArgs);
   }
 
   // prettier-ignore
   async update(request: Request, id: number, categoryUpdateDto: CategoryUpdateDto): Promise<Category> {
-    // @ts-ignore
-    return this.prismaService.category.update({
+    const categoryUpdateArgs: Prisma.CategoryUpdateArgs = {
       ...this.prismaService.setCategorySelect(),
       where: {
         id
       },
       data: categoryUpdateDto
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.category.update(categoryUpdateArgs);
   }
 
   async delete(request: Request, id: number): Promise<Category> {
-    // @ts-ignore
-    return this.prismaService.category.delete({
+    const categoryDeleteArgs: Prisma.CategoryDeleteArgs = {
       ...this.prismaService.setCategorySelect(),
       where: {
         id
       }
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.category.delete(categoryDeleteArgs);
   }
 }

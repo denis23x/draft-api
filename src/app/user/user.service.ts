@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
 
 @Injectable()
@@ -11,21 +11,30 @@ export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getAll(request: Request, userGetAllDto: UserGetAllDto): Promise<User[]> {
-    let userFindManyArgs: any = {
+    const userFindManyArgs: Prisma.UserFindManyArgs = {
       ...this.prismaService.setUserSelect(),
-      ...this.prismaService.setOrder()
-      // ...this.prismaService.setPagination()
+      ...this.prismaService.setOrder(),
+      ...this.prismaService.setPagination()
     };
 
     if (!!userGetAllDto) {
       /** Search */
 
       if (userGetAllDto.hasOwnProperty('name')) {
-        userFindManyArgs = this.prismaService.setWhere(userFindManyArgs, userGetAllDto, 'name');
+        userFindManyArgs.where = {
+          name: {
+            contains: userGetAllDto.name
+          }
+        };
       }
 
       if (userGetAllDto.hasOwnProperty('email')) {
-        userFindManyArgs = this.prismaService.setWhere(userFindManyArgs, userGetAllDto, 'email');
+        userFindManyArgs.where = {
+          ...userFindManyArgs.where,
+          email: {
+            contains: userGetAllDto.email
+          }
+        };
       }
 
       /** Scope */
@@ -55,7 +64,10 @@ export class UserService {
       /** Pagination */
 
       if (userGetAllDto.hasOwnProperty('page') && userGetAllDto.hasOwnProperty('size')) {
-        // userFindManyArgs = this.prismaService.setPagination(userFindManyArgs, userGetAllDto);
+        const { skip, take } = this.prismaService.setPagination(userGetAllDto);
+
+        userFindManyArgs.skip = skip;
+        userFindManyArgs.take = take;
       }
     }
 
@@ -64,7 +76,7 @@ export class UserService {
   }
 
   async getOne(request: Request, id: number, userGetOneDto: UserGetOneDto): Promise<User> {
-    let userFindUniqueArgs: any = {
+    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       ...this.prismaService.setUserSelect(),
       where: {
         id
@@ -102,23 +114,27 @@ export class UserService {
   }
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
-    // @ts-ignore
-    return this.prismaService.user.update({
+    const userUpdateArgs: Prisma.UserUpdateArgs = {
       ...this.prismaService.setUserSelect(),
       where: {
         id
       },
       data: userUpdateDto
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.user.update(userUpdateArgs);
   }
 
   async delete(request: Request, id: number): Promise<User> {
-    // @ts-ignore
-    return this.prismaService.user.delete({
+    const userDeleteArgs: Prisma.UserDeleteArgs = {
       ...this.prismaService.setUserSelect(),
       where: {
         id
       }
-    });
+    };
+
+    // @ts-ignore
+    return this.prismaService.user.delete(userDeleteArgs);
   }
 }

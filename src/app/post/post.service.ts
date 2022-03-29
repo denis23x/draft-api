@@ -72,18 +72,14 @@ export class PostService {
         if (postGetAllDto.scope.includes('category')) {
           postFindManyArgs.select = {
             ...postFindManyArgs.select,
-            category: {
-              ...this.prismaService.setCategorySelect()
-            }
+            category: this.prismaService.setCategorySelect()
           };
         }
 
         if (postGetAllDto.scope.includes('user')) {
           postFindManyArgs.select = {
             ...postFindManyArgs.select,
-            user: {
-              ...this.prismaService.setUserSelect()
-            }
+            user: this.prismaService.setUserSelect()
           };
         }
       }
@@ -117,18 +113,14 @@ export class PostService {
         if (postGetOneDto.scope.includes('category')) {
           postFindUniqueArgs.select = {
             ...postFindUniqueArgs.select,
-            category: {
-              ...this.prismaService.setCategorySelect()
-            }
+            category: this.prismaService.setCategorySelect()
           };
         }
 
         if (postGetOneDto.scope.includes('user')) {
           postFindUniqueArgs.select = {
             ...postFindUniqueArgs.select,
-            user: {
-              ...this.prismaService.setUserSelect()
-            }
+            user: this.prismaService.setUserSelect()
           };
         }
       }
