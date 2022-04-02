@@ -19,18 +19,18 @@ export class UserGetAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly name?: string;
+  name?: string;
 
   @ApiHideProperty()
   @IsOptional()
   @IsEmail()
-  readonly email?: string;
+  email?: string;
 
   @ApiHideProperty()
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  readonly exact?: number;
+  exact?: number;
 
   @ApiPropertyOptional({
     description: 'Page',
@@ -40,7 +40,7 @@ export class UserGetAllDto {
   @IsNumber()
   @IsPositive()
   @Type(() => Number)
-  readonly page?: number;
+  page?: number;
 
   @ApiPropertyOptional({
     description: 'Size',
@@ -50,12 +50,12 @@ export class UserGetAllDto {
   @IsNumber()
   @IsPositive()
   @Type(() => Number)
-  readonly size?: number;
+  size?: number;
 
   @ApiHideProperty()
   @IsOptional()
   @IsIn(['categories', 'posts'], {
     each: true
   })
-  readonly scope?: string[];
+  scope?: string[];
 }

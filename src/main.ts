@@ -76,7 +76,7 @@ const bootstrap = async () => {
       swaggerOptions: {
         filter: true,
         persistAuthorization: true,
-        docExpansion: 'list',
+        docExpansion: 'none',
         showExtensions: true,
         showCommonExtensions: true,
         defaultModelsExpandDepth: -1,

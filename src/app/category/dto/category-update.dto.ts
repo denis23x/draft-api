@@ -10,5 +10,5 @@ export class CategoryUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly name?: string;
+  name?: string;
 }

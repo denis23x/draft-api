@@ -9,5 +9,5 @@ export class PostGetOneDto {
   @IsIn(['category', 'user'], {
     each: true
   })
-  readonly scope?: string[];
+  scope?: string[];
 }

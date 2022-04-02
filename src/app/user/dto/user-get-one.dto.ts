@@ -7,12 +7,12 @@ export class UserGetOneDto {
   @ApiHideProperty()
   @IsOptional()
   @IsEmail()
-  readonly email?: string;
+  email?: string;
 
   @ApiHideProperty()
   @IsOptional()
   @IsIn(['categories', 'posts'], {
     each: true
   })
-  readonly scope?: string[];
+  scope?: string[];
 }

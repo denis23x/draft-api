@@ -10,7 +10,7 @@ export class UserUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly name?: string;
+  name?: string;
 
   @ApiProperty({
     default: null
@@ -18,12 +18,12 @@ export class UserUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly biography?: string;
+  biography?: string;
 
   @ApiProperty({
     default: 'moder@moder.com'
   })
   @IsOptional()
   @IsEmail()
-  readonly email?: string;
+  email?: string;
 }

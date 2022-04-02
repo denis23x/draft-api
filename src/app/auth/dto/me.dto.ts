@@ -3,10 +3,10 @@
 import { IsIn, IsOptional } from 'class-validator';
 import { ApiHideProperty } from '@nestjs/swagger';
 
-export class CategoryGetOneDto {
+export class MeDto {
   @ApiHideProperty()
   @IsOptional()
-  @IsIn(['user', 'posts'], {
+  @IsIn(['categories', 'posts'], {
     each: true
   })
   scope?: string[];

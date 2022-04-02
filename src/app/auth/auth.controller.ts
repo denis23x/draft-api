@@ -1,15 +1,14 @@
 /** @format */
 
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, RegistrationDto, AccessTokenDto, FingerprintDto } from './dto';
+import { LoginDto, RegistrationDto, AccessTokenDto, FingerprintDto, MeDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiExcludeEndpoint,
   ApiOperation,
   ApiResponse,
@@ -69,12 +68,13 @@ export class AuthController {
   @ApiBearerAuth('accessToken')
   @Post('refresh')
   @UseGuards(AuthGuard('custom'))
-  async refresh(@Req() request: Request, @Res(responseOptions) response: Response, @Body() fingerprint: FingerprintDto): Promise<User> {
-    return this.authService.refresh(request, response, fingerprint);
+  async refresh(@Req() request: Request, @Res(responseOptions) response: Response, @Body() fingerprintDto: FingerprintDto): Promise<User> {
+    return this.authService.refresh(request, response, fingerprintDto);
   }
 
   /** ME */
 
+  // prettier-ignore
   @ApiOperation({
     description: '## Prove authentication'
   })
@@ -85,8 +85,8 @@ export class AuthController {
   @ApiBearerAuth('accessToken')
   @Get('me')
   @UseGuards(AuthGuard('custom'))
-  async me(@Req() request: Request): Promise<User> {
-    return this.authService.me(request);
+  async me(@Req() request: Request, @Res(responseOptions) response: Response, @Query() meDto: MeDto): Promise<User> {
+    return this.authService.me(request, response, meDto);
   }
 
   /** SOCIAL AUTHENTICATION */

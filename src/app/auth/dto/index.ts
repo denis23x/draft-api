@@ -3,4 +3,5 @@
 export { AccessTokenDto } from './access-token.dto';
 export { FingerprintDto } from './fingerprint.dto';
 export { LoginDto } from './login.dto';
+export { MeDto } from './me.dto';
 export { RegistrationDto } from './registration.dto';

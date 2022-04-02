@@ -11,21 +11,21 @@ export class PostGetAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
-  readonly title?: string;
+  title?: string;
 
   @ApiHideProperty()
   @IsOptional()
   @IsNumber()
   @IsPositive()
   @Type(() => Number)
-  readonly userId?: number;
+  userId?: number;
 
   @ApiHideProperty()
   @IsOptional()
   @IsNumber()
   @IsPositive()
   @Type(() => Number)
-  readonly categoryId?: number;
+  categoryId?: number;
 
   @ApiPropertyOptional({
     description: 'Page',
@@ -35,7 +35,7 @@ export class PostGetAllDto {
   @IsNumber()
   @IsPositive()
   @Type(() => Number)
-  readonly page?: number;
+  page?: number;
 
   @ApiPropertyOptional({
     description: 'Size',
@@ -45,12 +45,12 @@ export class PostGetAllDto {
   @IsNumber()
   @IsPositive()
   @Type(() => Number)
-  readonly size?: number;
+  size?: number;
 
   @ApiHideProperty()
   @IsOptional()
   @IsIn(['category', 'user'], {
     each: true
   })
-  readonly scope?: string[];
+  scope?: string[];
 }

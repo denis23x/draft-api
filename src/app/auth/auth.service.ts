@@ -3,7 +3,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
-import { FingerprintDto, LoginDto, RegistrationDto } from './dto';
+import { FingerprintDto, LoginDto, MeDto, RegistrationDto } from './dto';
 import * as url from 'url';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
@@ -17,21 +17,51 @@ export class AuthService {
   ) {}
 
   async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
+    // @ts-ignore
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       select: {
         ...this.prismaService.setUserSelect(),
-        password: true,
-        categories: {
-          select: this.prismaService.setCategorySelect(),
-          orderBy: {
-            id: 'desc'
-          }
-        }
-      },
-      where: {
-        email: loginDto.email
+        password: true
       }
     };
+
+    if (!!loginDto) {
+      /** Search */
+
+      if (loginDto.hasOwnProperty('email')) {
+        userFindUniqueArgs.where = {
+          email: loginDto.email
+        };
+      }
+
+      /** Scope */
+
+      if (loginDto.hasOwnProperty('scope')) {
+        if (loginDto.scope.includes('categories')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            categories: {
+              select: this.prismaService.setCategorySelect(),
+              orderBy: {
+                id: 'desc'
+              }
+            }
+          };
+        }
+
+        if (loginDto.scope.includes('posts')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            posts: {
+              select: this.prismaService.setPostSelect(),
+              orderBy: {
+                id: 'desc'
+              }
+            }
+          };
+        }
+      }
+    }
 
     const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
@@ -86,21 +116,43 @@ export class AuthService {
     return this.setResponse(request, response, user, fingerprintDto);
   }
 
-  async me(request: Request): Promise<User> {
+  async me(request: Request, response: Response, meDto: MeDto): Promise<User> {
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      select: {
-        ...this.prismaService.setUserSelect(),
-        categories: {
-          select: this.prismaService.setCategorySelect(),
-          orderBy: {
-            id: 'desc'
-          }
-        }
-      },
+      select: this.prismaService.setUserSelect(),
       where: {
         id: (request.user as any).id
       }
     };
+
+    if (!!meDto) {
+      /** Scope */
+
+      if (meDto.hasOwnProperty('scope')) {
+        if (meDto.scope.includes('categories')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            categories: {
+              select: this.prismaService.setCategorySelect(),
+              orderBy: {
+                id: 'desc'
+              }
+            }
+          };
+        }
+
+        if (meDto.scope.includes('posts')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            posts: {
+              select: this.prismaService.setPostSelect(),
+              orderBy: {
+                id: 'desc'
+              }
+            }
+          };
+        }
+      }
+    }
 
     return this.prismaService.user.findUnique(userFindUniqueArgs);
   }

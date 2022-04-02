@@ -2,6 +2,7 @@
 
 import {
   IsEmail,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -54,4 +55,11 @@ export class LoginDto {
   @IsNotEmpty()
   @IsString()
   fingerprint: string;
+
+  @ApiHideProperty()
+  @IsOptional()
+  @IsIn(['categories', 'posts'], {
+    each: true
+  })
+  scope?: string[];
 }
