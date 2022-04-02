@@ -25,23 +25,21 @@ export class PostDto {
   })
   @IsNotEmpty()
   @MinLength(4)
-  @MaxLength(24)
+  @MaxLength(36)
   title: string;
 
   @ApiProperty({
     default: 'body'
   })
   @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(24)
+  @MinLength(24)
+  @MaxLength(7200)
   body: string;
 
   @ApiPropertyOptional({
     default: null
   })
   @IsOptional()
-  @MinLength(4)
-  @MaxLength(24)
   image?: string | null;
 
   @ApiHideProperty()

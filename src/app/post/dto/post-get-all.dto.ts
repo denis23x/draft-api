@@ -10,7 +10,7 @@ export class PostGetAllDto {
   })
   @IsOptional()
   @MinLength(4)
-  @MaxLength(24)
+  @MaxLength(36)
   title?: string;
 
   @ApiHideProperty()

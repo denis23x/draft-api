@@ -1,7 +1,14 @@
 /** @format */
 
-import { IsNotEmpty, IsNumber, IsPositive, MaxLength, MinLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  MaxLength,
+  MinLength
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class PostCreateDto {
@@ -11,7 +18,7 @@ export class PostCreateDto {
   })
   @IsNotEmpty()
   @MinLength(4)
-  @MaxLength(24)
+  @MaxLength(36)
   title: string;
 
   @ApiProperty({
@@ -19,9 +26,15 @@ export class PostCreateDto {
     default: 'body'
   })
   @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(24)
+  @MinLength(24)
+  @MaxLength(7200)
   body: string;
+
+  @ApiPropertyOptional({
+    default: null
+  })
+  @IsOptional()
+  image?: string | null;
 
   @ApiProperty({
     description: 'Category Id',

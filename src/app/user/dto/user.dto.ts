@@ -1,6 +1,6 @@
 /** @format */
 
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -29,19 +29,19 @@ export class UserDto {
   @MaxLength(24)
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     default: null
   })
   @IsOptional()
   @MinLength(4)
-  @MaxLength(24)
-  biography: string | null;
+  @MaxLength(255)
+  biography?: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     default: null
   })
   @IsOptional()
-  avatar: string | null;
+  avatar?: string | null;
 
   @ApiProperty({
     default: 'moder@moder.com'

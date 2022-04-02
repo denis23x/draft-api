@@ -1,10 +1,10 @@
 /** @format */
 
 import { IsOptional, MaxLength, MinLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CategoryUpdateDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     default: 'category'
   })
   @IsOptional()
