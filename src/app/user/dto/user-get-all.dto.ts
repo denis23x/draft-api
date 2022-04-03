@@ -16,6 +16,7 @@ export class UserGetAllDto {
   @ApiHideProperty()
   @IsOptional()
   @IsNumber()
+  @IsPositive()
   @Type(() => Number)
   exact?: number;
 
