@@ -110,10 +110,7 @@ export class AuthService {
       } else {
         const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
           where: {
-            fingerprint_userId: {
-              fingerprint: logoutDto.fingerprint,
-              userId: (request.user as any).id
-            }
+            id: logoutDto.id
           }
         };
 
