@@ -3,7 +3,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
-import { FingerprintDto, LoginDto, MeDto, RegistrationDto } from './dto';
+import { FingerprintDto, LoginDto, LogoutDto, MeDto, RegistrationDto } from './dto';
 import * as url from 'url';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
@@ -88,6 +88,35 @@ export class AuthService {
     throw new UnauthorizedException();
   }
 
+  async logout(request: Request, response: Response, logoutDto: LogoutDto): Promise<User> {
+    // @ts-ignore
+    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
+      select: {
+        ...this.prismaService.setUserSelect(),
+        password: true
+      }
+    };
+
+    if (!!logoutDto) {
+      /** Scope */
+      // if (logoutDto.hasOwnProperty('scope')) {
+      //   if (logoutDto.scope.includes('sessions')) {
+      //     userFindUniqueArgs.select = {
+      //       ...userFindUniqueArgs.select,
+      //       sessions: {
+      //         select: this.prismaService.setSessionSelect(),
+      //         orderBy: {
+      //           id: 'desc'
+      //         }
+      //       }
+      //     };
+      //   }
+      // }
+    }
+
+    return this.prismaService.user.findUnique(userFindUniqueArgs);
+  }
+
   // prettier-ignore
   async registration(request: Request, response: Response, registrationDto: RegistrationDto): Promise<User> {
     const userCreateArgs: Prisma.UserCreateArgs = {
@@ -145,6 +174,18 @@ export class AuthService {
             ...userFindUniqueArgs.select,
             posts: {
               select: this.prismaService.setPostSelect(),
+              orderBy: {
+                id: 'desc'
+              }
+            }
+          };
+        }
+
+        if (meDto.scope.includes('sessions')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            sessions: {
+              select: this.prismaService.setSessionSelect(),
               orderBy: {
                 id: 'desc'
               }

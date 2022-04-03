@@ -4,7 +4,7 @@ import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, RegistrationDto, AccessTokenDto, FingerprintDto, MeDto } from './dto';
+import { LoginDto, LogoutDto, RegistrationDto, AccessTokenDto, FingerprintDto, MeDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
@@ -38,6 +38,23 @@ export class AuthController {
   @Post('login')
   async login(@Req() request: Request, @Res(responseOptions) response: Response, @Body() loginDto: LoginDto): Promise<User> {
     return this.authService.login(request, response, loginDto);
+  }
+
+  /** LOGOUT */
+
+  // prettier-ignore
+  @ApiOperation({
+    description: '## User logout'
+  })
+  @ApiResponse({
+    status: 201,
+    type: UserDto
+  })
+  @ApiBearerAuth('accessToken')
+  @Post('logout')
+  @UseGuards(AuthGuard('custom'))
+  async logout(@Req() request: Request, @Res(responseOptions) response: Response, @Body() logoutDto: LogoutDto): Promise<User> {
+    return this.authService.logout(request, response, logoutDto);
   }
 
   /** REGISTRATION */

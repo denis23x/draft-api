@@ -6,7 +6,7 @@ import { ApiHideProperty } from '@nestjs/swagger';
 export class MeDto {
   @ApiHideProperty()
   @IsOptional()
-  @IsIn(['categories', 'posts'], {
+  @IsIn(['categories', 'posts', 'sessions'], {
     each: true
   })
   scope?: string[];
