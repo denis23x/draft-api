@@ -7,7 +7,7 @@ import { Type } from 'class-transformer';
 export class LogoutDto {
   @ApiProperty({
     description: 'Client unique identifier',
-    default: 'sPx5uhkrzLbrJNvtEbKl'
+    default: 'swagger'
   })
   @IsNotEmpty()
   @IsString()

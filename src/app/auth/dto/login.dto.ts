@@ -50,7 +50,7 @@ export class LoginDto {
 
   @ApiProperty({
     description: 'Client unique identifier',
-    default: 'sPx5uhkrzLbrJNvtEbKl'
+    default: 'swagger'
   })
   @IsNotEmpty()
   @IsString()
