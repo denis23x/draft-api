@@ -21,7 +21,8 @@ export class PostDto {
   id: number;
 
   @ApiProperty({
-    default: 'title'
+    description: 'Title',
+    default: 'Fusce tempor semper semper'
   })
   @IsNotEmpty()
   @MinLength(4)
@@ -29,7 +30,8 @@ export class PostDto {
   title: string;
 
   @ApiProperty({
-    default: 'body'
+    description: 'Body',
+    default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
   })
   @IsNotEmpty()
   @MinLength(24)

@@ -14,7 +14,7 @@ import { Type } from 'class-transformer';
 export class PostCreateDto {
   @ApiProperty({
     description: 'Title',
-    default: 'title'
+    default: 'Fusce tempor semper semper'
   })
   @IsNotEmpty()
   @MinLength(4)
@@ -23,7 +23,7 @@ export class PostCreateDto {
 
   @ApiProperty({
     description: 'Body',
-    default: 'body'
+    default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
   })
   @IsNotEmpty()
   @MinLength(24)

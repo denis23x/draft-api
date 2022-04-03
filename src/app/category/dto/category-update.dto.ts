@@ -5,7 +5,8 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CategoryUpdateDto {
   @ApiPropertyOptional({
-    default: 'category'
+    description: 'Name',
+    default: 'Mauris eget erat malesuada'
   })
   @IsOptional()
   @MinLength(4)

@@ -6,7 +6,8 @@ import { Type } from 'class-transformer';
 
 export class PostUpdateDto {
   @ApiPropertyOptional({
-    default: 'title'
+    description: 'Title',
+    default: 'Fusce tempor semper semper'
   })
   @IsOptional()
   @MinLength(4)
@@ -14,7 +15,8 @@ export class PostUpdateDto {
   title?: string;
 
   @ApiPropertyOptional({
-    default: 'body'
+    description: 'Body',
+    default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
   })
   @IsOptional()
   @MinLength(24)

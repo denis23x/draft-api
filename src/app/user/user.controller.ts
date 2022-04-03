@@ -7,6 +7,7 @@ import { UserGetAllDto, UserGetOneDto, UserUpdateDto, UserDto } from './dto';
 import { Request } from 'express';
 import { User } from '@prisma/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserRelationGuard } from '../auth/guards';
 
 @ApiTags('Users')
 @Controller('users')
@@ -49,7 +50,7 @@ export class UserController {
   })
   @ApiBearerAuth('accessToken')
   @Put(':id')
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('custom'), UserRelationGuard)
   async update(@Req() request: Request, @Param('id') id: number, @Body() userUpdateDto: UserUpdateDto): Promise<User> {
     return this.userService.update(request, id, userUpdateDto);
   }
@@ -63,7 +64,7 @@ export class UserController {
   })
   @ApiBearerAuth('accessToken')
   @Delete(':id')
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('custom'), UserRelationGuard)
   async delete(@Req() request: Request, @Param('id') id: number): Promise<User> {
     return this.userService.delete(request, id);
   }

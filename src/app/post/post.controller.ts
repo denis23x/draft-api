@@ -18,6 +18,7 @@ import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostDto, PostUpdateDto } f
 import { Request } from 'express';
 import { Post as PostModel } from '@prisma/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { PostRelationGuard } from '../auth/guards';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -76,7 +77,7 @@ export class PostController {
   })
   @ApiBearerAuth('accessToken')
   @Put(':id')
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('custom'), PostRelationGuard)
   async update(@Req() request: Request, @Param('id') id: number, @Body() postUpdateDto: PostUpdateDto): Promise<PostModel> {
     return this.postService.update(request, id, postUpdateDto);
   }
@@ -90,7 +91,7 @@ export class PostController {
   })
   @ApiBearerAuth('accessToken')
   @Delete(':id')
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('custom'), PostRelationGuard)
   async delete(@Req() request: Request, @Param('id') id: number): Promise<PostModel> {
     return this.postService.delete(request, id);
   }

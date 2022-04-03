@@ -14,7 +14,8 @@ export class CategoryDto {
   id: number;
 
   @ApiProperty({
-    default: 'category'
+    description: 'Name',
+    default: 'Mauris eget erat malesuada'
   })
   @IsNotEmpty()
   @MinLength(4)

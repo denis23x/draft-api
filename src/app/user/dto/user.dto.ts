@@ -22,6 +22,7 @@ export class UserDto {
   id: number;
 
   @ApiProperty({
+    description: 'Name',
     default: 'moderator'
   })
   @IsNotEmpty()

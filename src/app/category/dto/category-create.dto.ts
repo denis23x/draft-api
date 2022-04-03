@@ -6,7 +6,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CategoryCreateDto {
   @ApiProperty({
     description: 'Name',
-    default: 'category'
+    default: 'Mauris eget erat malesuada'
   })
   @IsNotEmpty()
   @MinLength(4)
