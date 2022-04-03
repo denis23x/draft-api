@@ -62,7 +62,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       id: true,
       userId: false,
       ua: true,
-      fingerprint: false,
+      fingerprint: true,
       ip: true,
       createdAt: true,
       updatedAt: true

@@ -89,29 +89,36 @@ export class AuthService {
   }
 
   async logout(request: Request, response: Response, logoutDto: LogoutDto): Promise<User> {
-    // @ts-ignore
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      select: {
-        ...this.prismaService.setUserSelect(),
-        password: true
+      select: this.prismaService.setUserSelect(),
+      where: {
+        id: (request.user as any).id
       }
     };
 
     if (!!logoutDto) {
-      /** Scope */
-      // if (logoutDto.hasOwnProperty('scope')) {
-      //   if (logoutDto.scope.includes('sessions')) {
-      //     userFindUniqueArgs.select = {
-      //       ...userFindUniqueArgs.select,
-      //       sessions: {
-      //         select: this.prismaService.setSessionSelect(),
-      //         orderBy: {
-      //           id: 'desc'
-      //         }
-      //       }
-      //     };
-      //   }
-      // }
+      /** Search */
+
+      if (logoutDto.hasOwnProperty('reset')) {
+        const sessionDeleteManyArgs: Prisma.SessionDeleteManyArgs = {
+          where: {
+            userId: (request.user as any).id
+          }
+        };
+
+        await this.prismaService.session.deleteMany(sessionDeleteManyArgs);
+      } else {
+        const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
+          where: {
+            fingerprint_userId: {
+              fingerprint: logoutDto.fingerprint,
+              userId: (request.user as any).id
+            }
+          }
+        };
+
+        await this.prismaService.session.delete(sessionDeleteArgs);
+      }
     }
 
     return this.prismaService.user.findUnique(userFindUniqueArgs);
