@@ -14,7 +14,15 @@ export class PostService {
     const { categoryId, ...rest } = postCreateDto;
 
     const postCreateArgs: Prisma.PostCreateArgs = {
-      select: this.prismaService.setPostSelect(),
+      select: {
+        ...this.prismaService.setPostSelect(),
+        category: {
+          select: this.prismaService.setCategorySelect()
+        },
+        user: {
+          select: this.prismaService.setUserSelect()
+        }
+      },
       data: {
         ...rest,
         user: {
@@ -140,11 +148,18 @@ export class PostService {
 
   async update(request: Request, id: number, postUpdateDto: PostUpdateDto): Promise<Post> {
     const postUpdateArgs: Prisma.PostUpdateArgs = {
-      select: this.prismaService.setPostSelect(),
+      select: {
+        ...this.prismaService.setPostSelect(),
+        category: {
+          select: this.prismaService.setCategorySelect()
+        },
+        user: {
+          select: this.prismaService.setUserSelect()
+        }
+      },
       where: {
         id
       },
-      // @ts-ignore
       data: postUpdateDto
     };
 
