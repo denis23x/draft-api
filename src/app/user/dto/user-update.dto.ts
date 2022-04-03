@@ -18,7 +18,13 @@ export class UserUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(255)
-  biography?: string;
+  biography?: string | null;
+
+  @ApiPropertyOptional({
+    default: null
+  })
+  @IsOptional()
+  avatar?: string | null;
 
   @ApiPropertyOptional({
     default: 'moder@moder.com'

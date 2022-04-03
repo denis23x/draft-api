@@ -24,6 +24,7 @@ import {
 import { Request } from 'express';
 import { Category } from '@prisma/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CategoryRelationGuard } from '../auth/guards';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -82,7 +83,7 @@ export class CategoryController {
   })
   @ApiBearerAuth('accessToken')
   @Put(':id')
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('custom'), CategoryRelationGuard)
   async update(@Req() request: Request, @Param('id') id: number, @Body() categoryUpdateDto: CategoryUpdateDto): Promise<Category> {
     return this.categoryService.update(request, id, categoryUpdateDto);
   }
@@ -96,7 +97,7 @@ export class CategoryController {
   })
   @ApiBearerAuth('accessToken')
   @Delete(':id')
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('custom'), CategoryRelationGuard)
   async delete(@Req() request: Request, @Param('id') id: number): Promise<Category> {
     return this.categoryService.delete(request, id);
   }
