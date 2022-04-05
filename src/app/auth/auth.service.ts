@@ -8,12 +8,16 @@ import * as url from 'url';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import * as UAParser from 'ua-parser-js';
+import { HttpService } from '@nestjs/axios';
+import { catchError, lastValueFrom, Observable, of, pluck, switchMap } from 'rxjs';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prismaService: PrismaService
+    private readonly prismaService: PrismaService,
+    private readonly httpService: HttpService
   ) {}
 
   async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
@@ -289,20 +293,36 @@ export class AuthService {
       await this.prismaService.session.delete(sessionDeleteArgs);
     }
 
-    const sessionCreateArgs: Prisma.SessionCreateArgs = {
-      data: {
-        ua: request.headers['user-agent'],
-        fingerprint: fingerprintDto.fingerprint,
-        ip: request.ip,
-        user: {
-          connect: {
-            id: user.id
-          }
-        }
-      }
-    };
+    /** https://www.geojs.io/docs/v1/endpoints/geo/ */
 
-    return this.prismaService.session.create(sessionCreateArgs);
+    const geolocationUrl = 'https://get.geojs.io/v1/ip/geo/';
+
+    const setSession$: Observable<Session> = this.httpService.get(geolocationUrl + request.ip)
+      .pipe(
+        pluck('data'),
+        catchError(() => of({})),
+        switchMap((geolocationResponse: any) => {
+          const uaParser: UAParser = new UAParser(request.headers['user-agent']);
+
+          const sessionCreateArgs: Prisma.SessionCreateArgs = {
+            data: {
+              // @ts-ignore
+              ua: uaParser.getResult(),
+              fingerprint: fingerprintDto.fingerprint,
+              ip: geolocationResponse,
+              user: {
+                connect: {
+                  id: user.id
+                }
+              }
+            }
+          };
+
+          return this.prismaService.session.create(sessionCreateArgs);
+        })
+      );
+
+    return lastValueFrom(setSession$)
   }
 
   async setToken(session: Session, user: User, expiresIn: string): Promise<string> {
