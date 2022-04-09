@@ -19,11 +19,4 @@ export class LogoutDto {
   @IsPositive()
   @Type(() => Number)
   id: number;
-
-  @ApiHideProperty()
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  reset?: number;
 }

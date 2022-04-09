@@ -103,18 +103,21 @@ export class AuthService {
     if (!!logoutDto) {
       /** Search */
 
-      if (logoutDto.hasOwnProperty('reset')) {
-        const sessionDeleteManyArgs: Prisma.SessionDeleteManyArgs = {
-          where: {
-            userId: (request.user as any).id
-          }
-        };
-
-        await this.prismaService.session.deleteMany(sessionDeleteManyArgs);
-      } else {
+      if (logoutDto.hasOwnProperty('id')) {
         const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
           where: {
             id: logoutDto.id
+          }
+        };
+
+        await this.prismaService.session.delete(sessionDeleteArgs);
+      } else {
+        const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
+          where: {
+            fingerprint_userId: {
+              fingerprint: logoutDto.fingerprint,
+              userId: (request.user as any).id
+            }
           }
         };
 
