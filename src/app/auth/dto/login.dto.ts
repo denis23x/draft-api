@@ -58,7 +58,7 @@ export class LoginDto {
 
   @ApiHideProperty()
   @IsOptional()
-  @IsIn(['categories', 'posts'], {
+  @IsIn(['categories', 'posts', 'settings'], {
     each: true
   })
   scope?: string[];

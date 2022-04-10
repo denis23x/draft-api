@@ -64,6 +64,15 @@ export class AuthService {
             }
           };
         }
+
+        if (loginDto.scope.includes('settings')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            settings: {
+              select: this.prismaService.setSettingsSelect()
+            }
+          };
+        }
       }
     }
 

@@ -8,17 +8,17 @@ datasource db {
 }
 
 model Settings {
-  id          Int      @id @default(autoincrement())
-  userId      Int?
-  theme       Theme     @default(AUTO)
-  createdAt   DateTime @default(now()) @db.DateTime(6)
-  updatedAt   DateTime @default(now()) @db.DateTime(6)
-  user        User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  theme       SettingsTheme @default(AUTO)
+  createdAt   DateTime      @default(now()) @db.DateTime(6)
+  updatedAt   DateTime      @default(now()) @db.DateTime(6)
+  user        User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([userId])
 }
 
-enum Theme {
+enum SettingsTheme {
   AUTO
   LIGHT
   DARK
@@ -26,13 +26,13 @@ enum Theme {
 
 model Session {
   id          Int      @id @default(autoincrement())
-  userId      Int?
+  userId      Int
   fingerprint String   @db.VarChar(255)
-  ua          Json?
-  ip          Json?
+  ua          Json
+  ip          Json
   createdAt   DateTime @default(now()) @db.DateTime(6)
   updatedAt   DateTime @default(now()) @db.DateTime(6)
-  user        User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user        User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([fingerprint, userId])
   @@index([userId])
@@ -53,17 +53,17 @@ model User {
   categories Category[]
   posts      Post[]
   sessions   Session[]
-  settings   Settings[]
+  settings   Settings?
 }
 
 model Category {
   id        Int       @id @default(autoincrement())
-  userId    Int?
+  userId    Int
   name      String    @db.VarChar(255)
   createdAt DateTime  @default(now()) @db.DateTime(6)
   updatedAt DateTime  @default(now()) @db.DateTime(6)
   deletedAt DateTime? @db.DateTime(6)
-  user      User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   posts     Post[]
 
   @@unique([name, userId])
@@ -75,13 +75,13 @@ model Post {
   title      String    @db.VarChar(255)
   body       String    @db.Text
   image      String?   @db.VarChar(255)
-  userId     Int?
-  categoryId Int?
+  userId     Int
+  categoryId Int
   createdAt  DateTime  @default(now()) @db.DateTime(6)
   updatedAt  DateTime  @default(now()) @db.DateTime(6)
   deletedAt  DateTime? @db.DateTime(6)
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user       User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([title, userId, categoryId])
   @@index([categoryId])
