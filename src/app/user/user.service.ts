@@ -121,7 +121,12 @@ export class UserService {
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
     const userUpdateArgs: Prisma.UserUpdateArgs = {
-      select: this.prismaService.setUserSelect(),
+      select: {
+        ...this.prismaService.setUserSelect(),
+        settings: {
+          select: this.prismaService.setSettingsSelect()
+        }
+      },
       where: {
         id
       },
