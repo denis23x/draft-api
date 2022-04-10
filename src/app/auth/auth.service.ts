@@ -132,11 +132,18 @@ export class AuthService {
   async registration(request: Request, response: Response, registrationDto: RegistrationDto): Promise<User> {
     const userCreateArgs: Prisma.UserCreateArgs = {
       select: this.prismaService.setUserSelect(),
-      data: registrationDto
+      data: {
+        ...registrationDto,
+        settings: {
+          create: {
+            theme: 'AUTO'
+          }
+        }
+      }
     };
 
     if (registrationDto.hasOwnProperty('password')) {
-      registrationDto.password = await hash(registrationDto.password, 10);
+      userCreateArgs.data.password  = await hash(registrationDto.password, 10);
     }
 
     return this.prismaService.user.create(userCreateArgs);
@@ -200,6 +207,15 @@ export class AuthService {
               orderBy: {
                 id: 'desc'
               }
+            }
+          };
+        }
+
+        if (meDto.scope.includes('settings')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            settings: {
+              select: this.prismaService.setSettingsSelect()
             }
           };
         }

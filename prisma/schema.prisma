@@ -7,6 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Settings {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  theme       Theme     @default(AUTO)
+  createdAt   DateTime @default(now()) @db.DateTime(6)
+  updatedAt   DateTime @default(now()) @db.DateTime(6)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId])
+}
+
+enum Theme {
+  AUTO
+  LIGHT
+  DARK
+}
+
 model Session {
   id          Int      @id @default(autoincrement())
   userId      Int?
@@ -36,6 +53,7 @@ model User {
   categories Category[]
   posts      Post[]
   sessions   Session[]
+  settings   Settings[]
 }
 
 model Category {

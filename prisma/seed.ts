@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 
 import { userRaw } from './seed/user';
 import { categoryRaw } from './seed/category';
+import { settingsRaw } from './seed/settings';
 import { postRaw } from './seed/post';
 
 /** https://github.com/faker-js/faker */
@@ -14,9 +15,10 @@ const prisma = new PrismaClient();
 const main = async () => {
   const deletePosts = prisma.post.deleteMany();
   const deleteCategories = prisma.category.deleteMany();
+  const deleteSettings = prisma.settings.deleteMany();
   const deleteUsers = prisma.user.deleteMany();
 
-  await prisma.$transaction([deletePosts, deleteCategories, deleteUsers]);
+  await prisma.$transaction([deletePosts, deleteCategories, deleteSettings, deleteUsers]);
 
   /**
    * INSERT DATABASE
@@ -25,6 +27,11 @@ const main = async () => {
 
   await prisma.user.createMany({
     data: await userRaw(),
+    skipDuplicates: true
+  });
+
+  await prisma.settings.createMany({
+    data: await settingsRaw(),
     skipDuplicates: true
   });
 

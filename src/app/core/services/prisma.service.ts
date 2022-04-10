@@ -69,6 +69,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     };
   }
 
+  setSettingsSelect(): Prisma.SettingsSelect {
+    return {
+      id: true,
+      theme: true,
+      createdAt: true,
+      updatedAt: true
+    };
+  }
+
   setUserSelect(): Prisma.UserSelect {
     return {
       id: true,

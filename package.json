@@ -9,7 +9,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
-    "prisma:studio": "npx prisma studio",
+    "prisma:studio": "npx prisma studio --browser none",
     "prisma:migrate:dev": "prisma migrate dev --skip-seed",
     "prisma:migrate:reset": "prisma migrate reset --skip-seed --force",
     "prisma:db:pull": "prisma db pull",
