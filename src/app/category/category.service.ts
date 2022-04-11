@@ -47,6 +47,13 @@ export class CategoryService {
         };
       }
 
+      if (categoryGetAllDto.hasOwnProperty('userId')) {
+        categoryFindManyArgs.where = {
+          ...categoryFindManyArgs.where,
+          userId: categoryGetAllDto.userId
+        };
+      }
+
       /** Scope */
 
       if (categoryGetAllDto.hasOwnProperty('scope')) {
