@@ -121,17 +121,32 @@ export class UserService {
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
     const userUpdateArgs: Prisma.UserUpdateArgs = {
-      select: {
-        ...this.prismaService.setUserSelect(),
-        settings: {
-          select: this.prismaService.setSettingsSelect()
-        }
-      },
+      select: this.prismaService.setUserSelect(),
       where: {
         id
       },
       data: userUpdateDto
     };
+
+    if (!!userUpdateDto) {
+      /** Update */
+
+      if (userUpdateDto.hasOwnProperty('settings')) {
+        userUpdateArgs.select = {
+          ...userUpdateArgs.select,
+          settings: {
+            select: this.prismaService.setSettingsSelect()
+          }
+        };
+
+        userUpdateArgs.data = {
+          ...userUpdateArgs.data,
+          settings: {
+            update: userUpdateDto.settings
+          }
+        };
+      }
+    }
 
     return this.prismaService.user.update(userUpdateArgs);
   }

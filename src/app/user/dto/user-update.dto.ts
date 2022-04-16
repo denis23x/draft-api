@@ -1,6 +1,6 @@
 /** @format */
 
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiHideProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsOptional, MaxLength, MinLength } from 'class-validator';
 
 export class UserUpdateDto {
@@ -33,4 +33,8 @@ export class UserUpdateDto {
   @IsOptional()
   @IsEmail()
   email?: string;
+
+  @ApiHideProperty()
+  @IsOptional()
+  settings?: any;
 }
