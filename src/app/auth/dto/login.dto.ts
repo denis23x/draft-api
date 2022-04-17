@@ -4,7 +4,6 @@ import {
   IsEmail,
   IsIn,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -12,7 +11,6 @@ import {
   ValidateIf
 } from 'class-validator';
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 
 export class LoginDto {
   @ApiProperty({
@@ -38,14 +36,12 @@ export class LoginDto {
 
   @ApiHideProperty()
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
+  @IsString()
   googleId?: string;
 
   @ApiHideProperty()
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
+  @IsString()
   facebookId?: string;
 
   @ApiProperty({
@@ -58,7 +54,7 @@ export class LoginDto {
 
   @ApiHideProperty()
   @IsOptional()
-  @IsIn(['categories', 'posts', 'settings'], {
+  @IsIn(['categories', 'posts', 'sessions', 'settings'], {
     each: true
   })
   scope?: string[];

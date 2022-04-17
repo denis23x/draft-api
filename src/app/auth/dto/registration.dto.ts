@@ -3,14 +3,13 @@
 import {
   IsEmail,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
+  IsString,
   MaxLength,
   MinLength,
   ValidateIf
 } from 'class-validator';
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 
 export class RegistrationDto {
   @ApiProperty({
@@ -45,13 +44,11 @@ export class RegistrationDto {
 
   @ApiHideProperty()
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
+  @IsString()
   googleId?: string;
 
   @ApiHideProperty()
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
+  @IsString()
   facebookId?: string;
 }

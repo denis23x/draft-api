@@ -25,7 +25,9 @@ export class AuthService {
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       select: {
         ...this.prismaService.setUserSelect(),
-        password: true
+        password: true,
+        googleId: true,
+        facebookId: true
       }
     };
 
@@ -58,6 +60,18 @@ export class AuthService {
             ...userFindUniqueArgs.select,
             posts: {
               select: this.prismaService.setPostSelect(),
+              orderBy: {
+                id: 'desc'
+              }
+            }
+          };
+        }
+
+        if (loginDto.scope.includes('sessions')) {
+          userFindUniqueArgs.select = {
+            ...userFindUniqueArgs.select,
+            sessions: {
+              select: this.prismaService.setSessionSelect(),
               orderBy: {
                 id: 'desc'
               }
@@ -247,7 +261,12 @@ export class AuthService {
         [socialKey]: request.user[socialKey]
       },
       create: {
-        ...(request.user as any)
+        ...(request.user as any),
+        settings: {
+          create: {
+            theme: 'AUTO'
+          }
+        }
       }
     };
 
