@@ -10,6 +10,7 @@ import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
 import { readFileSync } from 'fs';
+import helmet from 'helmet';
 
 const bootstrap = async () => {
   const globalPrefix = process.env.APP_PREFIX;
@@ -38,6 +39,7 @@ const bootstrap = async () => {
 
   /** MISC */
 
+  app.use(helmet());
   app.useStaticAssets('src/assets');
   app.useGlobalPipes(
     new ValidationPipe({
