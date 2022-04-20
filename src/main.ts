@@ -39,7 +39,14 @@ const bootstrap = async () => {
 
   /** MISC */
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: {
+        policy: 'cross-origin'
+      }
+    })
+  );
+
   app.useStaticAssets('src/assets');
   app.useGlobalPipes(
     new ValidationPipe({
