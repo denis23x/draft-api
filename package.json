@@ -67,6 +67,7 @@
     "@types/express": "^4.17.13",
     "@types/helmet": "^4.0.0",
     "@types/jest": "^27.0.1",
+    "@types/multer": "^1.4.7",
     "@types/node": "^16.11.21",
     "@types/passport-facebook": "^2.1.11",
     "@types/passport-google-oauth20": "^2.0.10",

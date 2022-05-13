@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
 import { CoreModule } from './core';
 import { PostModule } from './post/post.module';
+import { UploadModule } from './upload/upload.module';
 import { UserModule } from './user/user.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
@@ -29,6 +30,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
     CategoryModule,
     CoreModule,
     PostModule,
+    UploadModule,
     UserModule
   ],
   providers: [
@@ -41,6 +43,6 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
       useClass: ThrottlerGuard
     }
   ],
-  exports: [AuthModule, CategoryModule, CoreModule, PostModule, UserModule]
+  exports: [AuthModule, CategoryModule, CoreModule, PostModule, UploadModule, UserModule]
 })
 export class AppModule {}
