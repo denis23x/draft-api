@@ -1,8 +1,8 @@
 /** @format */
 
 import { BadRequestException, Module } from '@nestjs/common';
-import { UploadService } from './upload.service';
-import { UploadController } from './upload.controller';
+import { FileService } from './file.service';
+import { FileController } from './file.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Request } from 'express';
@@ -65,8 +65,8 @@ import * as path from 'path';
       })
     })
   ],
-  controllers: [UploadController],
-  exports: [UploadService],
-  providers: [UploadService]
+  controllers: [FileController],
+  exports: [FileService],
+  providers: [FileService]
 })
-export class UploadModule {}
+export class FileModule {}
