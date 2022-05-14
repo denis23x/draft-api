@@ -49,6 +49,8 @@ const bootstrap = async () => {
   );
 
   app.useStaticAssets('src/assets');
+  app.useStaticAssets('upload');
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
