@@ -8,27 +8,21 @@ datasource db {
 }
 
 model Settings {
-  id          Int           @id @default(autoincrement())
-  userId      Int
-  theme       SettingsTheme @default(AUTO)
-  createdAt   DateTime      @default(now()) @db.DateTime(6)
-  updatedAt   DateTime      @default(now()) @db.DateTime(6)
-  user        User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id        Int           @id @default(autoincrement())
+  userId    Int           @unique
+  theme     SettingsTheme @default(AUTO)
+  createdAt DateTime      @default(now()) @db.DateTime(6)
+  updatedAt DateTime      @default(now()) @db.DateTime(6)
+  user      User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([userId])
-}
-
-enum SettingsTheme {
-  AUTO
-  LIGHT
-  DARK
 }
 
 model Session {
   id          Int      @id @default(autoincrement())
   userId      Int
-  fingerprint String   @db.VarChar(255)
   ua          Json
+  fingerprint String   @db.VarChar(255)
   ip          Json
   createdAt   DateTime @default(now()) @db.DateTime(6)
   updatedAt   DateTime @default(now()) @db.DateTime(6)
@@ -39,17 +33,17 @@ model Session {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  googleId   String?    @db.VarChar(255)
-  facebookId String?    @db.VarChar(255)
-  name       String     @unique @db.VarChar(255)
-  biography  String?    @db.VarChar(255)
-  avatar     String?    @db.VarChar(255)
-  email      String     @unique @db.VarChar(255)
-  password   String?    @db.VarChar(255)
-  createdAt  DateTime   @default(now()) @db.DateTime(6)
-  updatedAt  DateTime   @default(now()) @db.DateTime(6)
-  deletedAt  DateTime?  @db.DateTime(6)
+  id         Int         @id @default(autoincrement())
+  googleId   String?     @db.VarChar(255)
+  facebookId String?     @db.VarChar(255)
+  name       String      @unique @db.VarChar(255)
+  biography  String?     @db.VarChar(255)
+  avatar     String?     @db.VarChar(255)
+  email      String      @unique @db.VarChar(255)
+  password   String?     @db.VarChar(255)
+  createdAt  DateTime    @default(now()) @db.DateTime(6)
+  updatedAt  DateTime    @default(now()) @db.DateTime(6)
+  deletedAt  DateTime?   @db.DateTime(6)
   categories Category[]
   posts      Post[]
   sessions   Session[]
@@ -86,4 +80,10 @@ model Post {
   @@unique([title, userId, categoryId])
   @@index([categoryId])
   @@index([userId])
+}
+
+enum SettingsTheme {
+  AUTO
+  LIGHT
+  DARK
 }

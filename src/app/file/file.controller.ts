@@ -3,14 +3,18 @@
 import { Controller, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileService } from './file.service';
 import { Request } from 'express';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags
+} from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { MulterField } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { AuthGuard } from '@nestjs/passport';
-
-export interface MulterFiles {
-  [key: string]: Express.Multer.File[];
-}
+import { FileCreateDto, FileDto } from './dto';
 
 export const multerField: MulterField[] = [
   {
@@ -30,17 +34,37 @@ export class FileController {
 
   // prettier-ignore
   @ApiOperation({
-    description: '## Upload file'
+    description: '## Create file'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        ...(() => {
+          const inputList: any = {};
+
+          multerField.forEach((multerField: MulterField) => {
+            inputList[multerField.name] = {
+              type: 'string',
+              format: 'binary',
+            }
+          })
+
+          return inputList;
+        })()
+      },
+    },
   })
   @ApiResponse({
     status: 201,
-    type: null
+    type: FileDto
   })
   @ApiBearerAuth('accessToken')
   @Post()
   @UseInterceptors(FileFieldsInterceptor(multerField))
   @UseGuards(AuthGuard('custom'))
-  async uploadFile(@Req() request: Request, @UploadedFiles() multerFiles: MulterFiles): Promise<any> {
-    return this.uploadService.create(request, multerFiles);
+  async uploadFile(@Req() request: Request, @UploadedFiles() fileCreateDto: FileCreateDto): Promise<any> {
+    return this.uploadService.create(request, fileCreateDto);
   }
 }
