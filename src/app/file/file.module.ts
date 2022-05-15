@@ -15,16 +15,10 @@ import * as path from 'path';
     MulterModule.registerAsync({
       useFactory: () => ({
         limits: {
-          fileSize: 1048576
+          fileSize: 1048576 // 1MB
         },
         fileFilter: (request: Request, file: Express.Multer.File, callback: any) => {
-          const mimeTypeList: string[] = [
-            'image/gif',
-            'image/jpeg',
-            'image/jpg',
-            'image/png',
-            'image/svg+xml'
-          ];
+          const mimeTypeList: string[] = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
 
           if (mimeTypeList.includes(file.mimetype)) {
             callback(null, true);

@@ -1,6 +1,6 @@
 /** @format */
 
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../core';
 import { Request } from 'express';
 import { Prisma } from '@prisma/client';
