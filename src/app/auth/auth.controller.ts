@@ -109,6 +109,19 @@ export class AuthController {
   /** SOCIAL AUTHENTICATION */
 
   @ApiExcludeEndpoint()
+  @Get('facebook')
+  @UseGuards(AuthGuard('facebook'))
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async facebook(): Promise<void> {}
+
+  @ApiExcludeEndpoint()
+  @Get('facebook/redirect')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
+    return this.authService.social(request, response, 'facebookId');
+  }
+
+  @ApiExcludeEndpoint()
   @Get('google')
   @UseGuards(AuthGuard('google'))
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -122,15 +135,15 @@ export class AuthController {
   }
 
   @ApiExcludeEndpoint()
-  @Get('facebook')
-  @UseGuards(AuthGuard('facebook'))
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async facebook(): Promise<void> {}
+  async github(): Promise<void> {}
 
   @ApiExcludeEndpoint()
-  @Get('facebook/redirect')
-  @UseGuards(AuthGuard('facebook'))
-  async facebookRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
-    return this.authService.social(request, response, 'facebookId');
+  @Get('github/redirect')
+  @UseGuards(AuthGuard('github'))
+  async githubRedirect(@Req() request: Request, @Res() response: Response): Promise<void> {
+    return this.authService.social(request, response, 'githubId');
   }
 }

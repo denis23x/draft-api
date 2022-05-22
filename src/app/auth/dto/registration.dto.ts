@@ -36,7 +36,7 @@ export class RegistrationDto {
     default: 'moder@moder.com'
   })
   @ValidateIf((registrationDto: RegistrationDto) => {
-    return !registrationDto.googleId && !registrationDto.facebookId;
+    return !registrationDto.googleId && !registrationDto.facebookId && !registrationDto.githubId;
   })
   @MinLength(6)
   @MaxLength(32)
@@ -45,10 +45,15 @@ export class RegistrationDto {
   @ApiHideProperty()
   @IsOptional()
   @IsString()
-  googleId?: string;
+  facebookId?: string;
 
   @ApiHideProperty()
   @IsOptional()
   @IsString()
-  facebookId?: string;
+  githubId?: string;
+
+  @ApiHideProperty()
+  @IsOptional()
+  @IsString()
+  googleId?: string;
 }

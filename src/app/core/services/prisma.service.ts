@@ -81,8 +81,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   setUserSelect(): Prisma.UserSelect {
     return {
       id: true,
-      googleId: false,
       facebookId: false,
+      githubId: false,
+      googleId: false,
       name: true,
       biography: true,
       avatar: true,

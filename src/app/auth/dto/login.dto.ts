@@ -28,7 +28,7 @@ export class LoginDto {
     default: 'moder@moder.com'
   })
   @ValidateIf((loginDto: LoginDto) => {
-    return !loginDto.googleId && !loginDto.facebookId;
+    return !loginDto.googleId && !loginDto.facebookId && !loginDto.githubId;
   })
   @MinLength(6)
   @MaxLength(32)
@@ -37,12 +37,17 @@ export class LoginDto {
   @ApiHideProperty()
   @IsOptional()
   @IsString()
-  googleId?: string;
+  facebookId?: string;
 
   @ApiHideProperty()
   @IsOptional()
   @IsString()
-  facebookId?: string;
+  githubId?: string;
+
+  @ApiHideProperty()
+  @IsOptional()
+  @IsString()
+  googleId?: string;
 
   @ApiProperty({
     description: 'Client unique identifier',

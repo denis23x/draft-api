@@ -26,8 +26,9 @@ export class AuthService {
       select: {
         ...this.prismaService.setUserSelect(),
         password: true,
-        googleId: true,
-        facebookId: true
+        facebookId: true,
+        githubId: true,
+        googleId: true
       }
     };
 
@@ -104,7 +105,7 @@ export class AuthService {
       }
     }
 
-    for (const socialKey of ['googleId', 'facebookId']) {
+    for (const socialKey of ['facebookId', 'githubId', 'googleId']) {
       if (loginDto.hasOwnProperty(socialKey)) {
         if (loginDto[socialKey] === user[socialKey]) {
           return this.setResponse(request, response, user, fingerprintDto);
