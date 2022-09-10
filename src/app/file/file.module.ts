@@ -3,15 +3,17 @@
 import { BadRequestException, Module } from '@nestjs/common';
 import { FileService } from './file.service';
 import { FileController } from './file.controller';
+import { HttpModule } from '@nestjs/axios';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Request } from 'express';
 import { ErrorBody } from '../core';
 import { existsSync, mkdirSync } from 'fs';
-import * as path from 'path';
+import * as mime from 'mime-types';
 
 @Module({
   imports: [
+    HttpModule,
     MulterModule.registerAsync({
       useFactory: () => ({
         limits: {
@@ -51,9 +53,9 @@ import * as path from 'path';
           },
           filename: function (request: Request, file: Express.Multer.File, callback: any) {
             const uniqueSuffix: string = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            const extension: string = path.extname(file.originalname);
+            const extension: string = mime.extension(file.mimetype);
 
-            callback(null, file.fieldname + '-' + uniqueSuffix + extension);
+            callback(null, file.fieldname + '-' + uniqueSuffix + '.' + extension);
           }
         })
       })

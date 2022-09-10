@@ -16,7 +16,7 @@ import {
   IntersectionType
 } from '@nestjs/swagger';
 
-const responseOptions = {
+export const responseOptions = {
   passthrough: true
 };
 

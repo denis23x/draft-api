@@ -1,13 +1,24 @@
 /** @format */
 
-import { Controller, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  Res,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors
+} from '@nestjs/common';
 import { FileService } from './file.service';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger';
@@ -66,5 +77,20 @@ export class FileController {
   @UseGuards(AuthGuard('custom'))
   async uploadFile(@Req() request: Request, @UploadedFiles() fileCreateDto: FileCreateDto): Promise<any> {
     return this.uploadService.create(request, fileCreateDto);
+  }
+
+  // prettier-ignore
+  @ApiOperation({
+    description: '## Stream file by url'
+  })
+  @ApiQuery({ name: 'url', type: 'string' })
+  @ApiResponse({
+    status: 200
+  })
+  @ApiBearerAuth('accessToken')
+  @Get('url')
+  @UseGuards(AuthGuard('custom'))
+  async uploadUrl(@Req() request: Request, @Res() response: Response, @Query() queryParams: any): Promise<any> {
+    return this.uploadService.createByUrl(request, response, queryParams);
   }
 }
