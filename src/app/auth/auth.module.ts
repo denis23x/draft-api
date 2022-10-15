@@ -13,7 +13,7 @@ import { HttpModule } from '@nestjs/axios';
     HttpModule,
     PassportModule,
     JwtModule.registerAsync({
-      useFactory: async () => ({
+      useFactory: async (): Promise<any> => ({
         issuer: process.env.JWT_ISSUER,
         audience: process.env.JWT_AUDIENCE,
         secret: process.env.JWT_SECRET

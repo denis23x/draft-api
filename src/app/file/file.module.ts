@@ -9,20 +9,22 @@ import { diskStorage } from 'multer';
 import { Request } from 'express';
 import { ErrorBody } from '../core';
 import { existsSync, mkdirSync } from 'fs';
+import { MulterModuleOptions } from '@nestjs/platform-express/multer/interfaces/files-upload-module.interface';
 import * as mime from 'mime-types';
+import * as crypto from 'crypto';
 
 @Module({
   imports: [
     HttpModule,
     MulterModule.registerAsync({
-      useFactory: () => ({
+      useFactory: async (): Promise<MulterModuleOptions> => ({
         limits: {
           fileSize: 1048576 // 1MB
         },
-        fileFilter: (request: Request, file: Express.Multer.File, callback: any) => {
-          const mimeTypeList: string[] = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
+        fileFilter: (request: Request, file: Express.Multer.File, callback: any): void => {
+          const mimeList: string[] = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
 
-          if (mimeTypeList.includes(file.mimetype)) {
+          if (mimeList.includes(file.mimetype)) {
             callback(null, true);
           } else {
             const errorBody: ErrorBody = {
@@ -34,7 +36,7 @@ import * as mime from 'mime-types';
           }
         },
         storage: diskStorage({
-          destination: (request: Request, file: Express.Multer.File, callback: any) => {
+          destination: (request: Request, file: Express.Multer.File, callback: any): void => {
             const buildPath = (path: string): void => {
               if (!existsSync(path)) {
                 mkdirSync(path);
@@ -51,11 +53,8 @@ import * as mime from 'mime-types';
 
             callback(null, uploadPathField);
           },
-          filename: function (request: Request, file: Express.Multer.File, callback: any) {
-            const uniqueSuffix: string = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            const extension: string = mime.extension(file.mimetype);
-
-            callback(null, file.fieldname + '-' + uniqueSuffix + '.' + extension);
+          filename: function (request: Request, file: Express.Multer.File, callback: any): void {
+            callback(null, crypto.randomUUID() + '.' + mime.extension(file.mimetype));
           }
         })
       })

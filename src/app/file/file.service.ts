@@ -1,11 +1,11 @@
 /** @format */
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../core';
 import { Request, Response } from 'express';
-import { Prisma } from '@prisma/client';
-import { FileCreateDto } from './dto';
+import { FileCreateDto, FileGetOneDto } from './dto';
 import { HttpService } from '@nestjs/axios';
+import { AxiosError, AxiosResponse } from 'axios';
 
 @Injectable()
 export class FileService {
@@ -14,46 +14,41 @@ export class FileService {
     private readonly httpService: HttpService
   ) {}
 
-  async create(request: Request, fileCreateDto: FileCreateDto): Promise<any> {
-    fileCreateDto = Object.assign({}, fileCreateDto);
+  async create(request: Request, fileCreateDto: FileCreateDto): Promise<Express.Multer.File> {
+    fileCreateDto = { ...fileCreateDto };
 
-    if (fileCreateDto.hasOwnProperty('avatar')) {
-      const file: Express.Multer.File = fileCreateDto.avatar.pop();
+    if (fileCreateDto.hasOwnProperty('avatars') || fileCreateDto.hasOwnProperty('images')) {
+      const file: Express.Multer.File = (fileCreateDto.avatars || fileCreateDto.images).pop();
 
-      const userUpdateArgs: Prisma.UserUpdateArgs = {
-        select: this.prismaService.setUserSelect(),
-        where: {
-          id: (request.user as any).id
-        },
-        data: {
-          avatar: process.env.APP_ORIGIN + '/avatar/' + file.filename
-        }
+      return {
+        ...file,
+        path: file.path.replace('upload', process.env.APP_ORIGIN)
       };
-
-      return this.prismaService.user.update(userUpdateArgs);
-    }
-
-    if (fileCreateDto.hasOwnProperty('image')) {
-      const file: Express.Multer.File = fileCreateDto.image.pop();
-
-      // TODO: image upload
-
-      console.log(file);
     }
 
     throw new BadRequestException();
   }
 
-  async createByUrl(request: Request, response: Response, queryParams: any): Promise<any> {
-    const axios: any = await this.httpService.axiosRef(queryParams.url, {
-      responseType: 'stream'
-    });
+  async getOne(request: Request, response: Response, fileGetOneDto: FileGetOneDto): Promise<void> {
+    return this.httpService
+      .axiosRef({
+        url: fileGetOneDto.url,
+        method: 'GET',
+        responseType: 'stream'
+      })
+      .then((axiosResponse: AxiosResponse) => {
+        response.status(axiosResponse.status);
+        response.header({
+          ...axiosResponse.headers,
+          'access-control-allow-origin': process.env.APP_SITE_ORIGIN
+        });
 
-    response.header(axios.headers);
-    response.status(200);
+        axiosResponse.data.pipe(response);
+      })
+      .catch((axiosError: AxiosError) => {
+        const { status, statusText }: any = axiosError.response;
 
-    await axios.data.pipe(response);
-
-    return true;
+        throw new HttpException(statusText, status);
+      });
   }
 }

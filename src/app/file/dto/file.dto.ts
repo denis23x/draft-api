@@ -1,52 +1,66 @@
 /** @format */
 
-import { IsNotEmpty, IsNumber, IsPositive, MaxLength, MinLength } from 'class-validator';
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class FileDto {
   @ApiProperty({
-    default: 1
+    description: 'Field name'
   })
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  id: number;
-
-  @ApiHideProperty()
   @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  userId: number;
+  @IsString()
+  fieldname: string;
+
+  @ApiProperty({
+    description: 'Original name'
+  })
+  @IsNotEmpty()
+  @IsString()
+  originalname: string;
+
+  @ApiProperty({
+    description: 'Encoding'
+  })
+  @IsNotEmpty()
+  @IsString()
+  encoding: string;
+
+  @ApiProperty({
+    description: 'Mime type'
+  })
+  @IsNotEmpty()
+  @IsString()
+  mimetype: string;
+
+  @ApiProperty({
+    description: 'Destination'
+  })
+  @IsNotEmpty()
+  @IsString()
+  destination: string;
+
+  @ApiProperty({
+    description: 'File name'
+  })
+  @IsNotEmpty()
+  @IsString()
+  filename: string;
 
   @ApiProperty({
     description: 'Path'
   })
   @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(255)
+  @IsString()
   path: string;
 
   @ApiProperty({
-    description: 'Original filename'
+    description: 'Size',
+    default: 1
   })
   @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(255)
-  originalName: string;
-
-  @ApiProperty({
-    description: 'Filename'
-  })
-  @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(255)
-  fileName: string;
-
-  @ApiProperty()
-  createdAt: Date;
-
-  @ApiProperty()
-  updatedAt: Date;
+  @IsNumber()
+  @IsPositive()
+  @Type(() => Number)
+  size: number;
 }

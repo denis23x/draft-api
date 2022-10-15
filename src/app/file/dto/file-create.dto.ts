@@ -5,16 +5,16 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class FileCreateDto {
   @ApiProperty({
-    description: 'Avatar'
+    description: 'Avatars'
   })
   @IsOptional()
   @IsArray()
-  avatar?: Express.Multer.File[];
+  avatars?: Express.Multer.File[];
 
   @ApiProperty({
-    description: 'Image'
+    description: 'Images'
   })
   @IsOptional()
   @IsArray()
-  image?: Express.Multer.File[];
+  images?: Express.Multer.File[];
 }
