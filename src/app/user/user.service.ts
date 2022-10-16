@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Prisma, User } from '@prisma/client';
 import { UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
+import { existsSync, unlinkSync } from 'fs';
 
 @Injectable()
 export class UserService {
@@ -145,6 +146,27 @@ export class UserService {
             update: userUpdateDto.settings
           }
         };
+      }
+
+      /** Remove previous avatar */
+
+      if (userUpdateDto.hasOwnProperty('avatar')) {
+        const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
+          select: {
+            avatar: true
+          },
+          where: {
+            id
+          }
+        };
+
+        this.prismaService.user.findUnique(userFindUniqueArgs).then((user: User) => {
+          const path: string = './upload/avatars/' + user.avatar.split('/').pop();
+
+          if (existsSync(path)) {
+            unlinkSync(path);
+          }
+        });
       }
     }
 
