@@ -23,6 +23,8 @@ export class UserDto {
 
   @ApiProperty({
     description: 'Name',
+    minLength: 4,
+    maxLength: 24,
     default: 'moderator'
   })
   @IsNotEmpty()
@@ -31,7 +33,9 @@ export class UserDto {
   name: string;
 
   @ApiPropertyOptional({
-    default: null
+    default: null,
+    minLength: 4,
+    maxLength: 255
   })
   @IsOptional()
   @MinLength(4)

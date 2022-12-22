@@ -6,6 +6,8 @@ import { IsEmail, IsOptional, MaxLength, MinLength } from 'class-validator';
 export class UserUpdateDto {
   @ApiPropertyOptional({
     description: 'Name',
+    minLength: 4,
+    maxLength: 24,
     default: 'moderator'
   })
   @IsOptional()
@@ -14,7 +16,9 @@ export class UserUpdateDto {
   name?: string;
 
   @ApiPropertyOptional({
-    default: null
+    default: null,
+    minLength: 4,
+    maxLength: 255
   })
   @IsOptional()
   @MinLength(4)

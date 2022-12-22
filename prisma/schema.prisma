@@ -33,18 +33,18 @@ model Session {
 }
 
 model User {
-  id         Int         @id @default(autoincrement())
-  facebookId String?     @db.VarChar(255)
-  githubId   String?     @db.VarChar(255)
-  googleId   String?     @db.VarChar(255)
-  name       String      @unique @db.VarChar(255)
-  biography  String?     @db.VarChar(255)
-  avatar     String?     @db.VarChar(255)
-  email      String      @unique @db.VarChar(255)
-  password   String?     @db.VarChar(255)
-  createdAt  DateTime    @default(now()) @db.DateTime(6)
-  updatedAt  DateTime    @default(now()) @db.DateTime(6)
-  deletedAt  DateTime?   @db.DateTime(6)
+  id         Int        @id @default(autoincrement())
+  googleId   String?    @db.VarChar(255)
+  facebookId String?    @db.VarChar(255)
+  name       String     @unique @db.VarChar(255)
+  biography  String?    @db.VarChar(255)
+  avatar     String?    @db.VarChar(255)
+  email      String     @unique @db.VarChar(255)
+  password   String?    @db.VarChar(255)
+  createdAt  DateTime   @default(now()) @db.DateTime(6)
+  updatedAt  DateTime   @default(now()) @db.DateTime(6)
+  deletedAt  DateTime?  @db.DateTime(6)
+  githubId   String?    @db.VarChar(255)
   categories Category[]
   posts      Post[]
   sessions   Session[]
@@ -52,31 +52,33 @@ model User {
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
-  userId    Int
-  name      String    @db.VarChar(255)
-  createdAt DateTime  @default(now()) @db.DateTime(6)
-  updatedAt DateTime  @default(now()) @db.DateTime(6)
-  deletedAt DateTime? @db.DateTime(6)
-  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  posts     Post[]
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  name          String    @db.VarChar(255)
+  description   String    @db.VarChar(255)
+  createdAt     DateTime  @default(now()) @db.DateTime(6)
+  updatedAt     DateTime  @default(now()) @db.DateTime(6)
+  deletedAt     DateTime? @db.DateTime(6)
+  user          User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  posts         Post[]
 
   @@unique([name, userId])
   @@index([userId])
 }
 
 model Post {
-  id         Int       @id @default(autoincrement())
-  title      String    @db.VarChar(255)
-  body       String    @db.Text
-  image      String?   @db.VarChar(255)
-  userId     Int
-  categoryId Int
-  createdAt  DateTime  @default(now()) @db.DateTime(6)
-  updatedAt  DateTime  @default(now()) @db.DateTime(6)
-  deletedAt  DateTime? @db.DateTime(6)
-  category   Category  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user       User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id            Int       @id @default(autoincrement())
+  title         String    @db.VarChar(255)
+  description   String    @db.VarChar(255)
+  body          String    @db.Text
+  image         String?   @db.VarChar(255)
+  userId        Int
+  categoryId    Int
+  createdAt     DateTime  @default(now()) @db.DateTime(6)
+  updatedAt     DateTime  @default(now()) @db.DateTime(6)
+  deletedAt     DateTime? @db.DateTime(6)
+  category      Category  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user          User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([title, userId, categoryId])
   @@index([categoryId])

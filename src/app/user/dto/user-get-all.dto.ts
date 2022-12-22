@@ -6,7 +6,9 @@ import { Type } from 'class-transformer';
 
 export class UserGetAllDto {
   @ApiPropertyOptional({
-    description: 'Name'
+    description: 'Name',
+    minLength: 4,
+    maxLength: 24
   })
   @IsOptional()
   @MinLength(4)

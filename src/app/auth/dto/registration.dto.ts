@@ -14,6 +14,8 @@ import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagg
 export class RegistrationDto {
   @ApiProperty({
     description: 'Name',
+    minLength: 4,
+    maxLength: 24,
     default: 'moderator'
   })
   @IsNotEmpty()

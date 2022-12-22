@@ -22,7 +22,9 @@ export class PostDto {
 
   @ApiProperty({
     description: 'Title',
-    default: 'Fusce tempor semper semper'
+    minLength: 4,
+    maxLength: 36,
+    default: 'Lorem ipsum dolor sit amet'
   })
   @IsNotEmpty()
   @MinLength(4)
@@ -30,7 +32,20 @@ export class PostDto {
   title: string;
 
   @ApiProperty({
+    description: 'Description',
+    minLength: 4,
+    maxLength: 255,
+    default: 'Mauris venenatis ante quis diam iaculis sollicitudin'
+  })
+  @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(255)
+  description: string;
+
+  @ApiProperty({
     description: 'Body',
+    minLength: 24,
+    maxLength: 7200,
     default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
   })
   @IsNotEmpty()

@@ -161,7 +161,7 @@ export class UserService {
         };
 
         this.prismaService.user.findUnique(userFindUniqueArgs).then((user: User) => {
-          const path: string = './upload/avatars/' + user.avatar.split('/').pop();
+          const path: string = './upload/avatars/' + user.avatar?.split('/').pop();
 
           if (existsSync(path)) {
             unlinkSync(path);

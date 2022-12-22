@@ -26,7 +26,8 @@ export const postRaw = async () => {
     const imageFile = faker.datatype.number({ min: 0, max: 199 }) + '.jpg';
 
     raw.push({
-      title: faker.lorem.sentence() + (i + 1),
+      title: i + 1 + faker.lorem.sentence(),
+      description: faker.lorem.sentence(),
       body: faker.lorem.paragraphs(),
       image: faker.datatype.boolean() ? imagePath + imageFile : null,
       userId: category.userId,

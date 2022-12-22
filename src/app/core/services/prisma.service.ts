@@ -36,6 +36,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     return {
       id: true,
       name: true,
+      description: true,
       userId: false,
       createdAt: true,
       updatedAt: true,
@@ -47,6 +48,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     return {
       id: true,
       title: true,
+      description: true,
       body: true,
       image: true,
       userId: false,
