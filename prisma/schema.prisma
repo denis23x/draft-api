@@ -33,22 +33,22 @@ model Session {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  googleId   String?    @db.VarChar(255)
-  facebookId String?    @db.VarChar(255)
-  name       String     @unique @db.VarChar(255)
-  biography  String?    @db.VarChar(255)
-  avatar     String?    @db.VarChar(255)
-  email      String     @unique @db.VarChar(255)
-  password   String?    @db.VarChar(255)
-  createdAt  DateTime   @default(now()) @db.DateTime(6)
-  updatedAt  DateTime   @default(now()) @db.DateTime(6)
-  deletedAt  DateTime?  @db.DateTime(6)
-  githubId   String?    @db.VarChar(255)
-  categories Category[]
-  posts      Post[]
-  sessions   Session[]
-  settings   Settings?
+  id            Int        @id @default(autoincrement())
+  googleId      String?    @db.VarChar(255)
+  facebookId    String?    @db.VarChar(255)
+  name          String     @unique @db.VarChar(255)
+  description   String?    @db.VarChar(255)
+  avatar        String?    @db.VarChar(255)
+  email         String     @unique @db.VarChar(255)
+  password      String?    @db.VarChar(255)
+  createdAt     DateTime   @default(now()) @db.DateTime(6)
+  updatedAt     DateTime   @default(now()) @db.DateTime(6)
+  deletedAt     DateTime?  @db.DateTime(6)
+  githubId      String?    @db.VarChar(255)
+  categories    Category[]
+  posts         Post[]
+  sessions      Session[]
+  settings      Settings?
 }
 
 model Category {
@@ -68,9 +68,9 @@ model Category {
 
 model Post {
   id            Int       @id @default(autoincrement())
-  title         String    @db.VarChar(255)
+  name          String    @db.VarChar(255)
   description   String    @db.VarChar(255)
-  body          String    @db.Text
+  markdown      String    @db.Text
   image         String?   @db.VarChar(255)
   userId        Int
   categoryId    Int
@@ -80,7 +80,7 @@ model Post {
   category      Category  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user          User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([title, userId, categoryId])
+  @@unique([name, userId, categoryId])
   @@index([categoryId])
   @@index([userId])
 }

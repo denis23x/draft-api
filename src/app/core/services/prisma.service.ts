@@ -47,9 +47,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   setPostSelect(): Prisma.PostSelect {
     return {
       id: true,
-      title: true,
+      name: true,
       description: true,
-      body: true,
+      markdown: true,
       image: true,
       userId: false,
       categoryId: false,
@@ -87,7 +87,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       githubId: false,
       googleId: false,
       name: true,
-      biography: true,
+      description: true,
       avatar: true,
       email: true,
       password: false,

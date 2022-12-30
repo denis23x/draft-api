@@ -54,10 +54,10 @@ export class PostService {
     if (!!postGetAllDto) {
       /** Search */
 
-      if (postGetAllDto.hasOwnProperty('title')) {
+      if (postGetAllDto.hasOwnProperty('name')) {
         postFindManyArgs.where = {
-          title: {
-            contains: postGetAllDto.title
+          name: {
+            contains: postGetAllDto.name
           }
         };
       }

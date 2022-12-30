@@ -5,15 +5,17 @@
 ### Category entity
 
 - **name** minmax(4, 24)
+- **description** minmax(4, 255)
 
 ### Post entity
 
-- **title** minmax(4, 36)
-- **body** minmax(24, 7200)
+- **name** minmax(4, 36)
+- **description** minmax(4, 255)
+- **markdown** minmax(24, 7200)
 
 ### User entity
 
 - **name** minmax(4, 24)
-- **biography** minmax(4, 255)
+- **description** minmax(4, 255)
 - **password** minmax(6, 32)
 

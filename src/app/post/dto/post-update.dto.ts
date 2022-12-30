@@ -6,7 +6,7 @@ import { Type } from 'class-transformer';
 
 export class PostUpdateDto {
   @ApiPropertyOptional({
-    description: 'Title',
+    description: 'Name',
     minLength: 4,
     maxLength: 36,
     default: 'Lorem ipsum dolor sit amet'
@@ -14,7 +14,7 @@ export class PostUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(36)
-  title?: string;
+  name?: string;
 
   @ApiPropertyOptional({
     description: 'Description',
@@ -28,7 +28,7 @@ export class PostUpdateDto {
   description?: string;
 
   @ApiPropertyOptional({
-    description: 'Body',
+    description: 'Markdown',
     minLength: 24,
     maxLength: 7200,
     default: 'In hac habitasse platea dictumst. Aenean et aliquam arcu'
@@ -36,7 +36,7 @@ export class PostUpdateDto {
   @IsOptional()
   @MinLength(24)
   @MaxLength(7200)
-  body?: string;
+  markdown?: string;
 
   @ApiPropertyOptional({
     default: null

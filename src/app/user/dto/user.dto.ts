@@ -40,7 +40,7 @@ export class UserDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(255)
-  biography?: string | null;
+  description?: string | null;
 
   @ApiPropertyOptional({
     default: null

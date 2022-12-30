@@ -13,7 +13,7 @@ import { Type } from 'class-transformer';
 
 export class PostCreateDto {
   @ApiProperty({
-    description: 'Title',
+    description: 'Name',
     minLength: 4,
     maxLength: 36,
     default: 'Lorem ipsum dolor sit amet'
@@ -21,7 +21,7 @@ export class PostCreateDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(36)
-  title: string;
+  name: string;
 
   @ApiProperty({
     description: 'Description',
@@ -35,7 +35,7 @@ export class PostCreateDto {
   description: string;
 
   @ApiProperty({
-    description: 'Body',
+    description: 'Markdown',
     minLength: 24,
     maxLength: 7200,
     default: 'In hac habitasse platea dictumst. Aenean et aliquam arcu'
@@ -43,7 +43,7 @@ export class PostCreateDto {
   @IsNotEmpty()
   @MinLength(24)
   @MaxLength(7200)
-  body: string;
+  markdown: string;
 
   @ApiPropertyOptional({
     default: null

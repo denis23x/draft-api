@@ -6,14 +6,14 @@ import { Type } from 'class-transformer';
 
 export class PostGetAllDto {
   @ApiPropertyOptional({
-    description: 'Title',
+    description: 'Name',
     minLength: 4,
     maxLength: 36
   })
   @IsOptional()
   @MinLength(4)
   @MaxLength(36)
-  title?: string;
+  name?: string;
 
   @ApiHideProperty()
   @IsOptional()
