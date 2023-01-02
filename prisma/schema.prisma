@@ -10,7 +10,7 @@ datasource db {
 model Settings {
   id        Int           @id @default(autoincrement())
   userId    Int           @unique
-  theme     SettingsTheme @default(AUTO)
+  theme     String        @db.VarChar(255)
   createdAt DateTime      @default(now()) @db.DateTime(6)
   updatedAt DateTime      @default(now()) @db.DateTime(6)
   user      User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -83,10 +83,4 @@ model Post {
   @@unique([name, userId, categoryId])
   @@index([categoryId])
   @@index([userId])
-}
-
-enum SettingsTheme {
-  AUTO
-  LIGHT
-  DARK
 }

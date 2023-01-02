@@ -18,7 +18,7 @@ export const settingsRaw = async () => {
     const user = usersDB[i];
 
     raw.push({
-      theme: 'AUTO',
+      theme: 'light',
       userId: user.id
     });
   }

@@ -160,7 +160,7 @@ export class AuthService {
         ...registrationDto,
         settings: {
           create: {
-            theme: 'AUTO'
+            theme: 'light'
           }
         }
       }
@@ -265,7 +265,7 @@ export class AuthService {
         ...(request.user as any),
         settings: {
           create: {
-            theme: 'AUTO'
+            theme: 'light'
           }
         }
       }

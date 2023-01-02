@@ -22,7 +22,7 @@ export const userRaw = async () => {
   for (let i = 0; i < 19; i++) {
     const email = faker.internet.email().toLowerCase();
     const avatarPath = process.env.APP_ORIGIN + '/images/';
-    const avatarFile = faker.datatype.number({ min: 0, max: 200 }) + '.jpg';
+    const avatarFile = faker.datatype.number({ min: 0, max: 199 }) + '.jpg';
 
     raw.push({
       name: faker.internet.userName() + (i + 1),
