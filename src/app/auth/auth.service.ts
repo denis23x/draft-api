@@ -160,7 +160,8 @@ export class AuthService {
         ...registrationDto,
         settings: {
           create: {
-            theme: 'light'
+            theme: 'light',
+            language: 'en',
           }
         }
       }
