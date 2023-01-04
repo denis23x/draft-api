@@ -162,6 +162,7 @@ export class AuthService {
           create: {
             theme: 'light',
             language: 'en',
+            monospace: false,
           }
         }
       }

@@ -20,6 +20,7 @@ export const settingsRaw = async () => {
     raw.push({
       theme: 'light',
       language: 'en',
+      monospace: false,
       userId: user.id
     });
   }

@@ -76,6 +76,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       id: true,
       theme: true,
       language: true,
+      monospace: true,
       createdAt: true,
       updatedAt: true
     };
