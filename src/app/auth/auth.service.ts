@@ -158,11 +158,13 @@ export class AuthService {
       select: this.prismaService.setUserSelect(),
       data: {
         ...registrationDto,
+        description: "I'm new here",
         settings: {
           create: {
             theme: 'light',
             language: 'en',
-            monospace: false,
+            monospace: true,
+            buttons: 'left',
           }
         }
       }
@@ -265,9 +267,13 @@ export class AuthService {
       },
       create: {
         ...(request.user as any),
+        description: "I'm new here",
         settings: {
           create: {
-            theme: 'light'
+            theme: 'light',
+            language: 'en',
+            monospace: true,
+            buttons: 'left'
           }
         }
       }

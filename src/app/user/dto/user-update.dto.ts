@@ -16,9 +16,10 @@ export class UserUpdateDto {
   name?: string;
 
   @ApiPropertyOptional({
-    default: null,
+    description: 'Description',
     minLength: 4,
-    maxLength: 255
+    maxLength: 255,
+    default: "I'm new here"
   })
   @IsOptional()
   @MinLength(4)

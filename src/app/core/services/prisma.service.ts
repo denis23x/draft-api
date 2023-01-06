@@ -64,7 +64,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       id: true,
       userId: false,
       ua: true,
-      fingerprint: false,
+      fingerprint: true,
       ip: true,
       createdAt: true,
       updatedAt: true
@@ -77,6 +77,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       theme: true,
       language: true,
       monospace: true,
+      buttons: true,
       createdAt: true,
       updatedAt: true
     };

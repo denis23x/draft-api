@@ -12,6 +12,7 @@ model Settings {
   userId    Int           @unique
   theme     String        @db.VarChar(255)
   language  String        @db.VarChar(255)
+  buttons   String        @db.VarChar(255)
   monospace Boolean
   createdAt DateTime      @default(now()) @db.DateTime(6)
   updatedAt DateTime      @default(now()) @db.DateTime(6)
@@ -39,7 +40,7 @@ model User {
   googleId      String?    @db.VarChar(255)
   facebookId    String?    @db.VarChar(255)
   name          String     @unique @db.VarChar(255)
-  description   String?    @db.VarChar(255)
+  description   String     @db.VarChar(255)
   avatar        String?    @db.VarChar(255)
   email         String     @unique @db.VarChar(255)
   password      String?    @db.VarChar(255)
