@@ -16,7 +16,7 @@ model Settings {
   monospace Boolean
   createdAt DateTime      @default(now()) @db.DateTime(6)
   updatedAt DateTime      @default(now()) @db.DateTime(6)
-  user      User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -29,7 +29,7 @@ model Session {
   ip          Json
   createdAt   DateTime @default(now()) @db.DateTime(6)
   updatedAt   DateTime @default(now()) @db.DateTime(6)
-  user        User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([fingerprint, userId])
   @@index([userId])
@@ -62,7 +62,7 @@ model Category {
   createdAt     DateTime  @default(now()) @db.DateTime(6)
   updatedAt     DateTime  @default(now()) @db.DateTime(6)
   deletedAt     DateTime? @db.DateTime(6)
-  user          User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   posts         Post[]
 
   @@unique([name, userId])
@@ -80,8 +80,8 @@ model Post {
   createdAt     DateTime  @default(now()) @db.DateTime(6)
   updatedAt     DateTime  @default(now()) @db.DateTime(6)
   deletedAt     DateTime? @db.DateTime(6)
-  category      Category  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user          User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category      Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id])
 
   @@unique([name, userId, categoryId])
   @@index([categoryId])
