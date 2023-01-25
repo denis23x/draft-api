@@ -15,8 +15,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { CategoryService } from './category.service';
 import {
-  CategoryCreateDto,
   CategoryDto,
+  CategoryCreateDto,
+  CategoryDeleteDto,
   CategoryGetAllDto,
   CategoryGetOneDto,
   CategoryUpdateDto
@@ -88,6 +89,7 @@ export class CategoryController {
     return this.categoryService.update(request, id, categoryUpdateDto);
   }
 
+  // prettier-ignore
   @ApiOperation({
     description: '## Delete category'
   })
@@ -98,7 +100,7 @@ export class CategoryController {
   @ApiBearerAuth('accessToken')
   @Delete(':id')
   @UseGuards(AuthGuard('custom'), CategoryRelationGuard)
-  async delete(@Req() request: Request, @Param('id') id: number): Promise<Category> {
-    return this.categoryService.delete(request, id);
+  async delete(@Req() request: Request, @Param('id') id: number, @Query() categoryDeleteDto: CategoryDeleteDto): Promise<Category> {
+    return this.categoryService.delete(request, id, categoryDeleteDto);
   }
 }

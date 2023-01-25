@@ -4,7 +4,13 @@ import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Category, Prisma } from '@prisma/client';
-import { CategoryCreateDto, CategoryGetAllDto, CategoryGetOneDto, CategoryUpdateDto } from './dto';
+import {
+  CategoryCreateDto,
+  CategoryDeleteDto,
+  CategoryGetAllDto,
+  CategoryGetOneDto,
+  CategoryUpdateDto
+} from './dto';
 
 @Injectable()
 export class CategoryService {
@@ -145,13 +151,27 @@ export class CategoryService {
     return this.prismaService.category.update(categoryUpdateArgs);
   }
 
-  async delete(request: Request, id: number): Promise<Category> {
+  // prettier-ignore
+  async delete(request: Request, id: number, categoryDeleteDto: CategoryDeleteDto): Promise<Category> {
     const categoryDeleteArgs: Prisma.CategoryDeleteArgs = {
       select: this.prismaService.setCategorySelect(),
       where: {
         id
       }
     };
+
+    if (!!categoryDeleteDto) {
+      if (categoryDeleteDto.hasOwnProperty('categoryId')) {
+        const postUpdateManyArgs: Prisma.PostUpdateManyArgs = {
+          where: {
+            categoryId: id
+          },
+          data: categoryDeleteDto
+        };
+
+        await this.prismaService.post.updateMany(postUpdateManyArgs);
+      }
+    }
 
     return this.prismaService.category.delete(categoryDeleteArgs);
   }
