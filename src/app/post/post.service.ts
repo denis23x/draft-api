@@ -112,7 +112,7 @@ export class PostService {
   }
 
   async getOne(request: Request, id: number, postGetOneDto: PostGetOneDto): Promise<Post> {
-    const postFindUniqueArgs: Prisma.PostFindUniqueArgs = {
+    const postFindUniqueOrThrowArgs: Prisma.PostFindUniqueOrThrowArgs = {
       select: this.prismaService.setPostSelect(),
       where: {
         id
@@ -124,8 +124,8 @@ export class PostService {
 
       if (postGetOneDto.hasOwnProperty('scope')) {
         if (postGetOneDto.scope.includes('category')) {
-          postFindUniqueArgs.select = {
-            ...postFindUniqueArgs.select,
+          postFindUniqueOrThrowArgs.select = {
+            ...postFindUniqueOrThrowArgs.select,
             category: {
               select: this.prismaService.setCategorySelect()
             }
@@ -133,8 +133,8 @@ export class PostService {
         }
 
         if (postGetOneDto.scope.includes('user')) {
-          postFindUniqueArgs.select = {
-            ...postFindUniqueArgs.select,
+          postFindUniqueOrThrowArgs.select = {
+            ...postFindUniqueOrThrowArgs.select,
             user: {
               select: this.prismaService.setUserSelect()
             }
@@ -143,7 +143,12 @@ export class PostService {
       }
     }
 
-    return this.prismaService.post.findUnique(postFindUniqueArgs);
+    return this.prismaService.post
+      .findUniqueOrThrow(postFindUniqueOrThrowArgs)
+      .catch((error: Error) => {
+        // prettier-ignore
+        throw new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+      });
   }
 
   async update(request: Request, id: number, postUpdateDto: PostUpdateDto): Promise<Post> {

@@ -6,22 +6,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    super({
-      rejectOnNotFound: {
-        // prettier-ignore
-        findUnique: {
-          Category: (error: Error) => {
-            return new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
-          },
-          Post: (error: Error) => {
-            return new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
-          },
-          User: (error: Error) => {
-            return new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
-          }
-        }
-      }
-    });
+    super();
   }
 
   async onModuleInit(): Promise<void> {

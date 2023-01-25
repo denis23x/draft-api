@@ -80,7 +80,7 @@ export class UserService {
   }
 
   async getOne(request: Request, id: number, userGetOneDto: UserGetOneDto): Promise<User> {
-    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
+    const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
       select: this.prismaService.setUserSelect(),
       where: {
         id
@@ -92,8 +92,8 @@ export class UserService {
 
       if (userGetOneDto.hasOwnProperty('scope')) {
         if (userGetOneDto.scope.includes('categories')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
+          userFindUniqueOrThrowArgs.select = {
+            ...userFindUniqueOrThrowArgs.select,
             categories: {
               select: this.prismaService.setCategorySelect(),
               orderBy: {
@@ -104,8 +104,8 @@ export class UserService {
         }
 
         if (userGetOneDto.scope.includes('posts')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
+          userFindUniqueOrThrowArgs.select = {
+            ...userFindUniqueOrThrowArgs.select,
             posts: {
               select: this.prismaService.setPostSelect(),
               orderBy: {
@@ -117,7 +117,12 @@ export class UserService {
       }
     }
 
-    return this.prismaService.user.findUnique(userFindUniqueArgs);
+    return this.prismaService.user
+      .findUniqueOrThrow(userFindUniqueOrThrowArgs)
+      .catch((error: Error) => {
+        // prettier-ignore
+        throw new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+      });
   }
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
@@ -160,7 +165,7 @@ export class UserService {
           }
         };
 
-        this.prismaService.user.findUnique(userFindUniqueArgs).then((user: User) => {
+        await this.prismaService.user.findUnique(userFindUniqueArgs).then((user: User) => {
           const path: string = './upload/avatars/' + user.avatar?.split('/').pop();
 
           if (existsSync(path)) {

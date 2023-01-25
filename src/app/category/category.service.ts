@@ -101,7 +101,7 @@ export class CategoryService {
 
   // prettier-ignore
   async getOne(request: Request, id: number, categoryGetOneDto: CategoryGetOneDto): Promise<Category> {
-    const categoryFindUniqueArgs: Prisma.CategoryFindUniqueArgs = {
+    const categoryFindUniqueOrThrowArgs: Prisma.CategoryFindUniqueOrThrowArgs = {
       select: this.prismaService.setCategorySelect(),
       where: {
         id
@@ -113,8 +113,8 @@ export class CategoryService {
 
       if (categoryGetOneDto.hasOwnProperty('scope')) {
         if (categoryGetOneDto.scope.includes('user')) {
-          categoryFindUniqueArgs.select = {
-            ...categoryFindUniqueArgs.select,
+          categoryFindUniqueOrThrowArgs.select = {
+            ...categoryFindUniqueOrThrowArgs.select,
             user: {
               select: this.prismaService.setUserSelect()
             }
@@ -122,8 +122,8 @@ export class CategoryService {
         }
 
         if (categoryGetOneDto.scope.includes('posts')) {
-          categoryFindUniqueArgs.select = {
-            ...categoryFindUniqueArgs.select,
+          categoryFindUniqueOrThrowArgs.select = {
+            ...categoryFindUniqueOrThrowArgs.select,
             posts: {
               select: this.prismaService.setPostSelect(),
               orderBy: {
@@ -135,7 +135,12 @@ export class CategoryService {
       }
     }
 
-    return this.prismaService.category.findUnique(categoryFindUniqueArgs);
+    return this.prismaService.category
+      .findUniqueOrThrow(categoryFindUniqueOrThrowArgs)
+      .catch((error: Error) => {
+        // prettier-ignore
+        throw new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+      });
   }
 
   // prettier-ignore
