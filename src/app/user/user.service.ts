@@ -4,12 +4,37 @@ import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Prisma, User } from '@prisma/client';
-import { UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
+import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
 import { existsSync, unlinkSync } from 'fs';
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
+
+  async create(request: Request, userCreateDto: UserCreateDto): Promise<User> {
+    const userCreateArgs: Prisma.UserCreateArgs = {
+      select: this.prismaService.setUserSelect(),
+      data: {
+        ...userCreateDto,
+        description: "I'm new here",
+        settings: {
+          create: {
+            theme: 'light',
+            language: 'en',
+            monospace: true,
+            buttons: 'left'
+          }
+        }
+      }
+    };
+
+    if (userCreateDto.hasOwnProperty('password')) {
+      userCreateArgs.data.password = await hash(userCreateDto.password, 10);
+    }
+
+    return this.prismaService.user.create(userCreateArgs);
+  }
 
   async getAll(request: Request, userGetAllDto: UserGetAllDto): Promise<User[]> {
     const userFindManyArgs: Prisma.UserFindManyArgs = {

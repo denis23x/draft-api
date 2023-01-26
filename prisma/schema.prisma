@@ -26,6 +26,8 @@ model Session {
   userId      Int
   ua          Json
   fingerprint String   @db.VarChar(255)
+  refresh     String   @db.VarChar(255) @default(uuid())
+  expires     BigInt
   ip          Json
   createdAt   DateTime @default(now()) @db.DateTime(6)
   updatedAt   DateTime @default(now()) @db.DateTime(6)

@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class RegistrationDto {
+export class UserCreateDto {
   @ApiProperty({
     description: 'Name',
     minLength: 4,
@@ -37,8 +37,8 @@ export class RegistrationDto {
     maxLength: 32,
     default: 'moder@moder.com'
   })
-  @ValidateIf((registrationDto: RegistrationDto) => {
-    return !registrationDto.googleId && !registrationDto.facebookId && !registrationDto.githubId;
+  @ValidateIf((userCreateDto: UserCreateDto) => {
+    return !userCreateDto.googleId && !userCreateDto.facebookId && !userCreateDto.githubId;
   })
   @MinLength(6)
   @MaxLength(32)
