@@ -56,11 +56,4 @@ export class LoginDto {
   @IsNotEmpty()
   @IsString()
   fingerprint: string;
-
-  @ApiHideProperty()
-  @IsOptional()
-  @IsIn(['categories', 'posts', 'sessions', 'settings'], {
-    each: true
-  })
-  scope?: string[];
 }

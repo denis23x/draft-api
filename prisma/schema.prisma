@@ -14,8 +14,8 @@ model Settings {
   language  String        @db.VarChar(255)
   buttons   String        @db.VarChar(255)
   monospace Boolean
-  createdAt DateTime      @default(now()) @db.DateTime(6)
-  updatedAt DateTime      @default(now()) @db.DateTime(6)
+  createdAt DateTime      @db.DateTime(6) @default(now())
+  updatedAt DateTime      @db.DateTime(6) @default(now())
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -29,8 +29,8 @@ model Session {
   refresh     String   @db.VarChar(255) @default(uuid())
   expires     BigInt
   ip          String   @db.VarChar(255)
-  createdAt   DateTime @default(now()) @db.DateTime(6)
-  updatedAt   DateTime @default(now()) @db.DateTime(6)
+  createdAt   DateTime @db.DateTime(6) @default(now())
+  updatedAt   DateTime @db.DateTime(6) @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([fingerprint, userId])
@@ -41,13 +41,13 @@ model User {
   id            Int        @id @default(autoincrement())
   googleId      String?    @db.VarChar(255)
   facebookId    String?    @db.VarChar(255)
-  name          String     @unique @db.VarChar(255)
+  name          String     @db.VarChar(255) @unique
   description   String     @db.VarChar(255)
   avatar        String?    @db.VarChar(255)
-  email         String     @unique @db.VarChar(255)
+  email         String     @db.VarChar(255) @unique
   password      String?    @db.VarChar(255)
-  createdAt     DateTime   @default(now()) @db.DateTime(6)
-  updatedAt     DateTime   @default(now()) @db.DateTime(6)
+  createdAt     DateTime   @db.DateTime(6) @default(now())
+  updatedAt     DateTime   @db.DateTime(6) @default(now())
   deletedAt     DateTime?  @db.DateTime(6)
   githubId      String?    @db.VarChar(255)
   categories    Category[]
@@ -61,8 +61,8 @@ model Category {
   userId        Int
   name          String    @db.VarChar(255)
   description   String    @db.VarChar(255)
-  createdAt     DateTime  @default(now()) @db.DateTime(6)
-  updatedAt     DateTime  @default(now()) @db.DateTime(6)
+  createdAt     DateTime  @db.DateTime(6) @default(now())
+  updatedAt     DateTime  @db.DateTime(6) @default(now())
   deletedAt     DateTime? @db.DateTime(6)
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   posts         Post[]
@@ -79,8 +79,8 @@ model Post {
   image         String?   @db.VarChar(255)
   userId        Int
   categoryId    Int
-  createdAt     DateTime  @default(now()) @db.DateTime(6)
-  updatedAt     DateTime  @default(now()) @db.DateTime(6)
+  createdAt     DateTime  @db.DateTime(6) @default(now())
+  updatedAt     DateTime  @db.DateTime(6) @default(now())
   deletedAt     DateTime? @db.DateTime(6)
   category      Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   user          User      @relation(fields: [userId], references: [id])
