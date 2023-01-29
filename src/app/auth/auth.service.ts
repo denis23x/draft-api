@@ -17,7 +17,7 @@ export class AuthService {
     private readonly prismaService: PrismaService
   ) {}
 
-  async login(request: Request, response: Response, loginDto: LoginDto): Promise<any> {
+  async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
     // @ts-ignore
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       select: {
@@ -25,7 +25,10 @@ export class AuthService {
         password: true,
         facebookId: true,
         githubId: true,
-        googleId: true
+        googleId: true,
+        settings: {
+          select: this.prismaService.setSettingsSelect()
+        }
       }
     };
 
@@ -36,55 +39,6 @@ export class AuthService {
         userFindUniqueArgs.where = {
           email: loginDto.email
         };
-      }
-
-      /** Scope */
-
-      if (loginDto.hasOwnProperty('scope')) {
-        if (loginDto.scope.includes('categories')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
-            categories: {
-              select: this.prismaService.setCategorySelect(),
-              orderBy: {
-                id: 'desc'
-              }
-            }
-          };
-        }
-
-        if (loginDto.scope.includes('posts')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
-            posts: {
-              select: this.prismaService.setPostSelect(),
-              orderBy: {
-                id: 'desc'
-              }
-            }
-          };
-        }
-
-        if (loginDto.scope.includes('sessions')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
-            sessions: {
-              select: this.prismaService.setSessionSelect(),
-              orderBy: {
-                id: 'desc'
-              }
-            }
-          };
-        }
-
-        if (loginDto.scope.includes('settings')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
-            settings: {
-              select: this.prismaService.setSettingsSelect()
-            }
-          };
-        }
       }
     }
 
@@ -173,7 +127,7 @@ export class AuthService {
   }
 
   // prettier-ignore
-  async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<any> {
+  async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<User> {
     const session: Session = await this.prismaService.session.findFirst({
       where: {
         refresh: request.signedCookies.refresh

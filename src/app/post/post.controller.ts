@@ -33,9 +33,9 @@ export class PostController {
     status: 201,
     type: PostDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Post()
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('access'))
   async create(@Req() request: Request, @Body() postCreateDto: PostCreateDto): Promise<PostModel> {
     return this.postService.create(request, postCreateDto);
   }
@@ -75,9 +75,9 @@ export class PostController {
     status: 200,
     type: PostDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Put(':id')
-  @UseGuards(AuthGuard('custom'), PostRelationGuard)
+  @UseGuards(AuthGuard('access'), PostRelationGuard)
   async update(@Req() request: Request, @Param('id') id: number, @Body() postUpdateDto: PostUpdateDto): Promise<PostModel> {
     return this.postService.update(request, id, postUpdateDto);
   }
@@ -89,9 +89,9 @@ export class PostController {
     status: 200,
     type: PostDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Delete(':id')
-  @UseGuards(AuthGuard('custom'), PostRelationGuard)
+  @UseGuards(AuthGuard('access'), PostRelationGuard)
   async delete(@Req() request: Request, @Param('id') id: number): Promise<PostModel> {
     return this.postService.delete(request, id);
   }

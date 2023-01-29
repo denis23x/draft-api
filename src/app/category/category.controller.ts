@@ -40,9 +40,9 @@ export class CategoryController {
     status: 201,
     type: CategoryDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Post()
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('access'))
   async create(@Req() request: Request, @Body() categoryCreateDto: CategoryCreateDto): Promise<Category> {
     return this.categoryService.create(request, categoryCreateDto);
   }
@@ -82,9 +82,9 @@ export class CategoryController {
     status: 200,
     type: CategoryDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Put(':id')
-  @UseGuards(AuthGuard('custom'), CategoryRelationGuard)
+  @UseGuards(AuthGuard('access'), CategoryRelationGuard)
   async update(@Req() request: Request, @Param('id') id: number, @Body() categoryUpdateDto: CategoryUpdateDto): Promise<Category> {
     return this.categoryService.update(request, id, categoryUpdateDto);
   }
@@ -97,9 +97,9 @@ export class CategoryController {
     status: 200,
     type: CategoryDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Delete(':id')
-  @UseGuards(AuthGuard('custom'), CategoryRelationGuard)
+  @UseGuards(AuthGuard('access'), CategoryRelationGuard)
   async delete(@Req() request: Request, @Param('id') id: number, @Query() categoryDeleteDto: CategoryDeleteDto): Promise<Category> {
     return this.categoryService.delete(request, id, categoryDeleteDto);
   }

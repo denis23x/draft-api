@@ -71,9 +71,9 @@ export class UserController {
     status: 200,
     type: UserDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Put(':id')
-  @UseGuards(AuthGuard('custom'), UserRelationGuard)
+  @UseGuards(AuthGuard('access'), UserRelationGuard)
   async update(@Req() request: Request, @Param('id') id: number, @Body() userUpdateDto: UserUpdateDto): Promise<User> {
     return this.userService.update(request, id, userUpdateDto);
   }
@@ -85,9 +85,9 @@ export class UserController {
     status: 200,
     type: UserDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Delete(':id')
-  @UseGuards(AuthGuard('custom'), UserRelationGuard)
+  @UseGuards(AuthGuard('access'), UserRelationGuard)
   async delete(@Req() request: Request, @Param('id') id: number): Promise<User> {
     return this.userService.delete(request, id);
   }

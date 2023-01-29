@@ -7,7 +7,7 @@ import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class CustomStrategy extends PassportStrategy(Strategy, 'custom') {
+export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
   constructor(private readonly jwtService: JwtService) {
     super();
   }

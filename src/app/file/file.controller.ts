@@ -54,10 +54,10 @@ export class FileController {
     status: 201,
     type: FileDto
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Post()
   @UseInterceptors(FileFieldsInterceptor(FileMulterField))
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('access'))
   async create(@Req() request: Request, @UploadedFiles() fileCreateDto: FileCreateDto): Promise<Express.Multer.File> {
     return this.uploadService.create(request, fileCreateDto);
   }
@@ -69,9 +69,9 @@ export class FileController {
   @ApiResponse({
     status: 200
   })
-  @ApiBearerAuth('accessToken')
+  @ApiBearerAuth('access')
   @Get()
-  @UseGuards(AuthGuard('custom'))
+  @UseGuards(AuthGuard('access'))
   async getOne(@Req() request: Request, @Res() response: Response, @Query() fileGetOneDto: FileGetOneDto): Promise<any> {
     return this.uploadService.getOne(request, response, fileGetOneDto);
   }
