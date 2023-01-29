@@ -1,10 +1,10 @@
 /** @format */
 
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, LogoutDto, RegistrationDto, AccessTokenDto, FingerprintDto, MeDto } from './dto';
+import { LoginDto, LogoutDto, TokenDto, FingerprintDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
@@ -25,26 +25,22 @@ export const responseOptions = {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  /** LOGIN */
-
   // prettier-ignore
   @ApiOperation({
-    description: '## User authentication'
+    description: '## Auth login'
   })
   @ApiResponse({
     status: 201,
-    type: IntersectionType(UserDto, AccessTokenDto)
+    type: IntersectionType(UserDto, TokenDto)
   })
   @Post('login')
   async login(@Req() request: Request, @Res(responseOptions) response: Response, @Body() loginDto: LoginDto): Promise<User> {
     return this.authService.login(request, response, loginDto);
   }
 
-  /** LOGOUT */
-
   // prettier-ignore
   @ApiOperation({
-    description: '## User logout'
+    description: '## Auth logout'
   })
   @ApiResponse({
     status: 201,
@@ -57,56 +53,20 @@ export class AuthController {
     return this.authService.logout(request, response, logoutDto);
   }
 
-  /** REGISTRATION */
-
   // prettier-ignore
   @ApiOperation({
-    description: '## User registration'
+    description: '## Auth refresh'
   })
   @ApiResponse({
     status: 201,
-    type: UserDto
+    type: IntersectionType(UserDto, TokenDto)
   })
-  @Post('registration')
-  async registration(@Req() request: Request, @Res(responseOptions) response: Response, @Body() registrationDto: RegistrationDto): Promise<User> {
-    return this.authService.registration(request, response, registrationDto);
-  }
-
-  /** REFRESH */
-
-  // prettier-ignore
-  @ApiOperation({
-    description: '## Refresh tokens pair'
-  })
-  @ApiResponse({
-    status: 201,
-    type: IntersectionType(UserDto, AccessTokenDto)
-  })
-  @ApiBearerAuth('accessToken')
   @Post('refresh')
-  @UseGuards(AuthGuard('custom'))
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response, @Body() fingerprintDto: FingerprintDto): Promise<User> {
     return this.authService.refresh(request, response, fingerprintDto);
   }
 
-  /** ME */
-
-  // prettier-ignore
-  @ApiOperation({
-    description: '## Prove authentication'
-  })
-  @ApiResponse({
-    status: 200,
-    type: UserDto
-  })
-  @ApiBearerAuth('accessToken')
-  @Get('me')
-  @UseGuards(AuthGuard('custom'))
-  async me(@Req() request: Request, @Res(responseOptions) response: Response, @Query() meDto: MeDto): Promise<User> {
-    return this.authService.me(request, response, meDto);
-  }
-
-  /** SOCIAL AUTHENTICATION */
+  /** SOCIAL */
 
   @ApiExcludeEndpoint()
   @Get('facebook')

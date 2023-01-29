@@ -1,26 +1,24 @@
 /** @format */
 
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { compare, hash } from 'bcrypt';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
-import { FingerprintDto, LoginDto, LogoutDto, MeDto, RegistrationDto } from './dto';
+import { FingerprintDto, LoginDto, LogoutDto } from './dto';
 import * as url from 'url';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
-import * as UAParser from 'ua-parser-js';
-import { HttpService } from '@nestjs/axios';
-import { catchError, lastValueFrom, Observable, of, pluck, switchMap } from 'rxjs';
+import { from, map, switchMap } from 'rxjs';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prismaService: PrismaService,
-    private readonly httpService: HttpService
+    private readonly prismaService: PrismaService
   ) {}
 
-  async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
+  async login(request: Request, response: Response, loginDto: LoginDto): Promise<any> {
     // @ts-ignore
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       select: {
@@ -93,24 +91,76 @@ export class AuthService {
 
     const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
-    const fingerprintDto: FingerprintDto = {
-      fingerprint: loginDto.fingerprint
-    };
+    if (!!user) {
+      const authenticated: boolean = await compare(loginDto.password, user.password);
 
-    if (loginDto.hasOwnProperty('password')) {
-      const password: boolean = await compare(loginDto.password, user.password);
+      if (authenticated) {
+        const sessionUpsertArgs: Prisma.SessionUpsertArgs = {
+          where: {
+            fingerprint_userId: {
+              fingerprint: loginDto.fingerprint,
+              userId: user.id
+            }
+          },
+          update: {
+            ua: {}, // request.headers['user-agent']
+            fingerprint: loginDto.fingerprint,
+            ip: {}, // request.ip
+            refresh: randomUUID(),
+            expires: Date.now() + Number(process.env.JWT_REFRESH_TTL)
+          },
+          create: {
+            ua: {},
+            fingerprint: loginDto.fingerprint,
+            ip: {},
+            refresh: randomUUID(),
+            expires: Date.now() + Number(process.env.JWT_REFRESH_TTL),
+            user: {
+              connect: {
+                id: user.id
+              }
+            }
+          }
+        };
 
-      if (password) {
-        return this.setResponse(request, response, user, fingerprintDto);
+        return from(this.prismaService.session.upsert(sessionUpsertArgs)).pipe(
+          switchMap((session: Session) => {
+            // TODO: enable secure and sameSite (need HTTPS)
+
+            response.cookie('refresh', session.refresh, {
+              domain: process.env.APP_COOKIE_DOMAIN,
+              path: '/api/auth',
+              signed: true,
+              httpOnly: true,
+              expires: new Date(Number(session.expires))
+              // secure: true,
+              // sameSite: 'none'
+            });
+
+            const jwtSignOptions: JwtSignOptions = {
+              expiresIn: Number(process.env.JWT_ACCESS_TTL),
+              subject: String(user.id),
+              jwtid: String(session.id)
+            };
+
+            return this.jwtService.signAsync({}, jwtSignOptions);
+          }),
+          map((token: string) => {
+            const userSelect: Prisma.UserSelect = this.prismaService.setUserSelect();
+
+            for (const column in userSelect) {
+              !userSelect[column] && delete user[column];
+            }
+
+            return {
+              ...user,
+              token
+            };
+          })
+        );
       }
-    }
-
-    for (const socialKey of ['facebookId', 'githubId', 'googleId']) {
-      if (loginDto.hasOwnProperty(socialKey)) {
-        if (loginDto[socialKey] === user[socialKey]) {
-          return this.setResponse(request, response, user, fingerprintDto);
-        }
-      }
+    } else {
+      throw new NotFoundException();
     }
 
     throw new UnauthorizedException();
@@ -149,108 +199,101 @@ export class AuthService {
       }
     }
 
+    response.clearCookie('refresh');
+
     return this.prismaService.user.findUnique(userFindUniqueArgs);
   }
 
   // prettier-ignore
-  async registration(request: Request, response: Response, registrationDto: RegistrationDto): Promise<User> {
-    const userCreateArgs: Prisma.UserCreateArgs = {
-      select: this.prismaService.setUserSelect(),
-      data: {
-        ...registrationDto,
-        description: "I'm new here",
-        settings: {
-          create: {
-            theme: 'light',
-            language: 'en',
-            monospace: true,
-            buttons: 'left',
-          }
-        }
-      }
-    };
-
-    if (registrationDto.hasOwnProperty('password')) {
-      userCreateArgs.data.password  = await hash(registrationDto.password, 10);
-    }
-
-    return this.prismaService.user.create(userCreateArgs);
-  }
-
-  // prettier-ignore
-  async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<User> {
-    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      select: this.prismaService.setUserSelect(),
+  async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<any> {
+    const session: Session = await this.prismaService.session.findFirst({
       where: {
-        id: (request.user as any).id
+        refresh: request.signedCookies.refresh
       }
-    };
+    });
 
-    const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
-
-    return this.setResponse(request, response, user, fingerprintDto);
-  }
-
-  async me(request: Request, response: Response, meDto: MeDto): Promise<User> {
-    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      select: this.prismaService.setUserSelect(),
-      where: {
-        id: (request.user as any).id
-      }
-    };
-
-    if (!!meDto) {
-      /** Scope */
-
-      if (meDto.hasOwnProperty('scope')) {
-        if (meDto.scope.includes('categories')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
-            categories: {
-              select: this.prismaService.setCategorySelect(),
-              orderBy: {
-                id: 'desc'
-              }
-            }
-          };
+    if (!!session) {
+      await this.prismaService.session.delete({
+        where: {
+          id: session.id
         }
+      });
 
-        if (meDto.scope.includes('posts')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
-            posts: {
-              select: this.prismaService.setPostSelect(),
-              orderBy: {
-                id: 'desc'
-              }
-            }
-          };
-        }
+      const isExpired: boolean = Date.now() > session.expires;
+      const isFingerprint: boolean = fingerprintDto.fingerprint !== session.fingerprint;
 
-        if (meDto.scope.includes('sessions')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
-            sessions: {
-              select: this.prismaService.setSessionSelect(),
-              orderBy: {
-                id: 'desc'
-              }
-            }
-          };
-        }
-
-        if (meDto.scope.includes('settings')) {
-          userFindUniqueArgs.select = {
-            ...userFindUniqueArgs.select,
+      if (isExpired || isFingerprint) {
+        throw new UnauthorizedException();
+      } else {
+        // @ts-ignore
+        const user: User = await this.prismaService.user.findUnique({
+          select: {
+            ...this.prismaService.setUserSelect(),
             settings: {
               select: this.prismaService.setSettingsSelect()
             }
-          };
-        }
-      }
-    }
+          },
+          where: {
+            id: session.userId
+          }
+        });
 
-    return this.prismaService.user.findUnique(userFindUniqueArgs);
+        const sessionCreateArgs: Prisma.SessionCreateArgs = {
+          data: {
+            ua: {},
+            fingerprint: fingerprintDto.fingerprint,
+            ip: {},
+            refresh: randomUUID(),
+            expires: Date.now() + Number(process.env.JWT_REFRESH_TTL),
+            user: {
+              connect: {
+                id: user.id
+              }
+            }
+          }
+        };
+
+        return from(this.prismaService.session.create(sessionCreateArgs)).pipe(
+          switchMap((session: Session) => {
+            // TODO: enable secure and sameSite (need HTTPS)
+
+            response.cookie('refresh', session.refresh, {
+              domain: process.env.APP_COOKIE_DOMAIN,
+              path: '/api/auth',
+              signed: true,
+              httpOnly: true,
+              expires: new Date(Number(session.expires))
+              // secure: true,
+              // sameSite: 'none'
+            });
+
+            const jwtSignOptions: JwtSignOptions = {
+              expiresIn: Number(process.env.JWT_ACCESS_TTL),
+              subject: String(user.id),
+              jwtid: String(session.id)
+            };
+
+            return this.jwtService.signAsync({}, jwtSignOptions);
+          }),
+          map((token: string) => {
+            const userSelect: Prisma.UserSelect = this.prismaService.setUserSelect();
+
+            for (const column in userSelect) {
+              !userSelect[column] && delete user[column];
+            }
+
+            return {
+              ...user,
+              token
+            };
+          })
+        )
+      }
+    } else {
+      response.clearCookie('refresh');
+
+      throw new UnauthorizedException();
+    }
   }
 
   async social(request: Request, response: Response, socialKey: string): Promise<void> {
@@ -290,105 +333,5 @@ export class AuthService {
         }
       })
     );
-  }
-
-  // prettier-ignore
-  async setResponse(request: Request, response: Response, user: User, fingerprintDto: FingerprintDto): Promise<User> {
-    const userSelect: Prisma.UserSelect = this.prismaService.setUserSelect();
-
-    for (const column in userSelect) {
-      !userSelect[column] && delete user[column];
-    }
-
-    const session: Session = await this.setSession(request, user, fingerprintDto);
-
-    /** Generate tokens */
-
-    const accessToken: string = await this.setToken(session, user, process.env.JWT_ACCESS_TTL);
-    const refreshToken: string = await this.setToken(session, user, process.env.JWT_REFRESH_TTL);
-
-    // TODO: enable secure and sameSite (need HTTPS)
-    // secure: true,
-    // sameSite: 'none'
-
-    response.cookie('refreshToken', refreshToken, {
-      domain: process.env.APP_COOKIE_DOMAIN,
-      path: '/api/auth',
-      signed: true,
-      httpOnly: true,
-      maxAge: Number(process.env.JWT_REFRESH_TTL)
-    });
-
-    return {
-      ...user,
-      // @ts-ignore
-      accessToken
-    };
-  }
-
-  // prettier-ignore
-  async setSession(request: Request, user: User, fingerprintDto?: FingerprintDto): Promise<Session> {
-    const sessionFindUniqueArgs: Prisma.SessionFindUniqueArgs = {
-      where: {
-        fingerprint_userId: {
-          fingerprint: fingerprintDto.fingerprint,
-          userId: user.id
-        }
-      }
-    };
-
-    const session: Session = await this.prismaService.session.findUnique(sessionFindUniqueArgs);
-
-    if (!!session) {
-      const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
-        where: {
-          id: session.id
-        }
-      };
-
-      await this.prismaService.session.delete(sessionDeleteArgs);
-    }
-
-    /** https://www.geojs.io/docs/v1/endpoints/geo/ */
-
-    const geolocationUrl = 'https://get.geojs.io/v1/ip/geo/';
-
-    const setSession$: Observable<Session> = this.httpService.get(geolocationUrl + request.ip)
-      .pipe(
-        pluck('data'),
-        catchError(() => of({})),
-        switchMap((geolocationResponse: any) => {
-          const uaParser: UAParser = new UAParser(request.headers['user-agent']);
-
-          const sessionCreateArgs: Prisma.SessionCreateArgs = {
-            data: {
-              // @ts-ignore
-              ua: uaParser.getResult(),
-              fingerprint: fingerprintDto.fingerprint,
-              ip: geolocationResponse,
-              user: {
-                connect: {
-                  id: user.id
-                }
-              }
-            }
-          };
-
-          return this.prismaService.session.create(sessionCreateArgs);
-        })
-      );
-
-    return lastValueFrom(setSession$)
-  }
-
-  async setToken(session: Session, user: User, expiresIn: string): Promise<string> {
-    const payload: any = {};
-    const options: JwtSignOptions = {
-      expiresIn: Number(expiresIn),
-      subject: String(user.id),
-      jwtid: String(session.id)
-    };
-
-    return this.jwtService.signAsync(payload, options);
   }
 }
