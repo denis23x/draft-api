@@ -88,42 +88,29 @@ export class AuthService {
     throw new UnauthorizedException();
   }
 
-  async logout(request: Request, response: Response, logoutDto: LogoutDto): Promise<User> {
-    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      select: this.prismaService.setUserSelect(),
-      where: {
-        id: (request.user as any).id
-      }
-    };
+  async logout(request: Request, response: Response, logoutDto: LogoutDto): Promise<any> {
+    const sessionDeleteArgs: Prisma.SessionDeleteArgs = {} as any;
 
     if (!!logoutDto) {
       /** Search */
 
       if (logoutDto.hasOwnProperty('id')) {
-        const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
-          where: {
-            id: logoutDto.id
-          }
-        };
+        response.clearCookie('refresh');
 
-        await this.prismaService.session.delete(sessionDeleteArgs);
+        sessionDeleteArgs.where = {
+          id: logoutDto.id
+        };
       } else {
-        const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
-          where: {
-            fingerprint_userId: {
-              fingerprint: logoutDto.fingerprint,
-              userId: (request.user as any).id
-            }
+        sessionDeleteArgs.where = {
+          fingerprint_userId: {
+            fingerprint: logoutDto.fingerprint,
+            userId: (request.user as any).id
           }
         };
-
-        await this.prismaService.session.delete(sessionDeleteArgs);
       }
     }
 
-    response.clearCookie('refresh');
-
-    return this.prismaService.user.findUnique(userFindUniqueArgs);
+    return this.prismaService.session.delete(sessionDeleteArgs);
   }
 
   // prettier-ignore

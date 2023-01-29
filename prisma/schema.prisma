@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Settings {
-  id        Int           @id @default(autoincrement())
-  userId    Int           @unique
+  id        Int           @db.Int @id @default(autoincrement())
+  userId    Int           @db.Int @unique
   theme     String        @db.VarChar(255)
   language  String        @db.VarChar(255)
   buttons   String        @db.VarChar(255)
@@ -22,12 +22,12 @@ model Settings {
 }
 
 model Session {
-  id          Int      @id @default(autoincrement())
-  userId      Int
+  id          Int      @db.Int @id @default(autoincrement())
+  userId      Int      @db.Int
   ua          String   @db.VarChar(255)
   fingerprint String   @db.VarChar(255)
   refresh     String   @db.VarChar(255) @default(uuid())
-  expires     BigInt
+  expires     BigInt   @db.BigInt
   ip          String   @db.VarChar(255)
   createdAt   DateTime @db.DateTime(6) @default(now())
   updatedAt   DateTime @db.DateTime(6) @default(now())
@@ -38,7 +38,7 @@ model Session {
 }
 
 model User {
-  id            Int        @id @default(autoincrement())
+  id            Int        @db.Int @id @default(autoincrement())
   googleId      String?    @db.VarChar(255)
   facebookId    String?    @db.VarChar(255)
   name          String     @db.VarChar(255) @unique
@@ -57,8 +57,8 @@ model User {
 }
 
 model Category {
-  id            Int       @id @default(autoincrement())
-  userId        Int
+  id            Int       @db.Int @id @default(autoincrement())
+  userId        Int       @db.Int
   name          String    @db.VarChar(255)
   description   String    @db.VarChar(255)
   createdAt     DateTime  @db.DateTime(6) @default(now())
@@ -72,13 +72,13 @@ model Category {
 }
 
 model Post {
-  id            Int       @id @default(autoincrement())
+  id            Int       @db.Int @id @default(autoincrement())
   name          String    @db.VarChar(255)
   description   String    @db.VarChar(255)
   markdown      String    @db.Text
   image         String?   @db.VarChar(255)
-  userId        Int
-  categoryId    Int
+  userId        Int       @db.Int
+  categoryId    Int       @db.Int
   createdAt     DateTime  @db.DateTime(6) @default(now())
   updatedAt     DateTime  @db.DateTime(6) @default(now())
   deletedAt     DateTime? @db.DateTime(6)

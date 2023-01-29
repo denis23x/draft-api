@@ -49,7 +49,7 @@ export class AuthController {
   @ApiBearerAuth('access')
   @Post('logout')
   @UseGuards(AuthGuard('access'))
-  async logout(@Req() request: Request, @Res(responseOptions) response: Response, @Body() logoutDto: LogoutDto): Promise<User> {
+  async logout(@Req() request: Request, @Res(responseOptions) response: Response, @Body() logoutDto: LogoutDto): Promise<any> {
     return this.authService.logout(request, response, logoutDto);
   }
 
