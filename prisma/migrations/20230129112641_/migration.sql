@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Session` MODIFY `ua` VARCHAR(255) NOT NULL;

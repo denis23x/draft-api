@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Session` MODIFY `ua` TEXT NOT NULL,
+    MODIFY `ip` VARCHAR(255) NOT NULL;

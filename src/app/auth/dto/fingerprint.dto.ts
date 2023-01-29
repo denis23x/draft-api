@@ -5,7 +5,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class FingerprintDto {
   @ApiProperty({
-    description: 'Client unique identifier',
+    description: 'Fingerprint',
     default: 'swagger'
   })
   @IsNotEmpty()

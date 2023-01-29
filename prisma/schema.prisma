@@ -24,11 +24,11 @@ model Settings {
 model Session {
   id          Int      @id @default(autoincrement())
   userId      Int
-  ua          Json
+  ua          String   @db.VarChar(255)
   fingerprint String   @db.VarChar(255)
   refresh     String   @db.VarChar(255) @default(uuid())
   expires     BigInt
-  ip          Json
+  ip          String   @db.VarChar(255)
   createdAt   DateTime @default(now()) @db.DateTime(6)
   updatedAt   DateTime @default(now()) @db.DateTime(6)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)

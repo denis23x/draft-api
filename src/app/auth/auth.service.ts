@@ -3,12 +3,11 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
-import { FingerprintDto, LoginDto, LogoutDto } from './dto';
+import { FingerprintDto, LoginDto, LogoutDto, TokenDto } from './dto';
 import * as url from 'url';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
-import { JwtService, JwtSignOptions } from '@nestjs/jwt';
-import { from, map, switchMap } from 'rxjs';
+import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -103,16 +102,16 @@ export class AuthService {
             }
           },
           update: {
-            ua: {}, // request.headers['user-agent']
+            ua: request.headers['user-agent'],
             fingerprint: loginDto.fingerprint,
-            ip: {}, // request.ip
+            ip: request.ip,
             refresh: randomUUID(),
             expires: Date.now() + Number(process.env.JWT_REFRESH_TTL)
           },
           create: {
-            ua: {},
+            ua: request.headers['user-agent'],
             fingerprint: loginDto.fingerprint,
-            ip: {},
+            ip: request.ip,
             refresh: randomUUID(),
             expires: Date.now() + Number(process.env.JWT_REFRESH_TTL),
             user: {
@@ -123,41 +122,10 @@ export class AuthService {
           }
         };
 
-        return from(this.prismaService.session.upsert(sessionUpsertArgs)).pipe(
-          switchMap((session: Session) => {
-            // TODO: enable secure and sameSite (need HTTPS)
-
-            response.cookie('refresh', session.refresh, {
-              domain: process.env.APP_COOKIE_DOMAIN,
-              path: '/api/auth',
-              signed: true,
-              httpOnly: true,
-              expires: new Date(Number(session.expires))
-              // secure: true,
-              // sameSite: 'none'
-            });
-
-            const jwtSignOptions: JwtSignOptions = {
-              expiresIn: Number(process.env.JWT_ACCESS_TTL),
-              subject: String(user.id),
-              jwtid: String(session.id)
-            };
-
-            return this.jwtService.signAsync({}, jwtSignOptions);
-          }),
-          map((token: string) => {
-            const userSelect: Prisma.UserSelect = this.prismaService.setUserSelect();
-
-            for (const column in userSelect) {
-              !userSelect[column] && delete user[column];
-            }
-
-            return {
-              ...user,
-              token
-            };
-          })
-        );
+        return this.prismaService.session
+          .upsert(sessionUpsertArgs)
+          .then((session: Session) => this.setRefresh(response, session))
+          .then((session: Session) => this.setAccess(user, session));
       }
     } else {
       throw new NotFoundException();
@@ -217,14 +185,12 @@ export class AuthService {
         where: {
           id: session.id
         }
-      });
+      }).then(() => response.clearCookie('refresh'));
 
       const isExpired: boolean = Date.now() > session.expires;
-      const isFingerprint: boolean = fingerprintDto.fingerprint !== session.fingerprint;
+      const isFingerprintInvalid: boolean = fingerprintDto.fingerprint !== session.fingerprint;
 
-      if (isExpired || isFingerprint) {
-        throw new UnauthorizedException();
-      } else {
+      if (!isExpired && !isFingerprintInvalid) {
         // @ts-ignore
         const user: User = await this.prismaService.user.findUnique({
           select: {
@@ -240,9 +206,9 @@ export class AuthService {
 
         const sessionCreateArgs: Prisma.SessionCreateArgs = {
           data: {
-            ua: {},
+            ua: request.headers['user-agent'],
             fingerprint: fingerprintDto.fingerprint,
-            ip: {},
+            ip: request.ip,
             refresh: randomUUID(),
             expires: Date.now() + Number(process.env.JWT_REFRESH_TTL),
             user: {
@@ -253,45 +219,13 @@ export class AuthService {
           }
         };
 
-        return from(this.prismaService.session.create(sessionCreateArgs)).pipe(
-          switchMap((session: Session) => {
-            // TODO: enable secure and sameSite (need HTTPS)
-
-            response.cookie('refresh', session.refresh, {
-              domain: process.env.APP_COOKIE_DOMAIN,
-              path: '/api/auth',
-              signed: true,
-              httpOnly: true,
-              expires: new Date(Number(session.expires))
-              // secure: true,
-              // sameSite: 'none'
-            });
-
-            const jwtSignOptions: JwtSignOptions = {
-              expiresIn: Number(process.env.JWT_ACCESS_TTL),
-              subject: String(user.id),
-              jwtid: String(session.id)
-            };
-
-            return this.jwtService.signAsync({}, jwtSignOptions);
-          }),
-          map((token: string) => {
-            const userSelect: Prisma.UserSelect = this.prismaService.setUserSelect();
-
-            for (const column in userSelect) {
-              !userSelect[column] && delete user[column];
-            }
-
-            return {
-              ...user,
-              token
-            };
-          })
-        )
+        return this.prismaService.session.create(sessionCreateArgs)
+          .then((session: Session) => this.setRefresh(response, session))
+          .then((session: Session) => this.setAccess(user, session));
+      } else {
+        throw new UnauthorizedException();
       }
     } else {
-      response.clearCookie('refresh');
-
       throw new UnauthorizedException();
     }
   }
@@ -333,5 +267,43 @@ export class AuthService {
         }
       })
     );
+  }
+
+  /** JWT */
+
+  async setRefresh(response: Response, session: Session): Promise<Session> {
+    // TODO: enable secure and sameSite (need HTTPS)
+
+    response.cookie('refresh', session.refresh, {
+      domain: process.env.APP_COOKIE_DOMAIN,
+      path: '/api/auth',
+      signed: true,
+      httpOnly: true,
+      expires: new Date(Number(session.expires))
+      // secure: true,
+      // sameSite: 'none'
+    });
+
+    return session;
+  }
+
+  async setAccess(user: User, session: Session): Promise<User & TokenDto> {
+    const userSelect: Prisma.UserSelect = this.prismaService.setUserSelect();
+
+    for (const column in userSelect) {
+      if (!userSelect[column]) {
+        delete user[column];
+      }
+    }
+
+    // prettier-ignore
+    return {
+      ...user,
+      token: await this.jwtService.signAsync({}, {
+        expiresIn: Number(process.env.JWT_ACCESS_TTL),
+        subject: String(user.id),
+        jwtid: String(session.id)
+      })
+    };
   }
 }

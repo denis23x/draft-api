@@ -96,4 +96,24 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       take
     };
   }
+
+  setScope(dto: any, args: any): any {
+    const scopeMap: any = {
+      categories: this.setCategorySelect()
+    };
+
+    dto.scope.forEach((scope: string) => {
+      args.select = {
+        ...args.select,
+        [scope]: {
+          select: scopeMap[scope],
+          orderBy: {
+            id: 'desc'
+          }
+        }
+      };
+    });
+
+    return args;
+  }
 }
