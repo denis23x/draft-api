@@ -140,30 +140,26 @@ export class UserService {
           };
         }
 
-        // if (id === (request.user as any).id) {
-        //   if (userGetOneDto.scope.includes('sessions')) {
-        //     userFindUniqueOrThrowArgs.select = {
-        //       ...userFindUniqueOrThrowArgs.select,
-        //       sessions: {
-        //         select: this.prismaService.setSessionSelect(),
-        //         orderBy: {
-        //           id: 'desc'
-        //         }
-        //       }
-        //     };
-        //   }
-        //
-        //   if (userGetOneDto.scope.includes('settings')) {
-        //     userFindUniqueOrThrowArgs.select = {
-        //       ...userFindUniqueOrThrowArgs.select,
-        //       settings: {
-        //         select: this.prismaService.setSettingsSelect()
-        //       }
-        //     };
-        //   }
-        // } else {
-        //   throw new ForbiddenException();
-        // }
+        if (userGetOneDto.scope.includes('sessions')) {
+          userFindUniqueOrThrowArgs.select = {
+            ...userFindUniqueOrThrowArgs.select,
+            sessions: {
+              select: this.prismaService.setSessionSelect(),
+              orderBy: {
+                id: 'desc'
+              }
+            }
+          };
+        }
+
+        if (userGetOneDto.scope.includes('settings')) {
+          userFindUniqueOrThrowArgs.select = {
+            ...userFindUniqueOrThrowArgs.select,
+            settings: {
+              select: this.prismaService.setSettingsSelect()
+            }
+          };
+        }
       }
     }
 
