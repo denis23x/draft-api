@@ -1,5 +1,0 @@
--- AlterTable
-ALTER TABLE `Settings` ALTER COLUMN `theme` DROP DEFAULT,
-    ALTER COLUMN `language` DROP DEFAULT,
-    ALTER COLUMN `monospace` DROP DEFAULT,
-    ALTER COLUMN `buttons` DROP DEFAULT;

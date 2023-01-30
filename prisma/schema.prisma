@@ -27,7 +27,7 @@ model Session {
   ua          String   @db.VarChar(255)
   fingerprint String   @db.VarChar(255)
   refresh     String   @db.VarChar(255) @default(uuid())
-  expires     BigInt   @db.BigInt
+  expires     String   @db.VarChar(255)
   ip          String   @db.VarChar(255)
   createdAt   DateTime @db.DateTime(6) @default(now())
   updatedAt   DateTime @db.DateTime(6) @default(now())
