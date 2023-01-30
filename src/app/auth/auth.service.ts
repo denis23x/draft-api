@@ -60,14 +60,14 @@ export class AuthService {
             fingerprint: loginDto.fingerprint,
             ip: request.ip,
             refresh: randomUUID(),
-            expires: Date.now() + Number(process.env.JWT_REFRESH_TTL)
+            expires: String(Date.now() + Number(process.env.JWT_REFRESH_TTL))
           },
           create: {
             ua: request.headers['user-agent'],
             fingerprint: loginDto.fingerprint,
             ip: request.ip,
             refresh: randomUUID(),
-            expires: Date.now() + Number(process.env.JWT_REFRESH_TTL),
+            expires: String(Date.now() + Number(process.env.JWT_REFRESH_TTL)),
             user: {
               connect: {
                 id: user.id
@@ -95,8 +95,6 @@ export class AuthService {
       /** Search */
 
       if (logoutDto.hasOwnProperty('id')) {
-        response.clearCookie('refresh');
-
         sessionDeleteArgs.where = {
           id: logoutDto.id
         };
@@ -110,7 +108,9 @@ export class AuthService {
       }
     }
 
-    return this.prismaService.session.delete(sessionDeleteArgs);
+    return this.prismaService.session
+      .delete(sessionDeleteArgs)
+      .then((session: Session) => this.setUnauthorized(response, session));
   }
 
   // prettier-ignore
@@ -119,16 +119,16 @@ export class AuthService {
       where: {
         refresh: request.signedCookies.refresh
       }
-    });
+    }).then((session: Session) => this.setUnauthorized(response, session));
 
     if (!!session) {
       await this.prismaService.session.delete({
         where: {
           id: session.id
         }
-      }).then(() => response.clearCookie('refresh'));
+      });
 
-      const isExpired: boolean = Date.now() > session.expires;
+      const isExpired: boolean = Date.now() > Number(session.expires);
       const isFingerprintInvalid: boolean = fingerprintDto.fingerprint !== session.fingerprint;
 
       if (!isExpired && !isFingerprintInvalid) {
@@ -151,7 +151,7 @@ export class AuthService {
             fingerprint: fingerprintDto.fingerprint,
             ip: request.ip,
             refresh: randomUUID(),
-            expires: Date.now() + Number(process.env.JWT_REFRESH_TTL),
+            expires: String(Date.now() + Number(process.env.JWT_REFRESH_TTL)),
             user: {
               connect: {
                 id: user.id
@@ -246,5 +246,24 @@ export class AuthService {
         jwtid: String(session.id)
       })
     };
+  }
+
+  async setUnauthorized(response: Response, session: Session): Promise<Session> {
+    response.clearCookie('authed');
+    response.clearCookie('theme');
+
+    // TODO: enable secure and sameSite (need HTTPS)
+
+    response.cookie('refresh', String(0), {
+      domain: process.env.APP_COOKIE_DOMAIN,
+      path: '/api/auth',
+      signed: true,
+      httpOnly: true,
+      expires: new Date()
+      // secure: true,
+      // sameSite: 'none'
+    });
+
+    return session;
   }
 }
