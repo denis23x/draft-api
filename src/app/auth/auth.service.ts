@@ -105,12 +105,12 @@ export class AuthService {
             userId: (request.user as any).id
           }
         };
+
+        await this.setUnauthorized(response);
       }
     }
 
-    return this.prismaService.session
-      .delete(sessionDeleteArgs)
-      .then((session: Session) => this.setUnauthorized(response, session));
+    return this.prismaService.session.delete(sessionDeleteArgs);
   }
 
   // prettier-ignore
@@ -248,7 +248,7 @@ export class AuthService {
     };
   }
 
-  async setUnauthorized(response: Response, session: Session): Promise<Session> {
+  async setUnauthorized(response: Response, session?: Session): Promise<Session> {
     response.clearCookie('authed');
     response.clearCookie('theme');
 
