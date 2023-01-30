@@ -5,7 +5,7 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../core';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 import { Request } from 'express';
-import { from, Observable, of, switchMap } from 'rxjs';
+import { from, map, Observable } from 'rxjs';
 
 @Injectable()
 export class UserRelationGuard implements CanActivate {
@@ -26,7 +26,7 @@ export class UserRelationGuard implements CanActivate {
     };
 
     return from(this.prismaService.user.findUnique(userFindUniqueArgs)).pipe(
-      switchMap((user: User) => of(user.id === (request.user as any).id))
+      map((user: User) => user.id === (request.user as any).id)
     );
   }
 }

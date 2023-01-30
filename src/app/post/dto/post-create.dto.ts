@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsPositive,
+  IsString,
   MaxLength,
   MinLength
 } from 'class-validator';
@@ -21,6 +22,7 @@ export class PostCreateDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(36)
+  @IsString()
   name: string;
 
   @ApiProperty({
@@ -32,6 +34,7 @@ export class PostCreateDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(255)
+  @IsString()
   description: string;
 
   @ApiProperty({
@@ -43,6 +46,7 @@ export class PostCreateDto {
   @IsNotEmpty()
   @MinLength(24)
   @MaxLength(7200)
+  @IsString()
   markdown: string;
 
   @ApiPropertyOptional({

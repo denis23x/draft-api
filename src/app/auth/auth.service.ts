@@ -131,9 +131,6 @@ export class AuthService {
       const isExpired: boolean = Date.now() > session.expires;
       const isFingerprintInvalid: boolean = fingerprintDto.fingerprint !== session.fingerprint;
 
-      console.log('isExpired', isExpired);
-      console.log('isFingerprintInvalid', isFingerprintInvalid);
-
       if (!isExpired && !isFingerprintInvalid) {
         // @ts-ignore
         const user: User = await this.prismaService.user.findUnique({

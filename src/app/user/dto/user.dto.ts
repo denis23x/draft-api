@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsOptional,
   IsPositive,
+  IsString,
   MaxLength,
   MinLength
 } from 'class-validator';
@@ -30,6 +31,7 @@ export class UserDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(24)
+  @IsString()
   name: string;
 
   @ApiPropertyOptional({
@@ -56,11 +58,14 @@ export class UserDto {
   email: string;
 
   @ApiProperty()
+  @IsString()
   createdAt: Date;
 
   @ApiProperty()
+  @IsString()
   updatedAt: Date;
 
   @ApiHideProperty()
+  @IsString()
   deletedAt: Date;
 }

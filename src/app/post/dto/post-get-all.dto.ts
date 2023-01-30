@@ -1,6 +1,14 @@
 /** @format */
 
-import { IsIn, IsNumber, IsOptional, IsPositive, MaxLength, MinLength } from 'class-validator';
+import {
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  MaxLength,
+  MinLength
+} from 'class-validator';
 import { ApiHideProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -13,6 +21,7 @@ export class PostGetAllDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(36)
+  @IsString()
   name?: string;
 
   @ApiHideProperty()

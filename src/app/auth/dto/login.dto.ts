@@ -32,6 +32,7 @@ export class LoginDto {
   })
   @MinLength(6)
   @MaxLength(32)
+  @IsString()
   password?: string;
 
   @ApiHideProperty()

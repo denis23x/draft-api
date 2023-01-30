@@ -21,6 +21,7 @@ export class UserCreateDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(24)
+  @IsString()
   name: string;
 
   @ApiProperty({
@@ -42,6 +43,7 @@ export class UserCreateDto {
   })
   @MinLength(6)
   @MaxLength(32)
+  @IsString()
   password?: string;
 
   @ApiHideProperty()

@@ -2,7 +2,7 @@
 
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
-import { Observable, of, switchMap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Response } from 'express';
 
 @Injectable()
@@ -13,11 +13,11 @@ export class TransformInterceptor implements NestInterceptor {
     const response: Response = httpArgumentsHost.getResponse<Response>();
 
     return callHandler.handle().pipe(
-      switchMap((data: any) => {
-        return of({
+      map((data: any) => {
+        return {
           data,
           statusCode: response.statusCode
-        });
+        };
       })
     );
   }

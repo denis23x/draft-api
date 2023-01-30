@@ -1,6 +1,6 @@
 /** @format */
 
-import { IsNumber, IsOptional, IsPositive, MaxLength, MinLength } from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -14,6 +14,7 @@ export class PostUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(36)
+  @IsString()
   name?: string;
 
   @ApiPropertyOptional({
@@ -25,6 +26,7 @@ export class PostUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(255)
+  @IsString()
   description?: string;
 
   @ApiPropertyOptional({
@@ -36,6 +38,7 @@ export class PostUpdateDto {
   @IsOptional()
   @MinLength(24)
   @MaxLength(7200)
+  @IsString()
   markdown?: string;
 
   @ApiPropertyOptional({

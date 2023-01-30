@@ -1,7 +1,7 @@
 /** @format */
 
 import { ApiHideProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UserUpdateDto {
   @ApiPropertyOptional({
@@ -13,6 +13,7 @@ export class UserUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
+  @IsString()
   name?: string;
 
   @ApiPropertyOptional({

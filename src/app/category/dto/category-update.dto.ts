@@ -1,6 +1,6 @@
 /** @format */
 
-import { IsOptional, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CategoryUpdateDto {
@@ -13,6 +13,7 @@ export class CategoryUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(24)
+  @IsString()
   name?: string;
 
   @ApiPropertyOptional({
@@ -24,5 +25,6 @@ export class CategoryUpdateDto {
   @IsOptional()
   @MinLength(4)
   @MaxLength(255)
+  @IsString()
   description?: string;
 }

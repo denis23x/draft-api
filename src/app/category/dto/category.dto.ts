@@ -1,6 +1,6 @@
 /** @format */
 
-import { IsNotEmpty, IsNumber, IsPositive, MaxLength, MinLength } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -22,6 +22,7 @@ export class CategoryDto {
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(24)
+  @IsString()
   name: string;
 
   @ApiProperty({
@@ -33,14 +34,18 @@ export class CategoryDto {
   @IsNotEmpty()
   @MinLength(6)
   @MaxLength(255)
+  @IsString()
   description: string;
 
   @ApiProperty()
+  @IsString()
   createdAt: Date;
 
   @ApiProperty()
+  @IsString()
   updatedAt: Date;
 
   @ApiHideProperty()
+  @IsString()
   deletedAt: Date;
 }

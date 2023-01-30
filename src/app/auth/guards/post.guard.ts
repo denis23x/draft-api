@@ -5,7 +5,7 @@ import { Category, Post, Prisma } from '@prisma/client';
 import { PrismaService } from '../../core';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 import { Request } from 'express';
-import { from, Observable, of, switchMap, forkJoin } from 'rxjs';
+import { from, Observable, forkJoin, map } from 'rxjs';
 
 @Injectable()
 export class PostRelationGuard implements CanActivate {
@@ -46,11 +46,11 @@ export class PostRelationGuard implements CanActivate {
 
     // prettier-ignore
     return forkJoin(forkJoinList).pipe(
-      switchMap(([post, category]: [Post, Category]) => {
+      map(([post, category]: [Post, Category]) => {
         const postRelation: boolean = post.userId === (request.user as any).id;
         const categoryRelation: boolean = category ? category.userId === (request.user as any).id : true;
 
-        return of(postRelation && categoryRelation);
+        return postRelation && categoryRelation;
       })
     );
   }
