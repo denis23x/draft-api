@@ -3,7 +3,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Category, Prisma } from '@prisma/client';
 import { PrismaService } from '../../core';
-import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 import { Request } from 'express';
 import { from, map, Observable } from 'rxjs';
 
@@ -12,9 +11,7 @@ export class CategoryRelationGuard implements CanActivate {
   constructor(private readonly prismaService: PrismaService) {}
 
   canActivate(executionContext: ExecutionContext): Observable<boolean> {
-    const httpArgumentsHost: HttpArgumentsHost = executionContext.switchToHttp();
-
-    const request: Request = httpArgumentsHost.getRequest<Request>();
+    const request: Request = executionContext.switchToHttp().getRequest<Request>();
 
     const categoryFindUniqueArgs: Prisma.CategoryFindUniqueArgs = {
       select: {
@@ -26,7 +23,9 @@ export class CategoryRelationGuard implements CanActivate {
     };
 
     return from(this.prismaService.category.findUnique(categoryFindUniqueArgs)).pipe(
-      map((category: Category) => category.userId === (request.user as any).id)
+      map((category: Category) => {
+        return category.userId === (request.user as any).id;
+      })
     );
   }
 }

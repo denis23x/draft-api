@@ -3,7 +3,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Category, Post, Prisma } from '@prisma/client';
 import { PrismaService } from '../../core';
-import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 import { Request } from 'express';
 import { from, Observable, forkJoin, map } from 'rxjs';
 
@@ -12,9 +11,7 @@ export class PostRelationGuard implements CanActivate {
   constructor(private readonly prismaService: PrismaService) {}
 
   canActivate(executionContext: ExecutionContext): Observable<boolean> {
-    const httpArgumentsHost: HttpArgumentsHost = executionContext.switchToHttp();
-
-    const request: Request = httpArgumentsHost.getRequest<Request>();
+    const request: Request = executionContext.switchToHttp().getRequest<Request>();
 
     const postFindUniqueArgs: Prisma.PostFindUniqueArgs = {
       select: {

@@ -89,51 +89,79 @@ export class AuthService {
   }
 
   async logout(request: Request, response: Response, logoutDto: LogoutDto): Promise<any> {
-    const sessionDeleteArgs: Prisma.SessionDeleteArgs = {} as any;
+    const sessionFindUniqueArgs: Prisma.SessionFindUniqueArgs = {
+      select: {
+        userId: true
+      },
+      where: {}
+    };
 
     if (!!logoutDto) {
       /** Search */
 
       if (logoutDto.hasOwnProperty('id')) {
-        sessionDeleteArgs.where = {
+        sessionFindUniqueArgs.where = {
           id: logoutDto.id
         };
+
+        const session: Session = await this.prismaService.session.findUnique(sessionFindUniqueArgs);
+
+        if (session.userId === (request.user as any).id) {
+          const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
+            where: {
+              id: logoutDto.id
+            }
+          };
+
+          return this.prismaService.session.delete(sessionDeleteArgs);
+        } else {
+          throw new UnauthorizedException();
+        }
       } else {
-        sessionDeleteArgs.where = {
-          fingerprint_userId: {
-            fingerprint: logoutDto.fingerprint,
-            userId: (request.user as any).id
+        const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
+          where: {
+            fingerprint_userId: {
+              fingerprint: logoutDto.fingerprint,
+              userId: (request.user as any).id
+            }
           }
         };
 
-        await this.setUnauthorized(response);
+        return this.setUnauthorized(response).then(() => {
+          return this.prismaService.session.delete(sessionDeleteArgs);
+        });
       }
     }
 
-    return this.prismaService.session.delete(sessionDeleteArgs);
+    throw new UnauthorizedException();
   }
 
   // prettier-ignore
   async refresh(request: Request, response: Response, fingerprintDto: FingerprintDto): Promise<User> {
-    const session: Session = await this.prismaService.session.findFirst({
+    const sessionFindFirstArgs: Prisma.SessionFindFirstArgs = {
       where: {
         refresh: request.signedCookies.refresh
       }
-    }).then((session: Session) => this.setUnauthorized(response, session));
+    };
+
+    const session: Session = await this.prismaService.session
+      .findFirst(sessionFindFirstArgs)
+      .then((session: Session) => this.setUnauthorized(response, session));
 
     if (!!session) {
-      await this.prismaService.session.delete({
+      const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
         where: {
           id: session.id
         }
-      });
+      }
+
+      await this.prismaService.session.delete(sessionDeleteArgs);
 
       const isExpired: boolean = Date.now() > Number(session.expires);
       const isFingerprintInvalid: boolean = fingerprintDto.fingerprint !== session.fingerprint;
 
       if (!isExpired && !isFingerprintInvalid) {
-        // @ts-ignore
-        const user: User = await this.prismaService.user.findUnique({
+        const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
           select: {
             ...this.prismaService.setUserSelect(),
             settings: {
@@ -143,7 +171,9 @@ export class AuthService {
           where: {
             id: session.userId
           }
-        });
+        }
+
+        const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
         const sessionCreateArgs: Prisma.SessionCreateArgs = {
           data: {
@@ -160,7 +190,8 @@ export class AuthService {
           }
         };
 
-        return this.prismaService.session.create(sessionCreateArgs)
+        return this.prismaService.session
+          .create(sessionCreateArgs)
           .then((session: Session) => this.setRefresh(response, session))
           .then((session: Session) => this.setAccess(user, session));
       } else {
