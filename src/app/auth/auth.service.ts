@@ -220,6 +220,7 @@ export class AuthService {
         settings: {
           create: {
             theme: 'light',
+            background: 'tortoise-shell',
             language: 'en',
             monospace: true,
             buttons: 'left'

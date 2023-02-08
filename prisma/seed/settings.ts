@@ -19,6 +19,7 @@ export const settingsRaw = async () => {
 
     raw.push({
       theme: 'light',
+      background: 'tortoise-shell',
       language: 'en',
       monospace: true,
       buttons: 'left',

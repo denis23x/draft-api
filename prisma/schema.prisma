@@ -8,15 +8,16 @@ datasource db {
 }
 
 model Settings {
-  id        Int           @db.Int @id @default(autoincrement())
-  userId    Int           @db.Int @unique
-  theme     String        @db.VarChar(255)
-  language  String        @db.VarChar(255)
-  buttons   String        @db.VarChar(255)
-  monospace Boolean
-  createdAt DateTime      @db.DateTime(6) @default(now())
-  updatedAt DateTime      @db.DateTime(6) @default(now())
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int           @db.Int @id @default(autoincrement())
+  userId        Int           @db.Int @unique
+  theme         String        @db.VarChar(255)
+  background    String        @db.VarChar(255)
+  language      String        @db.VarChar(255)
+  buttons       String        @db.VarChar(255)
+  monospace     Boolean
+  createdAt     DateTime      @db.DateTime(6) @default(now())
+  updatedAt     DateTime      @db.DateTime(6) @default(now())
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
