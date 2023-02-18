@@ -45,6 +45,14 @@ export class AuthService {
     const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
     if (!!user) {
+      // for (const socialKey of ['facebookId', 'githubId', 'googleId']) {
+      //   if (loginDto.hasOwnProperty(socialKey)) {
+      //     if (loginDto[socialKey] === user[socialKey]) {
+      //       return this.setResponse(request, response, user, fingerprintDto);
+      //     }
+      //   }
+      // }
+
       const authenticated: boolean = await compare(loginDto.password, user.password);
 
       if (authenticated) {
@@ -220,7 +228,7 @@ export class AuthService {
         settings: {
           create: {
             theme: 'light',
-            background: 'tortoise-shell',
+            background: 'pattern-randomized',
             language: 'en',
             monospace: true,
             buttons: 'left'
@@ -233,7 +241,7 @@ export class AuthService {
 
     return response.redirect(
       url.format({
-        pathname: process.env.APP_SITE_ORIGIN + '/auth/login',
+        pathname: process.env.APP_SITE_ORIGIN + '/login',
         query: {
           email: user.email,
           [socialKey]: user[socialKey]

@@ -21,7 +21,7 @@ export class UserService {
         settings: {
           create: {
             theme: 'light',
-            background: 'tortoise-shell',
+            background: 'pattern-randomized',
             language: 'en',
             monospace: true,
             buttons: 'left'
