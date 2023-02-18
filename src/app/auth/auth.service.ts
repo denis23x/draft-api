@@ -45,17 +45,23 @@ export class AuthService {
     const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
     if (!!user) {
-      // for (const socialKey of ['facebookId', 'githubId', 'googleId']) {
-      //   if (loginDto.hasOwnProperty(socialKey)) {
-      //     if (loginDto[socialKey] === user[socialKey]) {
-      //       return this.setResponse(request, response, user, fingerprintDto);
-      //     }
-      //   }
-      // }
+      let isAuthenticated: boolean = false;
 
-      const authenticated: boolean = await compare(loginDto.password, user.password);
+      /** Login by password */
 
-      if (authenticated) {
+      if (loginDto.hasOwnProperty('password')) {
+        isAuthenticated = await compare(loginDto.password, user.password);
+      }
+
+      /** Login by social authorization */
+
+      for (const socialId of ['facebookId', 'githubId', 'googleId']) {
+        if (loginDto.hasOwnProperty(socialId)) {
+          isAuthenticated = loginDto[socialId] === user[socialId];
+        }
+      }
+
+      if (isAuthenticated) {
         const sessionUpsertArgs: Prisma.SessionUpsertArgs = {
           where: {
             fingerprint_userId: {
@@ -88,12 +94,12 @@ export class AuthService {
           .upsert(sessionUpsertArgs)
           .then((session: Session) => this.setRefresh(response, session))
           .then((session: Session) => this.setAccess(user, session));
+      } else {
+        throw new UnauthorizedException();
       }
     } else {
       throw new NotFoundException();
     }
-
-    throw new UnauthorizedException();
   }
 
   async logout(request: Request, response: Response, logoutDto: LogoutDto): Promise<any> {
@@ -210,44 +216,49 @@ export class AuthService {
     }
   }
 
-  async social(request: Request, response: Response, socialKey: string): Promise<void> {
-    if (!request.user) {
-      throw new UnauthorizedException();
-    }
-
-    const userUpsertArgs: Prisma.UserUpsertArgs = {
-      where: {
-        email: (request.user as any).email
-      },
-      update: {
-        [socialKey]: request.user[socialKey]
-      },
-      create: {
-        ...(request.user as any),
-        description: "I'm new here",
-        settings: {
-          create: {
-            theme: 'light',
-            background: 'pattern-randomized',
-            language: 'en',
-            monospace: true,
-            buttons: 'left'
+  async social(request: Request, response: Response, socialId: string): Promise<void> {
+    if (!!request.user) {
+      const userUpsertArgs: Prisma.UserUpsertArgs = {
+        where: {
+          email: (request.user as any).email
+        },
+        update: {
+          [socialId]: request.user[socialId]
+        },
+        create: {
+          ...(request.user as any),
+          description: "I'm new here",
+          settings: {
+            create: {
+              theme: 'light',
+              background: 'pattern-randomized',
+              language: 'en',
+              monospace: true,
+              buttons: 'left'
+            }
           }
         }
-      }
-    };
+      };
 
-    const user: User = await this.prismaService.user.upsert(userUpsertArgs);
+      const user: User = await this.prismaService.user.upsert(userUpsertArgs);
 
-    return response.redirect(
-      url.format({
-        pathname: process.env.APP_SITE_ORIGIN + '/login',
-        query: {
-          email: user.email,
-          [socialKey]: user[socialKey]
-        }
-      })
-    );
+      const getUrl = (): string => {
+        const url: URL = new URL(process.env.APP_SITE_ORIGIN);
+        const urlSearchParams: URLSearchParams = new URLSearchParams([
+          ['email', user.email],
+          [socialId, user[socialId]]
+        ]);
+
+        url.pathname = '/login';
+        url.search = urlSearchParams.toString();
+
+        return url.href;
+      };
+
+      return response.redirect(getUrl());
+    }
+
+    throw new UnauthorizedException();
   }
 
   /** JWT */
