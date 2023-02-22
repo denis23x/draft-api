@@ -4,7 +4,6 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
 import { FingerprintDto, LoginDto, LogoutDto, TokenDto } from './dto';
-import * as url from 'url';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
@@ -227,15 +226,8 @@ export class AuthService {
         },
         create: {
           ...(request.user as any),
-          description: "I'm new here",
           settings: {
-            create: {
-              theme: 'light',
-              background: 'pattern-randomized',
-              language: 'en',
-              monospace: true,
-              buttons: 'left'
-            }
+            create: {}
           }
         }
       };

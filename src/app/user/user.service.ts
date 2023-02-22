@@ -17,15 +17,8 @@ export class UserService {
       select: this.prismaService.setUserSelect(),
       data: {
         ...userCreateDto,
-        description: "I'm new here",
         settings: {
-          create: {
-            theme: 'light',
-            background: 'pattern-randomized',
-            language: 'en',
-            monospace: true,
-            buttons: 'left'
-          }
+          create: {}
         }
       }
     };

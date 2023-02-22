@@ -8,16 +8,17 @@ datasource db {
 }
 
 model Settings {
-  id            Int           @db.Int @id @default(autoincrement())
-  userId        Int           @db.Int @unique
-  theme         String        @db.VarChar(255)
-  background    String        @db.VarChar(255)
-  language      String        @db.VarChar(255)
-  buttons       String        @db.VarChar(255)
-  monospace     Boolean
-  createdAt     DateTime      @db.DateTime(6) @default(now())
-  updatedAt     DateTime      @db.DateTime(6) @default(now())
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                Int           @db.Int @id @default(autoincrement())
+  userId            Int           @db.Int @unique
+  theme             String        @db.VarChar(255) @default("light")
+  themePrism        String        @db.VarChar(255) @default("prism")
+  themeBackground   String        @db.VarChar(255) @default("slanted-gradient")
+  language          String        @db.VarChar(255) @default("en")
+  buttons           String        @db.VarChar(255) @default("left")
+  monospace         Boolean       @db.TinyInt @default(true)
+  createdAt         DateTime      @db.DateTime(6) @default(now())
+  updatedAt         DateTime      @db.DateTime(6) @default(now())
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -43,7 +44,7 @@ model User {
   googleId      String?    @db.VarChar(255)
   facebookId    String?    @db.VarChar(255)
   name          String     @db.VarChar(255) @unique
-  description   String     @db.VarChar(255)
+  description   String     @db.VarChar(255) @default("No description")
   avatar        String?    @db.VarChar(255)
   email         String     @db.VarChar(255) @unique
   password      String?    @db.VarChar(255)

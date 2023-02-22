@@ -19,7 +19,8 @@ export const settingsRaw = async () => {
 
     raw.push({
       theme: 'light',
-      background: 'pattern-randomized',
+      themePrism: 'prism',
+      themeBackground: 'slanted-gradient',
       language: 'en',
       monospace: true,
       buttons: 'left',
