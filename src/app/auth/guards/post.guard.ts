@@ -13,7 +13,7 @@ export class PostRelationGuard implements CanActivate {
   canActivate(executionContext: ExecutionContext): Observable<boolean> {
     const request: Request = executionContext.switchToHttp().getRequest<Request>();
 
-    const postFindUniqueArgs: Prisma.PostFindUniqueArgs = {
+    const postFindUniqueOrThrowArgs: Prisma.PostFindUniqueOrThrowArgs = {
       select: {
         userId: true
       },
@@ -23,13 +23,20 @@ export class PostRelationGuard implements CanActivate {
     };
 
     const forkJoinList: Observable<Post | Category>[] = [
-      from(this.prismaService.post.findUnique(postFindUniqueArgs))
+      from(
+        this.prismaService.post
+          .findUniqueOrThrow(postFindUniqueOrThrowArgs)
+          .catch((error: Error) => {
+            // prettier-ignore
+            throw new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+          })
+      )
     ];
 
     /** Avoid unnecessary category relation change */
 
     if ('categoryId' in request.body) {
-      const categoryFindUniqueArgs: Prisma.CategoryFindUniqueArgs = {
+      const categoryFindUniqueOrThrowArgs: Prisma.CategoryFindUniqueOrThrowArgs = {
         select: {
           userId: true
         },
@@ -38,7 +45,16 @@ export class PostRelationGuard implements CanActivate {
         }
       };
 
-      forkJoinList.push(from(this.prismaService.category.findUnique(categoryFindUniqueArgs)));
+      forkJoinList.push(
+        from(
+          this.prismaService.category
+            .findUniqueOrThrow(categoryFindUniqueOrThrowArgs)
+            .catch((error: Error) => {
+              // prettier-ignore
+              throw new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+            })
+        )
+      );
     }
 
     // prettier-ignore

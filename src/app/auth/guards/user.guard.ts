@@ -13,7 +13,7 @@ export class UserRelationGuard implements CanActivate {
   canActivate(executionContext: ExecutionContext): Observable<boolean> {
     const request: Request = executionContext.switchToHttp().getRequest<Request>();
 
-    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
+    const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
       select: {
         id: true
       },
@@ -22,7 +22,12 @@ export class UserRelationGuard implements CanActivate {
       }
     };
 
-    return from(this.prismaService.user.findUnique(userFindUniqueArgs)).pipe(
+    return from(
+      this.prismaService.user.findUniqueOrThrow(userFindUniqueOrThrowArgs).catch((error: Error) => {
+        // prettier-ignore
+        throw new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+      })
+    ).pipe(
       map((user: User) => {
         return user.id === (request.user as any).id;
       })

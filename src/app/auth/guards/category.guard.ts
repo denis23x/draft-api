@@ -13,7 +13,7 @@ export class CategoryRelationGuard implements CanActivate {
   canActivate(executionContext: ExecutionContext): Observable<boolean> {
     const request: Request = executionContext.switchToHttp().getRequest<Request>();
 
-    const categoryFindUniqueArgs: Prisma.CategoryFindUniqueArgs = {
+    const categoryFindUniqueOrThrowArgs: Prisma.CategoryFindUniqueOrThrowArgs = {
       select: {
         userId: true
       },
@@ -22,7 +22,14 @@ export class CategoryRelationGuard implements CanActivate {
       }
     };
 
-    return from(this.prismaService.category.findUnique(categoryFindUniqueArgs)).pipe(
+    return from(
+      this.prismaService.category
+        .findUniqueOrThrow(categoryFindUniqueOrThrowArgs)
+        .catch((error: Error) => {
+          // prettier-ignore
+          throw new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+        })
+    ).pipe(
       map((category: Category) => {
         return category.userId === (request.user as any).id;
       })

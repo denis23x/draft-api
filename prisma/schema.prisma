@@ -11,7 +11,7 @@ model Settings {
   id                Int           @db.Int @id @default(autoincrement())
   userId            Int           @db.Int @unique
   theme             String        @db.VarChar(255) @default("light")
-  themePrism        String        @db.VarChar(255) @default("prism")
+  themePrism        String        @db.VarChar(255) @default("default")
   themeBackground   String        @db.VarChar(255) @default("slanted-gradient")
   language          String        @db.VarChar(255) @default("en")
   buttons           String        @db.VarChar(255) @default("left")
