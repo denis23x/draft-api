@@ -5,7 +5,6 @@ import { PrismaService } from '../core';
 import { Request, Response } from 'express';
 import { FileCreateDto, FileGetOneDto } from './dto';
 import { HttpService } from '@nestjs/axios';
-import { AxiosError, AxiosResponse } from 'axios';
 
 @Injectable()
 export class FileService {
@@ -36,7 +35,7 @@ export class FileService {
         method: 'GET',
         responseType: 'stream'
       })
-      .then((axiosResponse: AxiosResponse) => {
+      .then((axiosResponse: any) => {
         response.status(axiosResponse.status);
         response.header({
           ...axiosResponse.headers,
@@ -45,7 +44,7 @@ export class FileService {
 
         axiosResponse.data.pipe(response);
       })
-      .catch((axiosError: AxiosError) => {
+      .catch((axiosError: any) => {
         const { status, statusText }: any = axiosError.response;
 
         throw new HttpException(statusText, status);

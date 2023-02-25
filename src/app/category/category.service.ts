@@ -139,7 +139,10 @@ export class CategoryService {
       .findUniqueOrThrow(categoryFindUniqueOrThrowArgs)
       .catch((error: Error) => {
         // prettier-ignore
-        throw new Prisma.PrismaClientKnownRequestError(error.message, 'P2001', Prisma.prismaVersion.client);
+        throw new Prisma.PrismaClientKnownRequestError(error.message, {
+          code: 'P2001',
+          clientVersion: Prisma.prismaVersion.client
+        });
       });
   }
 

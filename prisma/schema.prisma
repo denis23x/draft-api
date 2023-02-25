@@ -13,7 +13,7 @@ model Settings {
   theme             String        @db.VarChar(255) @default("light")
   themePrism        String        @db.VarChar(255) @default("default")
   themeBackground   String        @db.VarChar(255) @default("slanted-gradient")
-  language          String        @db.VarChar(255) @default("en")
+  language          String        @db.VarChar(255) @default("en-US")
   buttons           String        @db.VarChar(255) @default("left")
   monospace         Boolean       @db.TinyInt @default(true)
   createdAt         DateTime      @db.DateTime(6) @default(now())

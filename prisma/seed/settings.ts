@@ -21,7 +21,7 @@ export const settingsRaw = async () => {
       theme: 'light',
       themePrism: 'default',
       themeBackground: 'slanted-gradient',
-      language: 'en',
+      language: 'en-US',
       monospace: true,
       buttons: 'left',
       userId: user.id
