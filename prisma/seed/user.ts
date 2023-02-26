@@ -1,7 +1,7 @@
 /** @format */
 
 import { hash } from 'bcrypt';
-import faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 
 export const userRaw = async () => {
   /**
