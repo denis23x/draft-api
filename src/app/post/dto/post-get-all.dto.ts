@@ -16,11 +16,11 @@ export class PostGetAllDto {
   @ApiPropertyOptional({
     description: 'Name',
     minLength: 4,
-    maxLength: 36
+    maxLength: 16
   })
   @IsOptional()
   @MinLength(4)
-  @MaxLength(36)
+  @MaxLength(16)
   @IsString()
   name?: string;
 

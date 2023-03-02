@@ -20,7 +20,7 @@ export const categoryRaw = async () => {
 
     raw.push({
       name: faker.commerce.department(),
-      description: faker.lorem.sentence(),
+      description: faker.datatype.boolean() ? faker.lorem.sentence() : null,
       userId: user.id
     });
   }

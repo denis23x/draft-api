@@ -16,11 +16,11 @@ export class UserGetAllDto {
   @ApiPropertyOptional({
     description: 'Name',
     minLength: 4,
-    maxLength: 24
+    maxLength: 16
   })
   @IsOptional()
   @MinLength(4)
-  @MaxLength(24)
+  @MaxLength(16)
   @IsString()
   name?: string;
 

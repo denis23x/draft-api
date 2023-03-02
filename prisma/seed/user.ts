@@ -27,7 +27,7 @@ export const userRaw = async () => {
     raw.push({
       name: faker.internet.userName(),
       email,
-      description: faker.name.jobTitle(),
+      description: faker.datatype.boolean() ? faker.name.jobTitle() : null,
       avatar: faker.datatype.boolean() ? avatarPath + avatarFile : null,
       password: await hash(email, 10)
     });

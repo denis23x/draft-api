@@ -35,12 +35,10 @@ export class UserDto {
   name: string;
 
   @ApiPropertyOptional({
-    default: null,
-    minLength: 4,
+    description: 'Description',
     maxLength: 255
   })
   @IsOptional()
-  @MinLength(4)
   @MaxLength(255)
   description?: string | null;
 

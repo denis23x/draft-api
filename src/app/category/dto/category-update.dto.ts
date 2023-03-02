@@ -7,24 +7,21 @@ export class CategoryUpdateDto {
   @ApiPropertyOptional({
     description: 'Name',
     minLength: 4,
-    maxLength: 24,
+    maxLength: 36,
     default: 'Lorem ipsum dolor sit amet'
   })
   @IsOptional()
   @MinLength(4)
-  @MaxLength(24)
+  @MaxLength(36)
   @IsString()
   name?: string;
 
   @ApiPropertyOptional({
     description: 'Description',
-    minLength: 4,
-    maxLength: 255,
-    default: 'Mauris venenatis ante quis diam iaculis sollicitudin'
+    maxLength: 255
   })
   @IsOptional()
-  @MinLength(4)
   @MaxLength(255)
   @IsString()
-  description?: string;
+  description?: string | null;
 }

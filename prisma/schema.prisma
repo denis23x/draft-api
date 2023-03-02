@@ -44,7 +44,7 @@ model User {
   googleId      String?    @db.VarChar(255)
   facebookId    String?    @db.VarChar(255)
   name          String     @db.VarChar(255) @unique
-  description   String     @db.VarChar(255) @default("No description")
+  description   String?    @db.VarChar(255)
   avatar        String?    @db.VarChar(255)
   email         String     @db.VarChar(255) @unique
   password      String?    @db.VarChar(255)
@@ -62,7 +62,7 @@ model Category {
   id            Int       @db.Int @id @default(autoincrement())
   userId        Int       @db.Int
   name          String    @db.VarChar(255)
-  description   String    @db.VarChar(255)
+  description   String?   @db.VarChar(255)
   createdAt     DateTime  @db.DateTime(6) @default(now())
   updatedAt     DateTime  @db.DateTime(6) @default(now())
   deletedAt     DateTime? @db.DateTime(6)
