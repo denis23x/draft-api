@@ -20,7 +20,7 @@ export class UserGetAllDto {
   })
   @IsOptional()
   @MinLength(4)
-  @MaxLength(16)
+  @MaxLength(24)
   @IsString()
   name?: string;
 

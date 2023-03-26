@@ -7,10 +7,14 @@ import { Prisma, User } from '@prisma/client';
 import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
 import { existsSync, unlinkSync } from 'fs';
 import { hash } from 'bcrypt';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly mailerService: MailerService
+  ) {}
 
   async create(request: Request, userCreateDto: UserCreateDto): Promise<User> {
     const userCreateArgs: Prisma.UserCreateArgs = {
@@ -27,7 +31,19 @@ export class UserService {
       userCreateArgs.data.password = await hash(userCreateDto.password, 10);
     }
 
-    return this.prismaService.user.create(userCreateArgs);
+    return this.prismaService.user.create(userCreateArgs).then((user: User) => {
+      this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Thank you for registering with us!',
+        template: 'registration',
+        context: {
+          user: user,
+          host: process.env.APP_SITE_ORIGIN
+        }
+      });
+
+      return user;
+    });
   }
 
   async getAll(request: Request, userGetAllDto: UserGetAllDto): Promise<User[]> {

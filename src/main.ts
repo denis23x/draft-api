@@ -116,4 +116,4 @@ const bootstrap = async () => {
   await app.listen(port, () => Logger.log('http://localhost:' + port + '/docs'));
 };
 
-bootstrap();
+bootstrap().then(() => Logger.log('OK'));

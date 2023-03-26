@@ -11,6 +11,16 @@
         "arrowParens": "avoid",
         "insertPragma": true
       }
+    },
+    {
+      "files": "*.hbs",
+      "options": {
+        "tabWidth": 2,
+        "useTabs": true,
+        "bracketSameLine": false,
+        "singleQuote": false,
+        "insertPragma": true
+      }
     }
   ]
 }
