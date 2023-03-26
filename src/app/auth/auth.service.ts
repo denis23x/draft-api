@@ -1,19 +1,21 @@
 /** @format */
 
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
-import { FingerprintDto, LoginDto, LogoutDto, TokenDto } from './dto';
+import { FingerprintDto, LoginDto, LogoutDto, ResetDto, TokenDto } from './dto';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prismaService: PrismaService
+    private readonly prismaService: PrismaService,
+    private readonly mailerService: MailerService
   ) {}
 
   async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
@@ -213,6 +215,37 @@ export class AuthService {
     } else {
       throw new UnauthorizedException();
     }
+  }
+
+  // prettier-ignore
+  async reset(request: Request, response: Response, resetDto: ResetDto): Promise<any> {
+    // @ts-ignore
+    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
+      select: {
+        ...this.prismaService.setUserSelect(),
+      },
+      where: {
+        email: resetDto.email
+      }
+    };
+
+    const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
+
+    if (!!user) {
+      this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Forgot your password?',
+        template: 'reset',
+        context: {
+          user: user,
+          host: process.env.APP_SITE_ORIGIN
+        }
+      }).then(() => {
+        // TODO: update promise
+      });
+    }
+
+    response.status(HttpStatus.OK);
   }
 
   async social(request: Request, response: Response, socialId: string): Promise<void> {
