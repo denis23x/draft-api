@@ -1,9 +1,16 @@
 /** @format */
 
-import { HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { compare } from 'bcrypt';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common';
+import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
-import { FingerprintDto, LoginDto, LogoutDto, ResetDto, TokenDto } from './dto';
+import { ChangePasswordDto, FingerprintDto, LoginDto, LogoutDto, ResetDto, TokenDto } from './dto';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
@@ -217,13 +224,10 @@ export class AuthService {
     }
   }
 
-  // prettier-ignore
   async reset(request: Request, response: Response, resetDto: ResetDto): Promise<any> {
     // @ts-ignore
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      select: {
-        ...this.prismaService.setUserSelect(),
-      },
+      select: this.prismaService.setUserSelect(),
       where: {
         email: resetDto.email
       }
@@ -232,20 +236,52 @@ export class AuthService {
     const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
     if (!!user) {
+      // prettier-ignore
       this.mailerService.sendMail({
         to: user.email,
         subject: 'Forgot your password?',
         template: 'reset',
         context: {
           user: user,
-          host: process.env.APP_SITE_ORIGIN
+          host: process.env.APP_SITE_ORIGIN,
+          token: await this.jwtService.signAsync({},{
+            expiresIn: Number(process.env.JWT_ACCESS_TTL),
+            subject: String(user.id),
+          })
         }
-      }).then(() => {
-        // TODO: update promise
-      });
+      })
+      .then(() => Logger.log('Reset password email sent'));
     }
 
     response.status(HttpStatus.OK);
+  }
+
+  // prettier-ignore
+  async changePassword(request: Request, response: Response, changePasswordDto: ChangePasswordDto): Promise<User> {
+    const token: string | undefined = changePasswordDto.token;
+
+    if (token) {
+      try {
+        const jwtSignOptions: any = await this.jwtService.verifyAsync(token);
+
+        // @ts-ignore
+        const userUpdateArgs: Prisma.UserUpdateArgs = {
+          select: this.prismaService.setUserSelect(),
+          where: {
+            id: Number(jwtSignOptions.sub)
+          },
+          data: {
+            password: await hash(changePasswordDto.password, 10)
+          }
+        };
+
+        return this.prismaService.user.update(userUpdateArgs);
+      } catch (error: any) {
+        throw new BadRequestException();
+      }
+    }
+
+    throw new UnauthorizedException();
   }
 
   async social(request: Request, response: Response, socialId: string): Promise<void> {
