@@ -264,6 +264,18 @@ export class AuthService {
       try {
         const jwtSignOptions: any = await this.jwtService.verifyAsync(token);
 
+        /** Remove all sessions */
+
+        const sessionDeleteManyArgs: Prisma.SessionDeleteManyArgs = {
+          where: {
+            userId: Number(jwtSignOptions.sub)
+          }
+        };
+
+        await this.prismaService.session.deleteMany(sessionDeleteManyArgs);
+
+        /** Update user password */
+
         // @ts-ignore
         const userUpdateArgs: Prisma.UserUpdateArgs = {
           select: this.prismaService.setUserSelect(),
