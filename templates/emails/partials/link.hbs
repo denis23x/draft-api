@@ -1,0 +1,37 @@
+<table
+	class="button_block block-4"
+	width="100%"
+	border="0"
+	cellpadding="0"
+	cellspacing="0"
+	role="presentation"
+	style="mso-table-lspace:0;mso-table-rspace:0"
+>
+	<tr>
+		<td
+			class="pad"
+			style="padding-bottom:10px;padding-top:10px;text-align:left"
+		>
+      <div class="alignment" align="left">
+        <!--[if mso]>
+          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ host }}{{ path }}{{#if token}}?token={{token}}{{/if}}" style="height:52px;width:568px;v-text-anchor:middle;" arcsize="58%" stroke="false" fillcolor="#2c39fc"><w:anchorlock/><v:textbox inset="0px,0px,0px,0px"><center style="color:#ffffff; font-family:Arial, sans-serif; font-size:16px"><![endif]-->
+        <a
+          href="{{ host }}{{ path }}{{#if token}}/?token={{token}}{{/if}}"
+          target="_blank"
+          style="text-decoration:none;display:block;color:#ffffff;background-color:#2c39fc;border-radius:30px;width:100%;border-top:0px solid transparent;font-weight:700;border-right:0px solid transparent;border-bottom:0px solid transparent;border-left:0px solid transparent;padding-top:10px;padding-bottom:10px;font-family:Open Sans, Helvetica, Arial, sans-serif;font-size:16px;text-align:center;mso-border-alt:none;word-break:keep-all;"
+        >
+          <span
+            style="padding-left:30px;padding-right:30px;font-size:16px;display:inline-block;letter-spacing:normal;"
+          >
+            <span dir="ltr" style="word-break:break-word;">
+              <span style="line-height: 32px;" dir="ltr" data-mce-style>
+                {{> @partial-block }}
+              </span>
+            </span>
+          </span>
+        </a>
+        <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
+      </div>
+		</td>
+	</tr>
+</table>

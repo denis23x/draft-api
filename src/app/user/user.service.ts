@@ -8,7 +8,6 @@ import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dt
 import { compare, hash } from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { stat, unlink } from 'fs';
-import { Stats } from 'fs';
 
 @Injectable()
 export class UserService {

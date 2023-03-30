@@ -32,7 +32,7 @@ import { join } from 'path';
           from: 'Draft website'
         },
         template: {
-          dir: join(__dirname, '../emails'),
+          dir: join(__dirname, '../../templates/emails'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true
@@ -40,7 +40,7 @@ import { join } from 'path';
         },
         options: {
           partials: {
-            dir: join(__dirname, '../emails/partials'),
+            dir: join(__dirname, '../../templates/emails/partials'),
             options: {
               strict: true
             }

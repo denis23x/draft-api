@@ -72,7 +72,7 @@ const bootstrap = async () => {
   app.use(compression());
 
   try {
-    const description: string = readFileSync('src/assets/md/swagger-ui-description.md', 'utf8');
+    const description: string = readFileSync('src/assets/md/swagger-ui.md', 'utf8');
 
     const config = new DocumentBuilder()
       .setTitle('Swagger UI')

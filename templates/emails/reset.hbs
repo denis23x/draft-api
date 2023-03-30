@@ -1,0 +1,13 @@
+{{#> layout }}
+  {{#> content }}
+    {{#> title }} Forgot you password? {{/ title }}
+
+    {{#> paragraph }}
+      We are writing to confirm that you have
+      requested a password reset. If you not
+      request this change, just ignore this email.
+    {{/ paragraph }}
+
+    {{#> link path="/reset/password" token=token }} CHANGE PASSWORD {{/ link }}
+  {{/ content }}
+{{/ layout }}
