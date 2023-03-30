@@ -203,6 +203,7 @@ export class UserService {
     const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
       select: {
         avatar: true,
+        email: true,
         password: true
       },
       where: {
@@ -272,31 +273,29 @@ export class UserService {
         });
       }
 
-      // TODO: send email
-      // if (!!newPassword) {
-      //   this.mailerService.sendMail({
-      //     to: user.email,
-      //     subject: user.name + ' your password has been changed',
-      //     template: 'changed-password',
-      //     context: {
-      //       user: user,
-      //       host: process.env.APP_SITE_ORIGIN
-      //     }
-      //   });
-      // }
+      if (!!newPassword) {
+        this.mailerService.sendMail({
+          to: user.email,
+          subject: 'Your password has been changed',
+          template: 'changed-password',
+          context: {
+            user: user,
+            host: process.env.APP_SITE_ORIGIN
+          }
+        });
+      }
 
-      // TODO: send email
-      // if (!!newEmail) {
-      //   this.mailerService.sendMail({
-      //     to: newEmail,
-      //     subject: user.name + ' your email has been changed',
-      //     template: 'changed-email',
-      //     context: {
-      //       user: user,
-      //       host: process.env.APP_SITE_ORIGIN
-      //     }
-      //   });
-      // }
+      if (!!newEmail) {
+        this.mailerService.sendMail({
+          to: [userCurrent.email, user.email],
+          subject: 'Your email has been changed',
+          template: 'changed-email',
+          context: {
+            user: user,
+            host: process.env.APP_SITE_ORIGIN
+          }
+        });
+      }
 
       return user;
     });
