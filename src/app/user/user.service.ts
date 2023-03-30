@@ -1,13 +1,14 @@
 /** @format */
 
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Prisma, User } from '@prisma/client';
 import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
-import { existsSync, unlinkSync } from 'fs';
-import { hash } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { stat, unlink } from 'fs';
+import { Stats } from 'fs';
 
 @Injectable()
 export class UserService {
@@ -28,7 +29,10 @@ export class UserService {
     };
 
     if (userCreateDto.hasOwnProperty('password')) {
-      userCreateArgs.data.password = await hash(userCreateDto.password, 10);
+      userCreateArgs.data = {
+        ...userCreateArgs.data,
+        password: await hash(userCreateDto.password, 10)
+      };
     }
 
     return this.prismaService.user.create(userCreateArgs).then((user: User) => {
@@ -185,56 +189,118 @@ export class UserService {
   }
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
+    const { password, newPassword, newEmail, ...userUpdateDtoData } = userUpdateDto;
+
     const userUpdateArgs: Prisma.UserUpdateArgs = {
       select: this.prismaService.setUserSelect(),
       where: {
         id
       },
-      data: userUpdateDto
+      data: userUpdateDtoData
     };
 
-    if (!!userUpdateDto) {
-      /** Update */
+    /** Get current state for next expressions */
 
-      if (userUpdateDto.hasOwnProperty('settings')) {
-        userUpdateArgs.select = {
-          ...userUpdateArgs.select,
-          settings: {
-            select: this.prismaService.setSettingsSelect()
-          }
-        };
-
-        userUpdateArgs.data = {
-          ...userUpdateArgs.data,
-          settings: {
-            update: userUpdateDto.settings
-          }
-        };
+    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
+      select: {
+        avatar: true,
+        password: true
+      },
+      where: {
+        id
       }
+    };
 
-      /** Remove previous avatar */
+    const userCurrent: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 
-      if (userUpdateDto.hasOwnProperty('avatar')) {
-        const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-          select: {
-            avatar: true
-          },
-          where: {
-            id
-          }
-        };
+    /** Update sensitive data */
 
-        await this.prismaService.user.findUnique(userFindUniqueArgs).then((user: User) => {
-          const path: string = './upload/avatars/' + user.avatar?.split('/').pop();
+    if (!!password) {
+      const isAuthenticated: boolean = await compare(password, userCurrent.password);
 
-          if (existsSync(path)) {
-            unlinkSync(path);
-          }
-        });
+      if (isAuthenticated) {
+        if (!!newEmail) {
+          userUpdateArgs.data = {
+            ...userUpdateArgs.data,
+            email: newEmail
+          };
+        }
+
+        if (!!newPassword) {
+          userUpdateArgs.data = {
+            ...userUpdateArgs.data,
+            password: await hash(newPassword, 10)
+          };
+        }
+      } else {
+        throw new ForbiddenException();
       }
     }
 
-    return this.prismaService.user.update(userUpdateArgs);
+    /** Update settings */
+
+    if (userUpdateDtoData.hasOwnProperty('settings')) {
+      userUpdateArgs.select = {
+        ...userUpdateArgs.select,
+        settings: {
+          select: this.prismaService.setSettingsSelect()
+        }
+      };
+
+      userUpdateArgs.data = {
+        ...userUpdateArgs.data,
+        settings: {
+          update: userUpdateDtoData.settings
+        }
+      };
+    }
+
+    return this.prismaService.user.update(userUpdateArgs).then((user: User) => {
+      if (userUpdateDtoData.hasOwnProperty('avatar')) {
+        const avatar: string = userCurrent.avatar?.split('/').pop();
+        const avatarPath: string = './upload/avatars/' + avatar;
+
+        stat(avatarPath, (error: NodeJS.ErrnoException | null) => {
+          if (!!error) {
+            console.log(error);
+          } else {
+            unlink(avatarPath, (error: NodeJS.ErrnoException | null) => {
+              if (!!error) {
+                console.log(error);
+              }
+            });
+          }
+        });
+      }
+
+      // TODO: send email
+      // if (!!newPassword) {
+      //   this.mailerService.sendMail({
+      //     to: user.email,
+      //     subject: user.name + ' your password has been changed',
+      //     template: 'changed-password',
+      //     context: {
+      //       user: user,
+      //       host: process.env.APP_SITE_ORIGIN
+      //     }
+      //   });
+      // }
+
+      // TODO: send email
+      // if (!!newEmail) {
+      //   this.mailerService.sendMail({
+      //     to: newEmail,
+      //     subject: user.name + ' your email has been changed',
+      //     template: 'changed-email',
+      //     context: {
+      //       user: user,
+      //       host: process.env.APP_SITE_ORIGIN
+      //     }
+      //   });
+      // }
+
+      return user;
+    });
   }
 
   async delete(request: Request, id: number): Promise<User> {

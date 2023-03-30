@@ -175,7 +175,7 @@ export class AuthService {
         where: {
           id: session.id
         }
-      }
+      };
 
       await this.prismaService.session.delete(sessionDeleteArgs);
 
@@ -193,7 +193,7 @@ export class AuthService {
           where: {
             id: session.userId
           }
-        }
+        };
 
         const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
 

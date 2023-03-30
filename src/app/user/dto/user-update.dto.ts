@@ -37,6 +37,35 @@ export class UserUpdateDto {
   @IsEmail()
   email?: string;
 
+  @ApiPropertyOptional({
+    description: 'Password',
+    minLength: 6,
+    maxLength: 32
+  })
+  @IsOptional()
+  @MinLength(6)
+  @MaxLength(32)
+  @IsString()
+  password?: string;
+
+  @ApiPropertyOptional({
+    default: 'moder2@moder.com'
+  })
+  @IsOptional()
+  @IsEmail()
+  newEmail?: string;
+
+  @ApiPropertyOptional({
+    description: 'Password',
+    minLength: 6,
+    maxLength: 32
+  })
+  @IsOptional()
+  @MinLength(6)
+  @MaxLength(32)
+  @IsString()
+  newPassword?: string;
+
   @ApiHideProperty()
   @IsOptional()
   settings?: any;
