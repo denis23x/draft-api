@@ -1,10 +1,10 @@
 /** @format */
 
 import { Module } from '@nestjs/common';
-import { HelperService, PrismaService } from './services';
+import { HelperService, PrismaService, WinstonService } from './services';
 
 @Module({
-  providers: [HelperService, PrismaService],
-  exports: [HelperService, PrismaService]
+  providers: [HelperService, WinstonService, PrismaService],
+  exports: [HelperService, WinstonService, PrismaService]
 })
 export class CoreModule {}

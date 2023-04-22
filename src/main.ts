@@ -4,7 +4,7 @@ import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/comm
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { TransformInterceptor, PrismaExceptionFilter } from './app/core';
+import { TransformInterceptor, PrismaExceptionFilter, WinstonService } from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
@@ -17,6 +17,7 @@ const bootstrap = async () => {
   const port = Number(process.env.APP_PORT);
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: new WinstonService(),
     cors: {
       // prettier-ignore
       origin: [process.env.APP_SITE_ORIGIN, /\.ngrok\.io$/].concat(process.env.APP_SITE_CORS.split(',')),
@@ -110,7 +111,7 @@ const bootstrap = async () => {
 
     SwaggerModule.setup('docs', app, openAPIObject, swaggerCustomOptions);
   } catch (error: any) {
-    Logger.error("Can't start Swagger UI: " + error);
+    Logger.error("Can't start Swagger UI", error);
   }
 
   await app.listen(port, () => Logger.log('http://localhost:' + port + '/docs'));
