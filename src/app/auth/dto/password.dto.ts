@@ -3,7 +3,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, MaxLength, MinLength } from 'class-validator';
 
-export class ChangePasswordDto {
+export class PasswordDto {
   @ApiProperty({
     default: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
   })

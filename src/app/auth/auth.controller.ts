@@ -4,7 +4,7 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, LogoutDto, TokenDto, FingerprintDto, ResetDto, ChangePasswordDto } from './dto';
+import { LoginDto, LogoutDto, TokenDto, FingerprintDto, ResetDto, PasswordDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
@@ -86,9 +86,9 @@ export class AuthController {
     status: 200,
     type: UserDto
   })
-  @Post('change/password')
-  async changePassword(@Req() request: Request, @Res(responseOptions) response: Response, @Body() changePasswordDto: ChangePasswordDto): Promise<User> {
-    return this.authService.changePassword(request, response, changePasswordDto);
+  @Post('password')
+  async password(@Req() request: Request, @Res(responseOptions) response: Response, @Body() passwordDto: PasswordDto): Promise<User> {
+    return this.authService.password(request, response, passwordDto);
   }
 
   /** SOCIAL */

@@ -1,6 +1,6 @@
 /** @format */
 
-export { ChangePasswordDto } from './change-password.dto';
+export { PasswordDto } from './password.dto';
 export { FingerprintDto } from './fingerprint.dto';
 export { LoginDto } from './login.dto';
 export { LogoutDto } from './logout.dto';

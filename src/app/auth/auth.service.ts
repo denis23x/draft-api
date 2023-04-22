@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
-import { ChangePasswordDto, FingerprintDto, LoginDto, LogoutDto, ResetDto, TokenDto } from './dto';
+import { PasswordDto, FingerprintDto, LoginDto, LogoutDto, ResetDto, TokenDto } from './dto';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
@@ -257,8 +257,8 @@ export class AuthService {
   }
 
   // prettier-ignore
-  async changePassword(request: Request, response: Response, changePasswordDto: ChangePasswordDto): Promise<User> {
-    const token: string | undefined = changePasswordDto.token;
+  async password(request: Request, response: Response, passwordDto: PasswordDto): Promise<User> {
+    const token: string | undefined = passwordDto.token;
 
     if (token) {
       try {
@@ -283,11 +283,23 @@ export class AuthService {
             id: Number(jwtSignOptions.sub)
           },
           data: {
-            password: await hash(changePasswordDto.password, 10)
+            password: await hash(passwordDto.password, 10)
           }
         };
 
-        return this.prismaService.user.update(userUpdateArgs);
+        return this.prismaService.user.update(userUpdateArgs).then((user: User) => {
+          this.mailerService.sendMail({
+            to: user.email,
+            subject: 'Your password has been changed',
+            template: 'changed-password',
+            context: {
+              user: user,
+              host: process.env.APP_SITE_ORIGIN
+            }
+          });
+
+          return user;
+        });
       } catch (error: any) {
         throw new BadRequestException();
       }
