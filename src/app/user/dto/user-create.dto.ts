@@ -1,6 +1,8 @@
 /** @format */
 
 import {
+  Equals,
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
@@ -10,6 +12,7 @@ import {
   ValidateIf
 } from 'class-validator';
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class UserCreateDto {
   @ApiProperty({
@@ -45,6 +48,16 @@ export class UserCreateDto {
   @MaxLength(32)
   @IsString()
   password?: string;
+
+  @ApiProperty({
+    description: 'Terms of use',
+    default: true
+  })
+  @IsNotEmpty()
+  @Equals(true)
+  @IsBoolean()
+  @Type(() => Boolean)
+  terms: boolean;
 
   @ApiHideProperty()
   @IsOptional()

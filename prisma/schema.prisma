@@ -8,31 +8,31 @@ datasource db {
 }
 
 model Settings {
-  id                Int           @db.Int @id @default(autoincrement())
-  userId            Int           @db.Int @unique
-  theme             String        @db.VarChar(255) @default("light")
-  themePrism        String        @db.VarChar(255) @default("default")
-  themeBackground   String        @db.VarChar(255) @default("slanted-gradient")
-  language          String        @db.VarChar(255) @default("en-US")
-  buttons           String        @db.VarChar(255) @default("left")
-  monospace         Boolean       @db.TinyInt @default(true)
-  createdAt         DateTime      @db.DateTime(6) @default(now())
-  updatedAt         DateTime      @db.DateTime(6) @default(now())
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              Int      @id @default(autoincrement()) @db.Int
+  userId          Int      @unique @db.Int
+  theme           String   @default("light") @db.VarChar(255)
+  themePrism      String   @default("default") @db.VarChar(255)
+  themeBackground String   @default("slanted-gradient") @db.VarChar(255)
+  language        String   @default("en-US") @db.VarChar(255)
+  buttons         String   @default("left") @db.VarChar(255)
+  monospace       Boolean  @default(true) @db.TinyInt
+  createdAt       DateTime @default(now()) @db.DateTime(6)
+  updatedAt       DateTime @default(now()) @db.DateTime(6)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Session {
-  id          Int      @db.Int @id @default(autoincrement())
+  id          Int      @id @default(autoincrement()) @db.Int
   userId      Int      @db.Int
   ua          String   @db.VarChar(255)
   fingerprint String   @db.VarChar(255)
-  refresh     String   @db.VarChar(255) @default(uuid())
+  refresh     String   @default(uuid()) @db.VarChar(255)
   expires     String   @db.VarChar(255)
   ip          String   @db.VarChar(255)
-  createdAt   DateTime @db.DateTime(6) @default(now())
-  updatedAt   DateTime @db.DateTime(6) @default(now())
+  createdAt   DateTime @default(now()) @db.DateTime(6)
+  updatedAt   DateTime @default(now()) @db.DateTime(6)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([fingerprint, userId])
@@ -40,52 +40,54 @@ model Session {
 }
 
 model User {
-  id            Int        @db.Int @id @default(autoincrement())
-  googleId      String?    @db.VarChar(255)
-  facebookId    String?    @db.VarChar(255)
-  name          String     @db.VarChar(255) @unique
-  description   String?    @db.VarChar(255)
-  avatar        String?    @db.VarChar(255)
-  email         String     @db.VarChar(255) @unique
-  password      String?    @db.VarChar(255)
-  createdAt     DateTime   @db.DateTime(6) @default(now())
-  updatedAt     DateTime   @db.DateTime(6) @default(now())
-  deletedAt     DateTime?  @db.DateTime(6)
-  githubId      String?    @db.VarChar(255)
-  categories    Category[]
-  posts         Post[]
-  sessions      Session[]
-  settings      Settings?
+  id             Int        @id @default(autoincrement()) @db.Int
+  googleId       String?    @db.VarChar(255)
+  facebookId     String?    @db.VarChar(255)
+  name           String     @unique @db.VarChar(255)
+  description    String?    @db.VarChar(255)
+  avatar         String?    @db.VarChar(255)
+  email          String     @unique @db.VarChar(255)
+  emailConfirmed Boolean    @default(false) @db.TinyInt
+  password       String?    @db.VarChar(255)
+  createdAt      DateTime   @default(now()) @db.DateTime(6)
+  updatedAt      DateTime   @default(now()) @db.DateTime(6)
+  deletedAt      DateTime?  @db.DateTime(6)
+  githubId       String?    @db.VarChar(255)
+  terms          Boolean    @default(true) @db.TinyInt
+  categories     Category[]
+  posts          Post[]
+  sessions       Session[]
+  settings       Settings?
 }
 
 model Category {
-  id            Int       @db.Int @id @default(autoincrement())
-  userId        Int       @db.Int
-  name          String    @db.VarChar(255)
-  description   String?   @db.VarChar(255)
-  createdAt     DateTime  @db.DateTime(6) @default(now())
-  updatedAt     DateTime  @db.DateTime(6) @default(now())
-  deletedAt     DateTime? @db.DateTime(6)
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  posts         Post[]
+  id          Int       @id @default(autoincrement()) @db.Int
+  userId      Int       @db.Int
+  name        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @db.DateTime(6)
+  deletedAt   DateTime? @db.DateTime(6)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts       Post[]
 
   @@unique([name, userId])
   @@index([userId])
 }
 
 model Post {
-  id            Int       @db.Int @id @default(autoincrement())
-  name          String    @db.VarChar(255)
-  description   String    @db.VarChar(255)
-  markdown      String    @db.Text
-  image         String?   @db.VarChar(255)
-  userId        Int       @db.Int
-  categoryId    Int       @db.Int
-  createdAt     DateTime  @db.DateTime(6) @default(now())
-  updatedAt     DateTime  @db.DateTime(6) @default(now())
-  deletedAt     DateTime? @db.DateTime(6)
-  category      Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  user          User      @relation(fields: [userId], references: [id])
+  id          Int       @id @default(autoincrement()) @db.Int
+  name        String    @db.VarChar(255)
+  description String    @db.VarChar(255)
+  markdown    String    @db.Text
+  image       String?   @db.VarChar(255)
+  userId      Int       @db.Int
+  categoryId  Int       @db.Int
+  createdAt   DateTime  @default(now()) @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @db.DateTime(6)
+  deletedAt   DateTime? @db.DateTime(6)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id])
 
   @@unique([name, userId, categoryId])
   @@index([categoryId])
