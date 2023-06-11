@@ -2,6 +2,7 @@
 
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsNumber,
@@ -54,6 +55,13 @@ export class UserDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @ApiProperty({
+    default: false
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  emailConfirmed: boolean;
 
   @ApiProperty()
   @IsString()
