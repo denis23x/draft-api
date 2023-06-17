@@ -5,10 +5,12 @@ import { PrismaService } from '../core';
 import { Request, Response } from 'express';
 import { FileCreateDto, FileGetOneDto } from './dto';
 import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FileService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly httpService: HttpService
   ) {}
@@ -21,7 +23,7 @@ export class FileService {
 
       return {
         ...file,
-        path: file.path.replace('upload', process.env.APP_ORIGIN)
+        path: file.path.replace('upload', this.configService.get('APP_ORIGIN'))
       };
     }
 
@@ -39,7 +41,7 @@ export class FileService {
         response.status(axiosResponse.status);
         response.header({
           ...axiosResponse.headers,
-          'access-control-allow-origin': process.env.APP_SITE_ORIGIN
+          'access-control-allow-origin': this.configService.get('APP_SITE_ORIGIN')
         });
 
         axiosResponse.data.pipe(response);

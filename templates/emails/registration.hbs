@@ -8,6 +8,11 @@
       exceptional user experience.
     {{/ paragraph }}
 
-    {{#> link path="/create" }} GO CREATE {{/ link }}
+    {{#> paragraph }}
+      To complete the registration process and confirm your account,
+      we kindly ask you to confirm your email address.
+    {{/ paragraph }}
+
+    {{#> link path="/email/confirmation" token=token }} CONFIRM EMAIL {{/ link }}
   {{/ content }}
 {{/ layout }}

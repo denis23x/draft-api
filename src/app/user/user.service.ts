@@ -8,10 +8,12 @@ import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dt
 import { compare, hash } from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { stat, unlink } from 'fs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly mailerService: MailerService
   ) {}
@@ -41,7 +43,7 @@ export class UserService {
         template: 'registration',
         context: {
           user: user,
-          host: process.env.APP_SITE_ORIGIN
+          host: this.configService.get('APP_SITE_ORIGIN')
         }
       });
 
@@ -280,7 +282,7 @@ export class UserService {
           template: 'changed-password',
           context: {
             user: user,
-            host: process.env.APP_SITE_ORIGIN
+            host: this.configService.get('APP_SITE_ORIGIN')
           }
         });
       }
@@ -292,7 +294,7 @@ export class UserService {
           template: 'changed-email',
           context: {
             user: user,
-            host: process.env.APP_SITE_ORIGIN
+            host: this.configService.get('APP_SITE_ORIGIN')
           }
         });
       }

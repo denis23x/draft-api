@@ -16,10 +16,12 @@ import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService,
     private readonly mailerService: MailerService
@@ -82,14 +84,14 @@ export class AuthService {
             fingerprint: loginDto.fingerprint,
             ip: request.ip,
             refresh: randomUUID(),
-            expires: String(Date.now() + Number(process.env.JWT_REFRESH_TTL))
+            expires: String(Date.now() + Number(this.configService.get('JWT_REFRESH_TTL')))
           },
           create: {
             ua: request.headers['user-agent'],
             fingerprint: loginDto.fingerprint,
             ip: request.ip,
             refresh: randomUUID(),
-            expires: String(Date.now() + Number(process.env.JWT_REFRESH_TTL)),
+            expires: String(Date.now() + Number(this.configService.get('JWT_REFRESH_TTL'))),
             user: {
               connect: {
                 id: user.id
@@ -203,7 +205,7 @@ export class AuthService {
             fingerprint: fingerprintDto.fingerprint,
             ip: request.ip,
             refresh: randomUUID(),
-            expires: String(Date.now() + Number(process.env.JWT_REFRESH_TTL)),
+            expires: String(Date.now() + Number(this.configService.get('JWT_REFRESH_TTL'))),
             user: {
               connect: {
                 id: user.id
@@ -243,9 +245,9 @@ export class AuthService {
         template: 'reset',
         context: {
           user: user,
-          host: process.env.APP_SITE_ORIGIN,
+          host: this.configService.get('APP_SITE_ORIGIN'),
           token: await this.jwtService.signAsync({},{
-            expiresIn: Number(process.env.JWT_ACCESS_TTL),
+            expiresIn: Number(this.configService.get('JWT_ACCESS_TTL')),
             subject: String(user.id),
           })
         }
@@ -294,7 +296,7 @@ export class AuthService {
             template: 'changed-password',
             context: {
               user: user,
-              host: process.env.APP_SITE_ORIGIN
+              host: this.configService.get('APP_SITE_ORIGIN')
             }
           });
 
@@ -328,7 +330,7 @@ export class AuthService {
       const user: User = await this.prismaService.user.upsert(userUpsertArgs);
 
       const getUrl = (): string => {
-        const url: URL = new URL(process.env.APP_SITE_ORIGIN);
+        const url: URL = new URL(this.configService.get('APP_SITE_ORIGIN'));
         const urlSearchParams: URLSearchParams = new URLSearchParams([
           ['email', user.email],
           [socialId, user[socialId]]
@@ -352,7 +354,7 @@ export class AuthService {
     // TODO: enable secure and sameSite (need HTTPS)
 
     response.cookie('refresh', session.refresh, {
-      domain: process.env.APP_COOKIE_DOMAIN,
+      domain: this.configService.get('APP_COOKIE_DOMAIN'),
       path: '/api/auth',
       signed: true,
       httpOnly: true,
@@ -377,7 +379,7 @@ export class AuthService {
     return {
       ...user,
       token: await this.jwtService.signAsync({}, {
-        expiresIn: Number(process.env.JWT_ACCESS_TTL),
+        expiresIn: Number(this.configService.get('JWT_ACCESS_TTL')),
         subject: String(user.id),
         jwtid: String(session.id)
       })
@@ -391,7 +393,7 @@ export class AuthService {
     // TODO: enable secure and sameSite (need HTTPS)
 
     response.cookie('refresh', String(0), {
-      domain: process.env.APP_COOKIE_DOMAIN,
+      domain: this.configService.get('APP_COOKIE_DOMAIN'),
       path: '/api/auth',
       signed: true,
       httpOnly: true,

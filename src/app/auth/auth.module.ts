@@ -7,17 +7,17 @@ import { AuthController } from './auth.controller';
 import { FacebookStrategy, GoogleStrategy, AccessStrategy, GithubStrategy } from './strategies';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
+import { JwtConfigService } from '../core';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     HttpModule,
     PassportModule,
     JwtModule.registerAsync({
-      useFactory: async (): Promise<any> => ({
-        issuer: process.env.JWT_ISSUER,
-        audience: process.env.JWT_AUDIENCE,
-        secret: process.env.JWT_SECRET
-      })
+      imports: [ConfigModule],
+      useExisting: JwtConfigService
     })
   ],
   controllers: [AuthController],

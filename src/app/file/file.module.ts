@@ -12,9 +12,11 @@ import { existsSync, mkdirSync } from 'fs';
 import { MulterModuleOptions } from '@nestjs/platform-express/multer/interfaces/files-upload-module.interface';
 import * as mime from 'mime-types';
 import * as crypto from 'crypto';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     HttpModule,
     MulterModule.registerAsync({
       useFactory: async (): Promise<MulterModuleOptions> => ({
