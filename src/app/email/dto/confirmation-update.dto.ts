@@ -3,7 +3,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class EmailConfirmationDto {
+export class ConfirmationUpdateDto {
   @ApiProperty({
     description: 'Token',
     default: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'

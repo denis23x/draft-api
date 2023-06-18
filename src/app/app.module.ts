@@ -13,6 +13,8 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { UtilitiesModule } from './utilities/utilities.module';
+import { PasswordModule } from './password/password.module';
+import { EmailModule } from './email/email.module';
 import { join } from 'path';
 
 @Global()
@@ -75,7 +77,9 @@ import { join } from 'path';
     AuthModule,
     CategoryModule,
     CoreModule,
+    EmailModule,
     FileModule,
+    PasswordModule,
     PostModule,
     UserModule,
     UtilitiesModule
