@@ -224,7 +224,8 @@ export class UserService {
         if (!!newEmail) {
           userUpdateArgs.data = {
             ...userUpdateArgs.data,
-            email: newEmail
+            email: newEmail,
+            emailConfirmed: false
           };
         }
 
@@ -291,7 +292,7 @@ export class UserService {
         this.mailerService.sendMail({
           to: [userCurrent.email, user.email],
           subject: 'Your email has been changed',
-          template: 'changed-email',
+          template: 'email-changed',
           context: {
             user: user,
             host: this.configService.get('APP_SITE_ORIGIN')
