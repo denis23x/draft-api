@@ -1,12 +1,14 @@
 /** @format */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
-export class PasswordDto {
+export class PasswordSetDto {
   @ApiProperty({
+    description: 'Token',
     default: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
   })
+  @IsNotEmpty()
   @IsString()
   token: string;
 
@@ -15,6 +17,7 @@ export class PasswordDto {
     minLength: 6,
     maxLength: 32
   })
+  @IsNotEmpty()
   @MinLength(6)
   @MaxLength(32)
   @IsString()

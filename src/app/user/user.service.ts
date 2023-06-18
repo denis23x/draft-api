@@ -280,7 +280,7 @@ export class UserService {
         this.mailerService.sendMail({
           to: user.email,
           subject: 'Your password has been changed',
-          template: 'changed-password',
+          template: 'password-changed',
           context: {
             user: user,
             host: this.configService.get('APP_SITE_ORIGIN')

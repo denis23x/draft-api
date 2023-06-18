@@ -4,7 +4,7 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, LogoutDto, TokenDto, FingerprintDto, ResetDto, PasswordDto } from './dto';
+import { LoginDto, LogoutDto, TokenDto, FingerprintDto } from './dto';
 import { User } from '@prisma/client';
 import { UserDto } from '../user/dto';
 import {
@@ -64,31 +64,6 @@ export class AuthController {
   @Post('refresh')
   async refresh(@Req() request: Request, @Res(responseOptions) response: Response, @Body() fingerprintDto: FingerprintDto): Promise<User> {
     return this.authService.refresh(request, response, fingerprintDto);
-  }
-
-  // prettier-ignore
-  @ApiOperation({
-    description: '## Auth reset email'
-  })
-  @ApiResponse({
-    status: 200
-  })
-  @Post('reset')
-  async reset(@Req() request: Request, @Res(responseOptions) response: Response, @Body() resetDto: ResetDto): Promise<any> {
-    return this.authService.reset(request, response, resetDto);
-  }
-
-  // prettier-ignore
-  @ApiOperation({
-    description: '## Auth change password'
-  })
-  @ApiResponse({
-    status: 200,
-    type: UserDto
-  })
-  @Post('password')
-  async password(@Req() request: Request, @Res(responseOptions) response: Response, @Body() passwordDto: PasswordDto): Promise<User> {
-    return this.authService.password(request, response, passwordDto);
   }
 
   /** SOCIAL */

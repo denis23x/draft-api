@@ -3,7 +3,7 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ResetDto {
+export class PasswordResetDto {
   @ApiProperty({
     description: 'Email'
   })

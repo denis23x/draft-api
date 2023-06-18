@@ -1,21 +1,13 @@
 /** @format */
 
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException
-} from '@nestjs/common';
-import { compare, hash } from 'bcrypt';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { compare } from 'bcrypt';
 import { Request, Response } from 'express';
-import { PasswordDto, FingerprintDto, LoginDto, LogoutDto, ResetDto, TokenDto } from './dto';
+import { FingerprintDto, LoginDto, LogoutDto, TokenDto } from './dto';
 import { Prisma, Session, User } from '@prisma/client';
 import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
-import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -23,8 +15,7 @@ export class AuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-    private readonly prismaService: PrismaService,
-    private readonly mailerService: MailerService
+    private readonly prismaService: PrismaService
   ) {}
 
   async login(request: Request, response: Response, loginDto: LoginDto): Promise<User> {
@@ -224,90 +215,6 @@ export class AuthService {
     } else {
       throw new UnauthorizedException();
     }
-  }
-
-  async reset(request: Request, response: Response, resetDto: ResetDto): Promise<any> {
-    // @ts-ignore
-    const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-      select: this.prismaService.setUserSelect(),
-      where: {
-        email: resetDto.email
-      }
-    };
-
-    const user: User = await this.prismaService.user.findUnique(userFindUniqueArgs);
-
-    if (!!user) {
-      // prettier-ignore
-      this.mailerService.sendMail({
-        to: user.email,
-        subject: 'Forgot your password?',
-        template: 'reset',
-        context: {
-          user: user,
-          host: this.configService.get('APP_SITE_ORIGIN'),
-          token: await this.jwtService.signAsync({}, {
-            expiresIn: Number(this.configService.get('JWT_ACCESS_TTL')),
-            subject: String(user.id),
-          })
-        }
-      })
-      .then(() => Logger.log('Reset password email sent'));
-    }
-
-    response.status(HttpStatus.OK);
-  }
-
-  // prettier-ignore
-  async password(request: Request, response: Response, passwordDto: PasswordDto): Promise<User> {
-    const token: string | undefined = passwordDto.token;
-
-    if (token) {
-      try {
-        const jwtSignOptions: any = await this.jwtService.verifyAsync(token);
-
-        /** Remove all sessions */
-
-        const sessionDeleteManyArgs: Prisma.SessionDeleteManyArgs = {
-          where: {
-            userId: Number(jwtSignOptions.sub)
-          }
-        };
-
-        await this.prismaService.session.deleteMany(sessionDeleteManyArgs);
-
-        /** Update user password */
-
-        // @ts-ignore
-        const userUpdateArgs: Prisma.UserUpdateArgs = {
-          select: this.prismaService.setUserSelect(),
-          where: {
-            id: Number(jwtSignOptions.sub)
-          },
-          data: {
-            password: await hash(passwordDto.password, 10)
-          }
-        };
-
-        return this.prismaService.user.update(userUpdateArgs).then((user: User) => {
-          this.mailerService.sendMail({
-            to: user.email,
-            subject: 'Your password has been changed',
-            template: 'changed-password',
-            context: {
-              user: user,
-              host: this.configService.get('APP_SITE_ORIGIN')
-            }
-          });
-
-          return user;
-        });
-      } catch (error: any) {
-        throw new BadRequestException();
-      }
-    }
-
-    throw new UnauthorizedException();
   }
 
   async social(request: Request, response: Response, socialId: string): Promise<void> {

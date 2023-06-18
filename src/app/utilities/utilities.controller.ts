@@ -1,10 +1,10 @@
 /** @format */
 
-import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { UtilitiesService } from './utilities.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { EmailConfirmationDto } from './dto';
+import { EmailConfirmationDto, PasswordResetDto, PasswordSetDto } from './dto';
 import { UserDto } from '../user/dto';
 import { User } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
@@ -40,6 +40,32 @@ export class UtilitiesController {
   @Post('email/confirmation')
   async postEmailConfirmation(@Req() request: Request, @Query() emailConfirmationDto: EmailConfirmationDto): Promise<User> {
     return this.utilitiesService.postEmailConfirmation(request, emailConfirmationDto);
+  }
+
+  // prettier-ignore
+  @ApiOperation({
+    description: '## Get password reset'
+  })
+  @ApiResponse({
+    status: 200,
+    type: UserDto
+  })
+  @Get('password/reset')
+  async getPasswordReset(@Req() request: Request, @Query() passwordResetDto: PasswordResetDto): Promise<User> {
+    return this.utilitiesService.getPasswordReset(request, passwordResetDto);
+  }
+
+  // prettier-ignore
+  @ApiOperation({
+    description: '## Post password reset'
+  })
+  @ApiResponse({
+    status: 200,
+    type: UserDto
+  })
+  @Post('password/reset')
+  async postPasswordReset(@Req() request: Request, @Body() passwordSetDto: PasswordSetDto): Promise<User> {
+    return this.utilitiesService.postPasswordReset(request, passwordSetDto);
   }
 
   /** DUMMY */
