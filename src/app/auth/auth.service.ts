@@ -246,7 +246,7 @@ export class AuthService {
         context: {
           user: user,
           host: this.configService.get('APP_SITE_ORIGIN'),
-          token: await this.jwtService.signAsync({},{
+          token: await this.jwtService.signAsync({}, {
             expiresIn: Number(this.configService.get('JWT_ACCESS_TTL')),
             subject: String(user.id),
           })
