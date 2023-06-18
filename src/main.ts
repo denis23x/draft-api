@@ -13,10 +13,10 @@ import { readFileSync } from 'fs';
 import helmet from 'helmet';
 
 const bootstrap = async () => {
-  const globalPrefix = process.env.APP_PREFIX;
-  const port = Number(process.env.APP_PORT);
+  const globalPrefix: string = process.env.APP_PREFIX;
+  const port: number = Number(process.env.APP_PORT);
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+  const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: new WinstonService(),
     cors: {
       // prettier-ignore

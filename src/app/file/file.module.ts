@@ -21,7 +21,7 @@ import { ConfigModule } from '@nestjs/config';
     MulterModule.registerAsync({
       useFactory: async (): Promise<MulterModuleOptions> => ({
         limits: {
-          fileSize: 1048576 // 1MB
+          fileSize: 1048576 * 1 // 1MB
         },
         fileFilter: (request: Request, file: Express.Multer.File, callback: any): void => {
           const mimeList: string[] = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
@@ -55,7 +55,7 @@ import { ConfigModule } from '@nestjs/config';
 
             callback(null, uploadPathField);
           },
-          filename: function (request: Request, file: Express.Multer.File, callback: any): void {
+          filename: (request: Request, file: Express.Multer.File, callback: any): void => {
             callback(null, crypto.randomUUID() + '.' + mime.extension(file.mimetype));
           }
         })

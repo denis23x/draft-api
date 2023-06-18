@@ -2,7 +2,13 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": ["../templates/**/*.hbs"],
+    "assets": [
+      {
+        "include": "../config/*.yaml",
+        "outDir": "./dist/config"
+      },
+      "../templates/**/*.hbs"
+    ],
     "watchAssets": true
   }
 }

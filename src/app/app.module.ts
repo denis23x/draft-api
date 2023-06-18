@@ -1,7 +1,7 @@
 /** @format */
 
 import { Module, Global, CacheModule, CacheInterceptor } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
@@ -12,20 +12,26 @@ import { UserModule } from './user/user.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { UtilitiesModule } from './utilities/utilities.module';
 import { join } from 'path';
 
 @Global()
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      cache: true,
+      expandVariables: true
+    }),
     MailerModule.forRootAsync({
-      useFactory: async () => ({
+      useFactory: async (configService: ConfigService) => ({
         transport: {
-          host: process.env.MAILER_HOST,
-          port: 587,
+          host: configService.get('MAILER_HOST'),
+          port: Number(configService.get('MAILER_PORT')),
           secure: false,
           auth: {
-            user: process.env.MAILER_USER,
-            pass: process.env.MAILER_PASSWORD
+            user: configService.get('MAILER_USER'),
+            pass: configService.get('MAILER_PASSWORD')
           }
         },
         defaults: {
@@ -46,26 +52,33 @@ import { join } from 'path';
             }
           }
         }
-      })
+      }),
+      imports: [ConfigModule],
+      inject: [ConfigService]
     }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env'
+    CacheModule.registerAsync({
+      useFactory: async (configService: ConfigService) => ({
+        ttl: Number(configService.get('APP_CACHE_TTL')),
+        max: Number(configService.get('APP_CACHE_MAX'))
+      }),
+      imports: [ConfigModule],
+      inject: [ConfigService]
     }),
-    CacheModule.register({
-      ttl: 5,
-      max: 20
-    }),
-    ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 40
+    ThrottlerModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => ({
+        ttl: Number(configService.get('APP_THROTTLER_TTL')),
+        limit: Number(configService.get('APP_THROTTLER_LIMIT'))
+      }),
+      imports: [ConfigModule],
+      inject: [ConfigService]
     }),
     AuthModule,
     CategoryModule,
     CoreModule,
     FileModule,
     PostModule,
-    UserModule
+    UserModule,
+    UtilitiesModule
   ],
   providers: [
     {
