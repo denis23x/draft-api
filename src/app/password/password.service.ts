@@ -20,7 +20,7 @@ export class PasswordService {
   ) {}
 
   // prettier-ignore
-  async getCheck(request: Request, passwordCheckGetDto: PasswordCheckGetDto): Promise<boolean> {
+  async getCheck(request: Request, passwordCheckGetDto: PasswordCheckGetDto): Promise<any> {
     const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
       select: {
         password: true
@@ -40,7 +40,9 @@ export class PasswordService {
         });
       });
 
-    return compare(passwordCheckGetDto.password, user.password);
+    return {
+      valid: await compare(passwordCheckGetDto.password, user.password)
+    };
   }
 
   // prettier-ignore

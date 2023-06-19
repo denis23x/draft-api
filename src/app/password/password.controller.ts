@@ -24,7 +24,7 @@ export class PasswordController {
   @ApiBearerAuth('access')
   @Get('check')
   @UseGuards(AuthGuard('access'))
-  async getCheck(@Req() request: Request, @Query() passwordCheckGetDto: PasswordCheckGetDto): Promise<boolean> {
+  async getCheck(@Req() request: Request, @Query() passwordCheckGetDto: PasswordCheckGetDto): Promise<any> {
     return this.passwordService.getCheck(request, passwordCheckGetDto);
   }
 
