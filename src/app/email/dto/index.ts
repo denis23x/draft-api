@@ -1,3 +1,3 @@
 /** @format */
 
-export { ConfirmationUpdateDto } from './confirmation-update.dto';
+export { EmailConfirmationUpdateDto } from './email-confirmation-update.dto';

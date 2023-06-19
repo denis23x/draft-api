@@ -31,7 +31,7 @@ export class FileService {
   }
 
   // prettier-ignore
-  async getOne(request: Request, response: Response, fileProxyGetOneDto: FileProxyGetOneDto): Promise<any> {
+  async proxyGet(request: Request, response: Response, fileProxyGetOneDto: FileProxyGetOneDto): Promise<any> {
     return this.httpService
       .axiosRef({
         url: fileProxyGetOneDto.url,

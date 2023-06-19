@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ConfirmationUpdateDto } from './dto';
+import { EmailConfirmationUpdateDto } from './dto';
 import { PrismaService } from '../core';
 import { Prisma, User } from '@prisma/client';
 
@@ -18,7 +18,7 @@ export class EmailService {
     private readonly prismaService: PrismaService
   ) {}
 
-  async getConfirmation(request: Request): Promise<User> {
+  async confirmationGet(request: Request): Promise<User> {
     const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
       select: this.prismaService.setUserSelect(),
       where: {
@@ -53,9 +53,9 @@ export class EmailService {
   }
 
   // prettier-ignore
-  async postConfirmation(request: Request, confirmationUpdateDto: ConfirmationUpdateDto): Promise<User> {
+  async confirmationUpdate(request: Request, emailConfirmationUpdateDto: EmailConfirmationUpdateDto): Promise<User> {
     try {
-      const jwtSignOptions: any = await this.jwtService.verifyAsync(confirmationUpdateDto.token);
+      const jwtSignOptions: any = await this.jwtService.verifyAsync(emailConfirmationUpdateDto.token);
 
       const userUpdateArgs: Prisma.UserUpdateArgs = {
         select: this.prismaService.setUserSelect(),

@@ -4,7 +4,7 @@ import { Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { EmailService } from './email.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ConfirmationUpdateDto } from './dto';
+import { EmailConfirmationUpdateDto } from './dto';
 import { UserDto } from '../user/dto';
 import { User } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
@@ -24,8 +24,8 @@ export class EmailController {
   @ApiBearerAuth('access')
   @Get('confirmation')
   @UseGuards(AuthGuard('access'))
-  async getConfirmation(@Req() request: Request): Promise<User> {
-    return this.emailService.getConfirmation(request);
+  async confirmationGet(@Req() request: Request): Promise<User> {
+    return this.emailService.confirmationGet(request);
   }
 
   // prettier-ignore
@@ -37,7 +37,7 @@ export class EmailController {
     type: UserDto
   })
   @Post('confirmation')
-  async postConfirmation(@Req() request: Request, @Query() confirmationUpdateDto: ConfirmationUpdateDto): Promise<User> {
-    return this.emailService.postConfirmation(request, confirmationUpdateDto);
+  async confirmationUpdate(@Req() request: Request, @Query() emailConfirmationUpdateDto: EmailConfirmationUpdateDto): Promise<User> {
+    return this.emailService.confirmationUpdate(request, emailConfirmationUpdateDto);
   }
 }

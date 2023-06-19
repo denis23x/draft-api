@@ -1,6 +1,6 @@
 /** @format */
 
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { PasswordService } from './password.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -16,41 +16,41 @@ export class PasswordController {
 
   // prettier-ignore
   @ApiOperation({
-    description: '## Get check'
+    description: '## Get passport validation'
   })
   @ApiResponse({
     status: 200
   })
   @ApiBearerAuth('access')
-  @Get('check')
+  @Post('check')
   @UseGuards(AuthGuard('access'))
-  async getCheck(@Req() request: Request, @Query() passwordCheckGetDto: PasswordCheckGetDto): Promise<any> {
-    return this.passwordService.getCheck(request, passwordCheckGetDto);
+  async checkGet(@Req() request: Request, @Body() passwordCheckGetDto: PasswordCheckGetDto): Promise<any> {
+    return this.passwordService.checkGet(request, passwordCheckGetDto);
   }
 
   // prettier-ignore
   @ApiOperation({
-    description: '## Get reset'
+    description: '## Get request to reset password'
   })
   @ApiResponse({
     status: 200,
     type: UserDto
   })
   @Get('reset')
-  async getReset(@Req() request: Request, @Query() passwordResetGetDto: PasswordResetGetDto): Promise<Partial<User>> {
-    return this.passwordService.getReset(request, passwordResetGetDto);
+  async resetGet(@Req() request: Request, @Query() passwordResetGetDto: PasswordResetGetDto): Promise<Partial<User>> {
+    return this.passwordService.resetGet(request, passwordResetGetDto);
   }
 
   // prettier-ignore
   @ApiOperation({
-    description: '## Post reset'
+    description: '## Update password'
   })
   @ApiResponse({
     status: 200,
     type: UserDto
   })
-  @Post('reset')
-  async postReset(@Req() request: Request, @Body() passwordResetUpdateDto: PasswordResetUpdateDto): Promise<Partial<User>> {
-    return this.passwordService.postReset(request, passwordResetUpdateDto);
+  @Put('reset')
+  async resetUpdate(@Req() request: Request, @Body() passwordResetUpdateDto: PasswordResetUpdateDto): Promise<Partial<User>> {
+    return this.passwordService.resetUpdate(request, passwordResetUpdateDto);
   }
 }

@@ -20,7 +20,7 @@ export class PasswordService {
   ) {}
 
   // prettier-ignore
-  async getCheck(request: Request, passwordCheckGetDto: PasswordCheckGetDto): Promise<any> {
+  async checkGet(request: Request, passwordCheckGetDto: PasswordCheckGetDto): Promise<any> {
     const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
       select: {
         password: true
@@ -46,7 +46,7 @@ export class PasswordService {
   }
 
   // prettier-ignore
-  async getReset(request: Request, passwordResetGetDto: PasswordResetGetDto): Promise<Partial<User>> {
+  async resetGet(request: Request, passwordResetGetDto: PasswordResetGetDto): Promise<Partial<User>> {
     const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
       select: {
         id: true,
@@ -83,7 +83,7 @@ export class PasswordService {
   }
 
   // prettier-ignore
-  async postReset(request: Request, passwordResetUpdateDto: PasswordResetUpdateDto): Promise<Partial<User>> {
+  async resetUpdate(request: Request, passwordResetUpdateDto: PasswordResetUpdateDto): Promise<Partial<User>> {
     try {
       const jwtSignOptions: any = await this.jwtService.verifyAsync(passwordResetUpdateDto.token);
 

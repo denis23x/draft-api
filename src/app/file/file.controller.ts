@@ -64,7 +64,7 @@ export class FileController {
 
   // prettier-ignore
   @ApiOperation({
-    description: '## Get file'
+    description: '## Get file from internet'
   })
   @ApiResponse({
     status: 200
@@ -72,7 +72,7 @@ export class FileController {
   @ApiBearerAuth('access')
   @Get('proxy')
   @UseGuards(AuthGuard('access'))
-  async getOne(@Req() request: Request, @Res() response: Response, @Query() fileProxyGetOneDto: FileProxyGetOneDto): Promise<any> {
-    return this.uploadService.getOne(request, response, fileProxyGetOneDto);
+  async proxyGet(@Req() request: Request, @Res() response: Response, @Query() fileProxyGetOneDto: FileProxyGetOneDto): Promise<any> {
+    return this.uploadService.proxyGet(request, response, fileProxyGetOneDto);
   }
 }
