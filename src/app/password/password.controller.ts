@@ -1,6 +1,6 @@
 /** @format */
 
-import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { PasswordService } from './password.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -22,9 +22,9 @@ export class PasswordController {
     status: 200
   })
   @ApiBearerAuth('access')
-  @Post('check')
+  @Get('check')
   @UseGuards(AuthGuard('access'))
-  async checkGet(@Req() request: Request, @Body() passwordCheckGetDto: PasswordCheckGetDto): Promise<any> {
+  async checkGet(@Req() request: Request, @Query() passwordCheckGetDto: PasswordCheckGetDto): Promise<any> {
     return this.passwordService.checkGet(request, passwordCheckGetDto);
   }
 

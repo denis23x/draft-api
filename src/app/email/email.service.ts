@@ -20,36 +20,58 @@ export class EmailService {
 
   async confirmationGet(request: Request): Promise<User> {
     const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
-      select: this.prismaService.setUserSelect(),
+      select: {
+        id: true,
+        email: true,
+        emailConfirmed: true
+      },
       where: {
         id: (request.user as any).id
       }
     };
 
-    const user: User = await this.prismaService.user
+    return this.prismaService.user
       .findUniqueOrThrow(userFindUniqueOrThrowArgs)
+      .then((user: User) => {
+        // prettier-ignore
+        if (!user.emailConfirmed) {
+          this.jwtService
+            .signAsync({}, {
+              expiresIn: Number(this.configService.get('JWT_ACCESS_TTL')),
+              subject: String(user.id)
+            })
+            .then((token: string) => {
+              this.mailerService
+                .sendMail({
+                  to: user.email,
+                  subject: 'Confirm your email address',
+                  template: 'email-confirmation',
+                  context: {
+                    host: this.configService.get('APP_SITE_ORIGIN'),
+                    token
+                  }
+                })
+                .catch(() => {
+                  // TODO: add log with mailerService problem
+                  throw new BadRequestException();
+                });
+            })
+            .catch(() => {
+              // TODO: add log with jwtService problem
+              throw new BadRequestException();
+            });
+        }
+
+        return user;
+      })
       .catch((error: Error) => {
+        // TODO: add log with prismaService problem
         // prettier-ignore
         throw new Prisma.PrismaClientKnownRequestError(error.message, {
           code: 'P2001',
           clientVersion: Prisma.prismaVersion.client
         });
       });
-
-    // prettier-ignore
-    return this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Confirm your email address',
-      template: 'email-confirmation',
-      context: {
-        user: user,
-        host: this.configService.get('APP_SITE_ORIGIN'),
-        token: await this.jwtService.signAsync({}, {
-          expiresIn: Number(this.configService.get('JWT_ACCESS_TTL')),
-          subject: String(user.id)
-        })
-      }
-    }).then(() => user);
   }
 
   // prettier-ignore

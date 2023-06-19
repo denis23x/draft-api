@@ -1,6 +1,6 @@
 /** @format */
 
-import { Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { EmailService } from './email.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -16,7 +16,7 @@ export class EmailController {
 
   // prettier-ignore
   @ApiOperation({
-    description: '## Get confirmation'
+    description: '## Get request to confirm email'
   })
   @ApiResponse({
     status: 200
@@ -30,13 +30,13 @@ export class EmailController {
 
   // prettier-ignore
   @ApiOperation({
-    description: '## Post confirmation'
+    description: '## Update email confirmation'
   })
   @ApiResponse({
     status: 200,
     type: UserDto
   })
-  @Post('confirmation')
+  @Put('confirmation')
   async confirmationUpdate(@Req() request: Request, @Query() emailConfirmationUpdateDto: EmailConfirmationUpdateDto): Promise<User> {
     return this.emailService.confirmationUpdate(request, emailConfirmationUpdateDto);
   }
