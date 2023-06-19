@@ -23,7 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
-import { FileDto, FileCreateDto, FileGetOneDto, FileMulterField } from './dto';
+import { FileDto, FileCreateDto, FileProxyGetOneDto, FileMulterField } from './dto';
 
 @ApiTags('Files')
 @Controller('files')
@@ -70,9 +70,9 @@ export class FileController {
     status: 200
   })
   @ApiBearerAuth('access')
-  @Get()
+  @Get('proxy')
   @UseGuards(AuthGuard('access'))
-  async getOne(@Req() request: Request, @Res() response: Response, @Query() fileGetOneDto: FileGetOneDto): Promise<any> {
-    return this.uploadService.getOne(request, response, fileGetOneDto);
+  async getOne(@Req() request: Request, @Res() response: Response, @Query() fileProxyGetOneDto: FileProxyGetOneDto): Promise<any> {
+    return this.uploadService.getOne(request, response, fileProxyGetOneDto);
   }
 }

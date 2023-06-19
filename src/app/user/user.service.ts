@@ -1,11 +1,11 @@
 /** @format */
 
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Prisma, User } from '@prisma/client';
 import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
-import { compare, hash } from 'bcrypt';
+import { hash } from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { stat, unlink } from 'fs';
 import { ConfigService } from '@nestjs/config';
@@ -190,7 +190,7 @@ export class UserService {
   }
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
-    const { password, newPassword, newEmail, ...userUpdateDtoData } = userUpdateDto;
+    const { newPassword, newEmail, ...userUpdateDtoData } = userUpdateDto;
 
     const userUpdateArgs: Prisma.UserUpdateArgs = {
       select: this.prismaService.setUserSelect(),
@@ -217,27 +217,19 @@ export class UserService {
 
     /** Update sensitive data */
 
-    if (!!password) {
-      const isAuthenticated: boolean = await compare(password, userCurrent.password);
+    if (!!newEmail) {
+      userUpdateArgs.data = {
+        ...userUpdateArgs.data,
+        email: newEmail,
+        emailConfirmed: false
+      };
+    }
 
-      if (isAuthenticated) {
-        if (!!newEmail) {
-          userUpdateArgs.data = {
-            ...userUpdateArgs.data,
-            email: newEmail,
-            emailConfirmed: false
-          };
-        }
-
-        if (!!newPassword) {
-          userUpdateArgs.data = {
-            ...userUpdateArgs.data,
-            password: await hash(newPassword, 10)
-          };
-        }
-      } else {
-        throw new ForbiddenException();
-      }
+    if (!!newPassword) {
+      userUpdateArgs.data = {
+        ...userUpdateArgs.data,
+        password: await hash(newPassword, 10)
+      };
     }
 
     /** Update settings */

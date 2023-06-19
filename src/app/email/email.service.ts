@@ -18,11 +18,11 @@ export class EmailService {
     private readonly prismaService: PrismaService
   ) {}
 
-  async getConfirmation(request: Request, id: number): Promise<User> {
+  async getConfirmation(request: Request): Promise<User> {
     const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
       select: this.prismaService.setUserSelect(),
       where: {
-        id
+        id: (request.user as any).id
       }
     };
 

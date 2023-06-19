@@ -3,7 +3,7 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../core';
 import { Request, Response } from 'express';
-import { FileCreateDto, FileGetOneDto } from './dto';
+import { FileCreateDto, FileProxyGetOneDto } from './dto';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 
@@ -30,10 +30,11 @@ export class FileService {
     throw new BadRequestException();
   }
 
-  async getOne(request: Request, response: Response, fileGetOneDto: FileGetOneDto): Promise<void> {
+  // prettier-ignore
+  async getOne(request: Request, response: Response, fileProxyGetOneDto: FileProxyGetOneDto): Promise<void> {
     return this.httpService
       .axiosRef({
-        url: fileGetOneDto.url,
+        url: fileProxyGetOneDto.url,
         method: 'GET',
         responseType: 'stream'
       })
