@@ -3,7 +3,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
-export class PasswordUpdateDto {
+export class PasswordResetUpdateDto {
   @ApiProperty({
     description: 'Token',
     default: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'

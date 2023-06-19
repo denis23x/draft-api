@@ -5,10 +5,10 @@ import { Request } from 'express';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PasswordGetOneDto, PasswordUpdateDto } from './dto';
+import { PasswordCheckGetDto, PasswordResetGetDto, PasswordResetUpdateDto } from './dto';
 import { PrismaService } from '../core';
 import { Prisma, User } from '@prisma/client';
-import { hash } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 
 @Injectable()
 export class PasswordService {
@@ -19,11 +19,39 @@ export class PasswordService {
     private readonly prismaService: PrismaService
   ) {}
 
-  async getReset(request: Request, passwordGetOneDto: PasswordGetOneDto): Promise<User> {
+  // prettier-ignore
+  async getCheck(request: Request, passwordCheckGetDto: PasswordCheckGetDto): Promise<boolean> {
     const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
-      select: this.prismaService.setUserSelect(),
+      select: {
+        password: true
+      },
       where: {
-        email: passwordGetOneDto.email
+        id: (request.user as any).id
+      }
+    };
+
+    const user: User = await this.prismaService.user
+      .findUniqueOrThrow(userFindUniqueOrThrowArgs)
+      .catch((error: Error) => {
+        // prettier-ignore
+        throw new Prisma.PrismaClientKnownRequestError(error.message, {
+          code: 'P2001',
+          clientVersion: Prisma.prismaVersion.client
+        });
+      });
+
+    return compare(passwordCheckGetDto.password, user.password);
+  }
+
+  // prettier-ignore
+  async getReset(request: Request, passwordResetGetDto: PasswordResetGetDto): Promise<Partial<User>> {
+    const userFindUniqueOrThrowArgs: Prisma.UserFindUniqueOrThrowArgs = {
+      select: {
+        id: true,
+        email: true
+      },
+      where: {
+        email: passwordResetGetDto.email
       }
     };
 
@@ -43,7 +71,6 @@ export class PasswordService {
       subject: 'Forgot your password?',
       template: 'password-reset',
       context: {
-        user: user,
         host: this.configService.get('APP_SITE_ORIGIN'),
         token: await this.jwtService.signAsync({}, {
           expiresIn: Number(this.configService.get('JWT_ACCESS_TTL')),
@@ -54,9 +81,9 @@ export class PasswordService {
   }
 
   // prettier-ignore
-  async postReset(request: Request, passwordUpdateDto: PasswordUpdateDto): Promise<User> {
+  async postReset(request: Request, passwordResetUpdateDto: PasswordResetUpdateDto): Promise<Partial<User>> {
     try {
-      const jwtSignOptions: any = await this.jwtService.verifyAsync(passwordUpdateDto.token);
+      const jwtSignOptions: any = await this.jwtService.verifyAsync(passwordResetUpdateDto.token);
 
       /** Remove all sessions */
 
@@ -71,12 +98,15 @@ export class PasswordService {
       /** Update user password */
 
       const userUpdateArgs: Prisma.UserUpdateArgs = {
-        select: this.prismaService.setUserSelect(),
+        select: {
+          id: true,
+          email: true
+        },
         where: {
           id: Number(jwtSignOptions.sub)
         },
         data: {
-          password: await hash(passwordUpdateDto.password, 10)
+          password: await hash(passwordResetUpdateDto.password, 10)
         }
       };
 
@@ -86,7 +116,6 @@ export class PasswordService {
           subject: 'Your password has been changed',
           template: 'password-changed',
           context: {
-            user: user,
             host: this.configService.get('APP_SITE_ORIGIN')
           }
         });

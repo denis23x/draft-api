@@ -1,4 +1,5 @@
 /** @format */
 
-export { PasswordGetOneDto } from './password-get-one.dto';
-export { PasswordUpdateDto } from './password-update.dto';
+export { PasswordCheckGetDto } from './password-check-get.dto';
+export { PasswordResetGetDto } from './password-reset-get.dto';
+export { PasswordResetUpdateDto } from './password-reset-update.dto';
