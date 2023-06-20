@@ -51,26 +51,16 @@ export class EmailService {
                     token
                   }
                 })
-                .catch(() => {
-                  // TODO: add log with mailerService problem
-                  throw new BadRequestException();
+                .catch((error: Error) => {
+                  throw new Error(error.message)
                 });
             })
-            .catch(() => {
-              // TODO: add log with jwtService problem
-              throw new BadRequestException();
+            .catch((error: Error) => {
+              throw new Error(error.message)
             });
         }
 
         return user;
-      })
-      .catch((error: Error) => {
-        // TODO: add log with prismaService problem
-        // prettier-ignore
-        throw new Prisma.PrismaClientKnownRequestError(error.message, {
-          code: 'P2001',
-          clientVersion: Prisma.prismaVersion.client
-        });
       });
   }
 

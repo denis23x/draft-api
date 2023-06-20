@@ -1,55 +1,54 @@
 /** @format */
 
-import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, Inject } from '@nestjs/common';
 import { Response } from 'express';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 import { Prisma } from '@prisma/client';
-
-export interface ErrorBody {
-  statusCode: number;
-  message: string;
-}
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
+import { ConfigService } from '@nestjs/config';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
+    private readonly configService: ConfigService
+  ) {}
+
   catch(exception: any, argumentsHost: ArgumentsHost) {
     const httpArgumentsHost: HttpArgumentsHost = argumentsHost.switchToHttp();
 
     const response: Response = httpArgumentsHost.getResponse<Response>();
+    const request: Request = httpArgumentsHost.getRequest<Request>();
 
     /** https://www.prisma.io/docs/reference/api-reference/error-reference */
     /** https://developer.mozilla.org/ru/docs/Web/HTTP/Status */
 
-    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      const getErrorBody = (): ErrorBody => {
-        switch (exception.code) {
-          case 'P2001': {
-            return {
-              statusCode: 404,
-              message: 'Not found'
-            };
-          }
-          case 'P2002': {
-            return {
-              statusCode: 422,
-              message: 'Already exists'
-            };
-          }
-          default: {
-            return {
-              statusCode: 400,
-              message: 'Bad Request'
-            };
-          }
-        }
-      };
+    // console.log(request.body);
 
-      const errorBody: ErrorBody = getErrorBody();
+    this.logger.error(request.url, exception);
 
-      return response.status(errorBody.statusCode).json({
-        statusCode: errorBody.statusCode,
-        message: errorBody.message
-      });
+    switch (exception.code) {
+      case 'P2001':
+      case 'P2025': {
+        return response.status(404).json({
+          statusCode: 404,
+          message: 'Not found'
+        });
+      }
+      case 'P2002': {
+        return response.status(422).json({
+          statusCode: 422,
+          message: 'Already exists'
+        });
+      }
+      default: {
+        return response.status(400).json({
+          statusCode: 400,
+          message: 'Bad Request'
+        });
+      }
     }
   }
 }

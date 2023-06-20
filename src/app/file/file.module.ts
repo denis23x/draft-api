@@ -7,7 +7,6 @@ import { HttpModule } from '@nestjs/axios';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Request } from 'express';
-import { ErrorBody } from '../core';
 import { existsSync, mkdirSync } from 'fs';
 import { MulterModuleOptions } from '@nestjs/platform-express/multer/interfaces/files-upload-module.interface';
 import * as mime from 'mime-types';
@@ -29,7 +28,7 @@ import { ConfigModule } from '@nestjs/config';
           if (mimeList.includes(file.mimetype)) {
             callback(null, true);
           } else {
-            const errorBody: ErrorBody = {
+            const errorBody: any = {
               statusCode: 400,
               message: 'File type is not supported'
             };

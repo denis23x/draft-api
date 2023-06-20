@@ -1,23 +1,22 @@
 /** @format */
 
-import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { TransformInterceptor, PrismaExceptionFilter, WinstonService } from './app/core';
+import { TransformInterceptor, PrismaExceptionFilter } from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
 import { readFileSync } from 'fs';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
+import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 
 const bootstrap = async () => {
-  const globalPrefix: string = process.env.APP_PREFIX;
-  const port: number = Number(process.env.APP_PORT);
-
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: new WinstonService(),
     cors: {
       // prettier-ignore
       origin: [process.env.APP_SITE_ORIGIN, /\.ngrok\.io$/].concat(process.env.APP_SITE_CORS.split(',')),
@@ -28,11 +27,16 @@ const bootstrap = async () => {
     }
   });
 
-  app.setGlobalPrefix(globalPrefix);
+  const loggerWinston: Logger = app.get<Logger>(WINSTON_MODULE_PROVIDER);
+  const configService: ConfigService = app.get<ConfigService>(ConfigService);
+
+  /** SETTINGS */
+
+  app.setGlobalPrefix(configService.get('APP_PREFIX'));
 
   /** FILTERS */
 
-  app.useGlobalFilters(new PrismaExceptionFilter());
+  app.useGlobalFilters(new PrismaExceptionFilter(loggerWinston, configService));
 
   /** INTERCEPTORS */
 
@@ -69,13 +73,13 @@ const bootstrap = async () => {
     })
   );
 
-  app.use(cookieParser(process.env.APP_COOKIE_SECRET));
+  app.use(cookieParser(configService.get('APP_COOKIE_SECRET')));
   app.use(compression());
 
   try {
     const description: string = readFileSync('src/assets/md/swagger-ui.md', 'utf8');
 
-    const config = new DocumentBuilder()
+    const openAPIConfig: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
       .setTitle('Swagger UI')
       .setDescription(description)
       .setVersion('0.1')
@@ -89,7 +93,7 @@ const bootstrap = async () => {
       )
       .build();
 
-    const openAPIObject: OpenAPIObject = SwaggerModule.createDocument(app, config);
+    const openAPIObject: OpenAPIObject = SwaggerModule.createDocument(app, openAPIConfig);
 
     /** https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ */
 
@@ -111,10 +115,12 @@ const bootstrap = async () => {
 
     SwaggerModule.setup('docs', app, openAPIObject, swaggerCustomOptions);
   } catch (error: any) {
-    Logger.error("Can't start Swagger UI", error);
+    console.error("Can't start Swagger UI", error);
   }
 
-  await app.listen(port, () => Logger.log('http://localhost:' + port + '/docs'));
+  await app.listen(Number(configService.get('APP_PORT')));
 };
 
-bootstrap().then(() => Logger.log('OK'));
+bootstrap().then(() => {
+  console.log(`\n\n** Server is listening on http://localhost:3323/docs\n\n`);
+});
