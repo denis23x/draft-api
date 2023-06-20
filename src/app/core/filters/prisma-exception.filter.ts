@@ -16,18 +16,38 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     private readonly configService: ConfigService
   ) {}
 
-  catch(exception: any, argumentsHost: ArgumentsHost) {
+  catch(exception: any, argumentsHost: ArgumentsHost): Response {
     const httpArgumentsHost: HttpArgumentsHost = argumentsHost.switchToHttp();
 
     const response: Response = httpArgumentsHost.getResponse<Response>();
     const request: Request = httpArgumentsHost.getRequest<Request>();
 
+    /** LOGGER */
+
+    const searchParams: URLSearchParams = new URLSearchParams(request.url.split('?')[1]);
+    const queryParams: string[] = searchParams
+      .toString()
+      .split('&')
+      .filter((param: string) => !!param);
+
+    const message: string = `${exception.message}: ${request.method} ${request.url}`;
+
+    this.logger.error(message, {
+      request: {
+        jwt: (request as any).user,
+        body: Object.keys(request.body).length ? request.body : undefined,
+        method: request.method,
+        queryParams: queryParams.length ? queryParams : undefined,
+        headers: {
+          ...request.headers,
+          authorization: undefined
+        }
+      },
+      ...exception
+    });
+
     /** https://www.prisma.io/docs/reference/api-reference/error-reference */
     /** https://developer.mozilla.org/ru/docs/Web/HTTP/Status */
-
-    // console.log(request.body);
-
-    this.logger.error(request.url, exception);
 
     switch (exception.code) {
       case 'P2001':

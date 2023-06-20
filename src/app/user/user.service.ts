@@ -178,15 +178,7 @@ export class UserService {
       }
     }
 
-    return this.prismaService.user
-      .findUniqueOrThrow(userFindUniqueOrThrowArgs)
-      .catch((error: Error) => {
-        // prettier-ignore
-        throw new Prisma.PrismaClientKnownRequestError(error.message, {
-          code: 'P2001',
-          clientVersion: Prisma.prismaVersion.client
-        });
-      });
+    return this.prismaService.user.findUniqueOrThrow(userFindUniqueOrThrowArgs);
   }
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {

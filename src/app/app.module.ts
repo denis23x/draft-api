@@ -16,6 +16,9 @@ import { UtilitiesModule } from './utilities/utilities.module';
 import { PasswordModule } from './password/password.module';
 import { EmailModule } from './email/email.module';
 import { join } from 'path';
+import { WinstonModule } from 'nest-winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import * as winston from 'winston';
 
 @Global()
 @Module({
@@ -73,6 +76,48 @@ import { join } from 'path';
       }),
       imports: [ConfigModule],
       inject: [ConfigService]
+    }),
+    WinstonModule.forRootAsync({
+      useFactory: () => ({
+        format: winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.metadata({
+            fillExcept: ['message', 'level', 'timestamp', 'metadata']
+          }),
+          winston.format.json({
+            space: 2,
+            maximumBreadth: 10,
+            maximumDepth: 10
+          })
+        ),
+        transports: [
+          new winston.transports.Console({
+            level: 'info',
+            format: winston.format.combine(
+              winston.format.colorize({
+                level: true,
+                message: true
+              }),
+              winston.format.printf((transformableInfo: winston.Logform.TransformableInfo) => {
+                const { timestamp, level, message } = transformableInfo;
+
+                return `[${timestamp}] WINSTON [${level}]: ${message}`;
+              })
+            )
+          }),
+          new DailyRotateFile({
+            level: 'error',
+            handleExceptions: true,
+            handleRejections: true,
+            filename: 'logs/error-%DATE%.log',
+            datePattern: 'DD-MM-YYYY',
+            zippedArchive: true,
+            maxSize: '3m',
+            maxFiles: '3d'
+          })
+        ],
+        exitOnError: false
+      })
     }),
     AuthModule,
     CategoryModule,

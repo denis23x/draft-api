@@ -122,5 +122,5 @@ const bootstrap = async () => {
 };
 
 bootstrap().then(() => {
-  console.log(`\n\n** Server is listening on http://localhost:3323/docs\n\n`);
+  console.log('\nServer is listening on http://localhost:3323/docs\n');
 });
