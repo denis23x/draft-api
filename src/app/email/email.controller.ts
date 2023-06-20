@@ -1,6 +1,6 @@
 /** @format */
 
-import { Controller, Get, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 import { EmailService } from './email.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -37,7 +37,7 @@ export class EmailController {
     type: UserDto
   })
   @Put('confirmation')
-  async confirmationUpdate(@Req() request: Request, @Query() emailConfirmationUpdateDto: EmailConfirmationUpdateDto): Promise<User> {
+  async confirmationUpdate(@Req() request: Request, @Body() emailConfirmationUpdateDto: EmailConfirmationUpdateDto): Promise<User> {
     return this.emailService.confirmationUpdate(request, emailConfirmationUpdateDto);
   }
 }

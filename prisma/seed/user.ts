@@ -13,7 +13,7 @@ export const userRaw = async () => {
     {
       name: 'moderator',
       email: 'moder@moder.com',
-      emailConfirmed: true,
+      emailConfirmed: false,
       description: 'The moderator',
       avatar: null,
       password: await hash('moder@moder.com', 10)
