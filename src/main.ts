@@ -6,62 +6,80 @@ import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { TransformInterceptor, PrismaExceptionFilter } from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
-import cookieParser from 'cookie-parser';
-import compression from 'compression';
 import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
 import { readFileSync } from 'fs';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { ConfigService } from '@nestjs/config';
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import compression from 'compression';
+
+let pinoLogger: Logger;
 
 const bootstrap = async () => {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
-    cors: {
-      // prettier-ignore
-      origin: [process.env.APP_SITE_ORIGIN, /\.ngrok\.io$/].concat(process.env.APP_SITE_CORS.split(',')),
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      preflightContinue: false,
-      optionsSuccessStatus: 204,
-      credentials: true
-    }
+    bufferLogs: true
   });
 
-  const loggerWinston: Logger = app.get<Logger>(WINSTON_MODULE_PROVIDER);
-  const configService: ConfigService = app.get<ConfigService>(ConfigService);
+  const logger: Logger = app.get(Logger);
+  const reflector: Reflector = app.get(Reflector);
+  const configService: ConfigService = app.get(ConfigService);
+
+  pinoLogger = logger;
 
   /** SETTINGS */
 
   app.setGlobalPrefix(configService.get('APP_PREFIX'));
 
+  /** LOGGER */
+
+  app.useLogger(app.get(Logger));
+
   /** FILTERS */
 
-  app.useGlobalFilters(new PrismaExceptionFilter(loggerWinston, configService));
+  app.useGlobalFilters(new PrismaExceptionFilter(configService));
 
   /** INTERCEPTORS */
 
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  app.useGlobalInterceptors(new TransformInterceptor());
-
-  /** MISC */
-
-  app.use(
-    helmet({
-      crossOriginResourcePolicy: {
-        policy: 'cross-origin'
-      },
-      contentSecurityPolicy: {
-        useDefaults: true,
-        directives: {
-          'img-src': ["'self'", 'https: data: blob:']
-        }
-      },
-      expectCt: false
-    })
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(reflector),
+    new TransformInterceptor(),
+    new LoggerErrorInterceptor()
   );
+
+  /** CORS */
+
+  app.enableCors({
+    // prettier-ignore
+    origin: [configService.get('APP_SITE_ORIGIN')].concat(configService.get('APP_SITE_CORS').split(','), /\.ngrok\.io$/),
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true
+  });
+
+  /** SECURITY */
+
+  // prettier-ignore
+  app.use(helmet({
+    crossOriginResourcePolicy: {
+      policy: 'cross-origin'
+    },
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        'img-src': ["'self'", 'https: data: blob:']
+      }
+    },
+    expectCt: false
+  }));
+
+  /** ASSETS */
 
   app.useStaticAssets('src/assets');
   app.useStaticAssets('upload');
+
+  /** PIPES */
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -73,8 +91,12 @@ const bootstrap = async () => {
     })
   );
 
+  /** MISC */
+
   app.use(cookieParser(configService.get('APP_COOKIE_SECRET')));
   app.use(compression());
+
+  /** SWAGGER */
 
   try {
     const description: string = readFileSync('src/assets/md/swagger-ui.md', 'utf8');
@@ -115,12 +137,10 @@ const bootstrap = async () => {
 
     SwaggerModule.setup('docs', app, openAPIObject, swaggerCustomOptions);
   } catch (error: any) {
-    console.error("Can't start Swagger UI", error);
+    logger.error("Can't start Swagger UI", error);
   }
 
   await app.listen(Number(configService.get('APP_PORT')));
 };
 
-bootstrap().then(() => {
-  console.log('\nServer is listening on http://localhost:3323/docs\n');
-});
+bootstrap().then(() => pinoLogger.log('Server is listening on http://localhost:3323/docs'));
