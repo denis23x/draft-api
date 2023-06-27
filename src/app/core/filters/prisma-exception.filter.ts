@@ -6,7 +6,13 @@ import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-
 import { Prisma } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
-@Catch(Prisma.PrismaClientKnownRequestError)
+@Catch(
+  Prisma.PrismaClientKnownRequestError,
+  Prisma.PrismaClientUnknownRequestError,
+  Prisma.PrismaClientRustPanicError,
+  Prisma.PrismaClientInitializationError,
+  Prisma.PrismaClientValidationError
+)
 export class PrismaExceptionFilter implements ExceptionFilter {
   constructor(private readonly configService: ConfigService) {}
 
@@ -14,6 +20,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     const httpArgumentsHost: HttpArgumentsHost = argumentsHost.switchToHttp();
 
     const response: Response = httpArgumentsHost.getResponse<Response>();
+    const request: Request = httpArgumentsHost.getRequest<Request>();
 
     /** https://www.prisma.io/docs/reference/api-reference/error-reference */
     /** https://developer.mozilla.org/ru/docs/Web/HTTP/Status */

@@ -1,10 +1,10 @@
 /** @format */
 
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { TransformInterceptor, PrismaExceptionFilter } from './app/core';
+import { TransformInterceptor, PrismaExceptionFilter, AllExceptionsFilter } from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
 import { readFileSync } from 'fs';
@@ -24,6 +24,7 @@ const bootstrap = async () => {
   const logger: Logger = app.get(Logger);
   const reflector: Reflector = app.get(Reflector);
   const configService: ConfigService = app.get(ConfigService);
+  const httpAdapterHost: HttpAdapterHost = app.get(HttpAdapterHost);
 
   pinoLogger = logger;
 
@@ -37,7 +38,10 @@ const bootstrap = async () => {
 
   /** FILTERS */
 
-  app.useGlobalFilters(new PrismaExceptionFilter(configService));
+  app.useGlobalFilters(
+    new AllExceptionsFilter(configService, httpAdapterHost),
+    new PrismaExceptionFilter(configService)
+  );
 
   /** INTERCEPTORS */
 

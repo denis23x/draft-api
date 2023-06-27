@@ -99,7 +99,8 @@ import { IncomingMessage, ServerResponse } from 'http';
                 level: 'error',
                 target: 'pino/file',
                 options: {
-                  destination: `${__dirname}/app.log`
+                  destination: join(__dirname, '/error.log'),
+                  mkdir: true
                 }
               },
               {
