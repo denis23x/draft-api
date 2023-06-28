@@ -65,6 +65,7 @@ export class EmailService {
       const userUpdateArgs: Prisma.UserUpdateArgs = {
         select: {
           id: true,
+          name: true,
           emailConfirmed: true
         },
         where: {
