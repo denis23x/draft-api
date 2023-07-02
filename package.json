@@ -18,7 +18,7 @@
     "prisma:validate": "npx prisma validate",
     "prisma:generate": "npx prisma generate",
     "api:start": "nest start",
-    "api:dev": "nest start --watch",
+    "api:dev": "nest start --watch --preserveWatchOutput",
     "api:prebuild": "rimraf dist",
     "api:build": "nest build",
     "api:lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

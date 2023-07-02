@@ -1,3 +1,51 @@
+#### Docker utility
+
+```bash
+docker image ls
+```
+
+```bash
+docker container ls
+```
+
+```bash
+docker build -t draft-api:latest .
+```
+
+```bash
+docker rm -f app-api app-mysql
+```
+
+---
+
+### Build
+
+```bash
+docker-compose up --remove-orphans --force-recreate
+```
+
+```bash
+docker-compose down --volumes
+```
+
+```bash
+docker exec -it app-api bash -c 'npx prisma migrate dev'
+```
+
+```bash
+docker exec -it app-api bash -c 'npx prisma db seed'
+```
+
+```bash
+docker exec -it app-api bash -c 'npx prisma studio'
+```
+
+```bash
+docker exec -it app-mysql mysql -u root -p
+```
+
+---
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
