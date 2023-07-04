@@ -13,8 +13,8 @@ import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
-
-let pinoLogger: Logger;
+import swaggerStats from 'swagger-stats';
+import { SecuritySchemeObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 const bootstrap = async () => {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -26,11 +26,11 @@ const bootstrap = async () => {
   const configService: ConfigService = app.get(ConfigService);
   const httpAdapterHost: HttpAdapterHost = app.get(HttpAdapterHost);
 
-  pinoLogger = logger;
-
   /** SETTINGS */
 
-  app.setGlobalPrefix(configService.get('APP_PREFIX'));
+  app.setGlobalPrefix(configService.get('APP_PREFIX'), {
+    exclude: ['swagger']
+  });
 
   /** LOGGER */
 
@@ -55,7 +55,7 @@ const bootstrap = async () => {
 
   app.enableCors({
     // prettier-ignore
-    origin: [configService.get('APP_SITE_ORIGIN')].concat(configService.get('APP_SITE_CORS').split(','), /\.ngrok\.io$/),
+    origin: [configService.get('APP_SITE_ORIGIN'), ...configService.get('APP_SITE_CORS').split(',')],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
@@ -102,49 +102,59 @@ const bootstrap = async () => {
 
   /** SWAGGER */
 
-  try {
-    const description: string = readFileSync('src/assets/md/swagger-ui.md', 'utf8');
+  const swaggerDescription: string = readFileSync('src/assets/md/swagger-ui.md', 'utf8');
+  const swaggerBearer: SecuritySchemeObject = {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT'
+  };
 
-    const openAPIConfig: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
-      .setTitle('Swagger UI')
-      .setDescription(description)
-      .setVersion('0.1')
-      .addBearerAuth(
-        {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT'
-        },
-        'access'
-      )
-      .build();
+  const openAPIConfig: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
+    .setTitle('Swagger UI')
+    .setDescription(swaggerDescription)
+    .setVersion(configService.get('APP_VERSION'))
+    .addBearerAuth(swaggerBearer, 'access')
+    .build();
 
-    const openAPIObject: OpenAPIObject = SwaggerModule.createDocument(app, openAPIConfig);
+  const openAPIObject: OpenAPIObject = SwaggerModule.createDocument(app, openAPIConfig);
 
-    /** https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ */
+  /** https://swaggerstats.io/guide/conf.html */
 
-    const swaggerCustomOptions: SwaggerCustomOptions = {
-      swaggerOptions: {
-        filter: true,
-        persistAuthorization: true,
-        docExpansion: 'none',
-        showExtensions: true,
-        showCommonExtensions: true,
-        defaultModelsExpandDepth: -1,
-        syntaxHighlight: {
-          activate: true,
-          theme: 'monokai'
-        },
-        operationIdFactory: (controllerKey: string, methodKey: string) => methodKey
-      }
-    };
+  // prettier-ignore
+  app.use(swaggerStats.getMiddleware({
+    name: 'Swagger Stats',
+    version: configService.get('APP_VERSION'),
+    uriPath: '/swagger/stats',
+    swaggerSpec: openAPIObject,
+    authentication: true,
+    onAuthenticate: (request, username, password) => username === configService.get('SWAGGER_STATS_USER') && password === configService.get('SWAGGER_STATS_PASSWORD')
+  }));
 
-    SwaggerModule.setup('docs', app, openAPIObject, swaggerCustomOptions);
-  } catch (error: any) {
-    logger.error("Can't start Swagger UI", error);
-  }
+  /** https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ */
 
-  await app.listen(Number(configService.get('APP_PORT')));
+  const swaggerCustomOptions: SwaggerCustomOptions = {
+    swaggerOptions: {
+      filter: true,
+      persistAuthorization: true,
+      docExpansion: 'none',
+      showExtensions: true,
+      showCommonExtensions: true,
+      defaultModelsExpandDepth: -1,
+      syntaxHighlight: {
+        activate: true,
+        theme: 'monokai'
+      },
+      operationIdFactory: (controllerKey: string, methodKey: string) => methodKey
+    }
+  };
+
+  SwaggerModule.setup('/swagger/docs', app, openAPIObject, swaggerCustomOptions);
+
+  /** LISTEN */
+
+  app
+    .listen(Number(configService.get('APP_PORT')))
+    .then(() => logger.log('Server is listening on http://localhost:3323/swagger/docs'));
 };
 
-bootstrap().then(() => pinoLogger.log('Server is listening on http://localhost:3323/docs'));
+bootstrap().then(() => console.debug('OK'));
