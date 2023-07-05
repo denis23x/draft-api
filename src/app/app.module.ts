@@ -1,18 +1,12 @@
 /** @format */
 
-import {
-  Module,
-  Global,
-  CacheModule,
-  CacheInterceptor,
-  MiddlewareConsumer,
-  NestModule
-} from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
-import { CoreModule, LoggerMiddleware } from './core';
+import { CoreModule } from './core';
 import { FileModule } from './file/file.module';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
@@ -147,8 +141,4 @@ import { IncomingMessage, ServerResponse } from 'http';
     UtilitiesModule
   ]
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}

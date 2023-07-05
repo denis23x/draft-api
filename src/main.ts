@@ -74,8 +74,7 @@ const bootstrap = async () => {
       directives: {
         'img-src': ["'self'", 'https: data: blob:']
       }
-    },
-    expectCt: false
+    }
   }));
 
   /** ASSETS */
