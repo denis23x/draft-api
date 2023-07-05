@@ -4,7 +4,12 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { TransformInterceptor, PrismaExceptionFilter, AllExceptionsFilter } from './app/core';
+import {
+  TransformInterceptor,
+  PrismaExceptionFilter,
+  AllExceptionsFilter,
+  PrismaService
+} from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
 import { readFileSync } from 'fs';
@@ -25,6 +30,13 @@ const bootstrap = async () => {
   const reflector: Reflector = app.get(Reflector);
   const configService: ConfigService = app.get(ConfigService);
   const httpAdapterHost: HttpAdapterHost = app.get(HttpAdapterHost);
+  const prismaService: PrismaService = app.get(PrismaService);
+
+  /** https://docs.nestjs.com/recipes/prisma#issues-with-enableshutdownhooks */
+
+  prismaService.enableShutdownHooks(app).then(() => {
+    logger.log('Prisma enableShutdownHooks');
+  });
 
   /** SETTINGS */
 
@@ -34,7 +46,7 @@ const bootstrap = async () => {
 
   /** LOGGER */
 
-  app.useLogger(app.get(Logger));
+  app.useLogger(logger);
 
   /** FILTERS */
 
@@ -151,9 +163,9 @@ const bootstrap = async () => {
 
   /** LISTEN */
 
-  app
-    .listen(Number(configService.get('APP_PORT')))
-    .then(() => logger.log('Server is listening on http://localhost:3323/swagger/docs'));
+  app.listen(Number(configService.get('APP_PORT'))).then(() => {
+    logger.log('Server is listening on http://localhost:3323/swagger/docs');
+  });
 };
 
 bootstrap().then(() => console.debug('OK'));
