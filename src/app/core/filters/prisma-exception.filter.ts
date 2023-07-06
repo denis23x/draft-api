@@ -1,26 +1,35 @@
 /** @format */
 
-import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, Logger } from '@nestjs/common';
 import { Response } from 'express';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
 import { Prisma } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
+import { AbstractHttpAdapter, HttpAdapterHost } from '@nestjs/core';
 
 @Catch(
   Prisma.PrismaClientKnownRequestError,
   Prisma.PrismaClientUnknownRequestError,
-  Prisma.PrismaClientRustPanicError,
-  Prisma.PrismaClientInitializationError,
   Prisma.PrismaClientValidationError
 )
 export class PrismaExceptionFilter implements ExceptionFilter {
-  constructor(private readonly configService: ConfigService) {}
+  private readonly logger: Logger = new Logger(PrismaExceptionFilter.name);
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly httpAdapterHost: HttpAdapterHost
+  ) {}
 
   catch(exception: any, argumentsHost: ArgumentsHost): Response {
+    const httpAdapterHost: AbstractHttpAdapter = this.httpAdapterHost.httpAdapter;
     const httpArgumentsHost: HttpArgumentsHost = argumentsHost.switchToHttp();
 
     const response: Response = httpArgumentsHost.getResponse<Response>();
     const request: Request = httpArgumentsHost.getRequest<Request>();
+
+    /** LOGGER */
+
+    this.logger.error(exception.message);
 
     /** https://www.prisma.io/docs/reference/api-reference/error-reference */
     /** https://developer.mozilla.org/ru/docs/Web/HTTP/Status */
@@ -40,9 +49,9 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         });
       }
       default: {
-        return response.status(400).json({
-          statusCode: 400,
-          message: 'Bad Request'
+        return response.status(500).json({
+          statusCode: 500,
+          message: 'Internal Server Error'
         });
       }
     }

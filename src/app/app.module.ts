@@ -1,12 +1,12 @@
 /** @format */
 
-import { Module, Global, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
-import { CoreModule, LoggerMiddleware } from './core';
+import { CoreModule } from './core';
 import { FileModule } from './file/file.module';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
@@ -18,14 +18,7 @@ import { PasswordModule } from './password/password.module';
 import { EmailModule } from './email/email.module';
 import { join } from 'path';
 import { LoggerModule } from 'nestjs-pino';
-import { AuthController } from './auth/auth.controller';
 import { SerializerFn } from 'pino';
-import { CategoryController } from './category/category.controller';
-import { EmailController } from './email/email.controller';
-import { FileController } from './file/file.controller';
-import { PasswordController } from './password/password.controller';
-import { PostController } from './post/post.controller';
-import { UserController } from './user/user.controller';
 import { randomUUID } from 'crypto';
 
 @Global()
@@ -90,12 +83,12 @@ import { randomUUID } from 'crypto';
         pinoHttp: {
           redact: {
             paths: [
-              'req.headers.authorization',
-              'req.headers.cookie',
-              'req.body.password',
-              'req.body.newPassword',
-              'req.body.newEmail',
-              'req.body.fingerprint'
+              'request.headers.authorization',
+              'request.headers.cookie',
+              'request.body.password',
+              'request.body.newPassword',
+              'request.body.newEmail',
+              'request.body.fingerprint'
             ],
             remove: true
           },
@@ -115,8 +108,9 @@ import { randomUUID } from 'crypto';
             res: 'response',
             err: 'error'
           },
-          autoLogging: configService.get('APP_ENV') === 'production',
+          autoLogging: configService.get('APP_ENV') !== 'production',
           transport: {
+            dedupe: true,
             targets: [
               {
                 level: 'error',
@@ -130,7 +124,9 @@ import { randomUUID } from 'crypto';
                 level: 'info',
                 target: 'pino-pretty',
                 options: {
-                  singleLine: true
+                  colorize: true,
+                  colorizeObjects: true,
+                  singleLine: false
                 }
               }
             ]
@@ -172,18 +168,4 @@ import { randomUUID } from 'crypto';
     UtilitiesModule
   ]
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware)
-      .forRoutes(
-        AuthController,
-        CategoryController,
-        EmailController,
-        FileController,
-        PasswordController,
-        PostController,
-        UserController
-      );
-  }
-}
+export class AppModule {}
