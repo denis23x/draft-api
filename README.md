@@ -1,24 +1,4 @@
-#### Docker utility
-
-```bash
-docker image ls
-```
-
-```bash
-docker container ls
-```
-
-```bash
-docker build -t draft-api:latest .
-```
-
-```bash
-docker rm -f app-api app-mysql
-```
-
----
-
-### Build
+### Compose
 
 ```bash
 docker-compose up --remove-orphans --force-recreate
@@ -28,16 +8,10 @@ docker-compose up --remove-orphans --force-recreate
 docker-compose down --volumes
 ```
 
-```bash
-docker exec -it app-api bash -c 'npx prisma migrate dev'
-```
+### Exec
 
 ```bash
-docker exec -it app-api bash -c 'npx prisma db seed'
-```
-
-```bash
-docker exec -it app-api bash -c 'npx prisma studio'
+docker exec -it app-api bash
 ```
 
 ```bash
