@@ -4,12 +4,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import {
-  TransformInterceptor,
-  PrismaExceptionFilter,
-  AllExceptionsFilter,
-  PrismaService
-} from './app/core';
+import { TransformInterceptor, PrismaExceptionFilter, PrismaService } from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
 import { readFileSync } from 'fs';
@@ -50,10 +45,7 @@ const bootstrap = async () => {
 
   /** FILTERS */
 
-  app.useGlobalFilters(
-    new AllExceptionsFilter(configService, httpAdapterHost),
-    new PrismaExceptionFilter(configService)
-  );
+  app.useGlobalFilters(new PrismaExceptionFilter(configService, httpAdapterHost));
 
   /** INTERCEPTORS */
 

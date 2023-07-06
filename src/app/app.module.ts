@@ -1,12 +1,12 @@
 /** @format */
 
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
-import { CoreModule } from './core';
+import { CoreModule, LoggerMiddleware } from './core';
 import { FileModule } from './file/file.module';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
@@ -18,7 +18,15 @@ import { PasswordModule } from './password/password.module';
 import { EmailModule } from './email/email.module';
 import { join } from 'path';
 import { LoggerModule } from 'nestjs-pino';
-import { IncomingMessage, ServerResponse } from 'http';
+import { AuthController } from './auth/auth.controller';
+import { SerializerFn } from 'pino';
+import { CategoryController } from './category/category.controller';
+import { EmailController } from './email/email.controller';
+import { FileController } from './file/file.controller';
+import { PasswordController } from './password/password.controller';
+import { PostController } from './post/post.controller';
+import { UserController } from './user/user.controller';
+import { randomUUID } from 'crypto';
 
 @Global()
 @Module({
@@ -78,15 +86,36 @@ import { IncomingMessage, ServerResponse } from 'http';
       inject: [ConfigService]
     }),
     LoggerModule.forRootAsync({
-      useFactory: async () => ({
+      useFactory: async (configService: ConfigService) => ({
         pinoHttp: {
           redact: {
-            paths: ['req.headers.authorization'],
+            paths: [
+              'req.headers.authorization',
+              'req.headers.cookie',
+              'req.body.password',
+              'req.body.newPassword',
+              'req.body.newEmail',
+              'req.body.fingerprint'
+            ],
             remove: true
           },
-          customProps: (req: IncomingMessage, res: ServerResponse) => ({
+          genReqId: () => randomUUID(),
+          customProps: () => ({
             context: 'HTTP'
           }),
+          serializers: {
+            req(request: any): SerializerFn {
+              request.body = request.raw.body;
+
+              return request;
+            }
+          },
+          customAttributeKeys: {
+            req: 'request',
+            res: 'response',
+            err: 'error'
+          },
+          autoLogging: configService.get('APP_ENV') === 'production',
           transport: {
             targets: [
               {
@@ -107,7 +136,9 @@ import { IncomingMessage, ServerResponse } from 'http';
             ]
           }
         }
-      })
+      }),
+      imports: [ConfigModule],
+      inject: [ConfigService]
     }),
     AuthModule,
     CategoryModule,
@@ -141,4 +172,18 @@ import { IncomingMessage, ServerResponse } from 'http';
     UtilitiesModule
   ]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes(
+        AuthController,
+        CategoryController,
+        EmailController,
+        FileController,
+        PasswordController,
+        PostController,
+        UserController
+      );
+  }
+}
