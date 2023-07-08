@@ -36,7 +36,7 @@ services:
       retries: 10
     volumes:
       - app-mysql-data:/var/lib/mysql/
-      - ./prisma/mysql:/docker-entrypoint-initdb.d/
+      - ./src/database/mysql:/docker-entrypoint-initdb.d/
     networks:
       - api-network
 

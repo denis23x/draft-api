@@ -20,10 +20,10 @@ export const postRaw = async () => {
   const raw = [];
 
   for (let i = 0; i < categoriesDB.length * 10; i++) {
-    const category = categoriesDB[faker.datatype.number({ min: 0, max: categoriesDB.length - 1 })];
+    const category = categoriesDB[faker.number.int({ min: 0, max: categoriesDB.length - 1 })];
 
     const imagePath = process.env.APP_ORIGIN + '/images/';
-    const imageFile = faker.datatype.number({ min: 0, max: 199 }) + '.jpg';
+    const imageFile = faker.number.int({ min: 0, max: 199 }) + '.jpg';
 
     raw.push({
       name: faker.music.songName(),

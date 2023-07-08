@@ -16,7 +16,7 @@ export const categoryRaw = async () => {
   const raw = [];
 
   for (let i = 0; i < usersDB.length * 10; i++) {
-    const user = usersDB[faker.datatype.number({ min: 0, max: usersDB.length - 1 })];
+    const user = usersDB[faker.number.int({ min: 0, max: usersDB.length - 1 })];
 
     raw.push({
       name: faker.commerce.department(),
