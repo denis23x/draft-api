@@ -11,6 +11,7 @@ RUN npm i
 
 COPY --chown=node:node . .
 
+RUN npm run prisma:validate
 RUN npm run prisma:generate
 
 USER node

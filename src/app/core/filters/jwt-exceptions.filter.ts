@@ -17,11 +17,13 @@ export class JwtExceptionsFilter implements ExceptionFilter {
   ) {}
 
   catch(exception: any, argumentsHost: ArgumentsHost): Response {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const httpAdapterHost: AbstractHttpAdapter = this.httpAdapterHost.httpAdapter;
     const httpArgumentsHost: HttpArgumentsHost = argumentsHost.switchToHttp();
 
-    const response: Response = httpArgumentsHost.getResponse<Response>();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const request: Request = httpArgumentsHost.getRequest<Request>();
+    const response: Response = httpArgumentsHost.getResponse<Response>();
 
     /** LOGGER */
 
