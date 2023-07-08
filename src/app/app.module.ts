@@ -44,7 +44,7 @@ import { randomUUID } from 'crypto';
           from: 'Draft website'
         },
         template: {
-          dir: join(__dirname, '../../templates/emails'),
+          dir: join(__dirname, '../templates/emails'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true
@@ -52,7 +52,7 @@ import { randomUUID } from 'crypto';
         },
         options: {
           partials: {
-            dir: join(__dirname, '../../templates/emails/partials'),
+            dir: join(__dirname, '../templates/emails/partials'),
             options: {
               strict: true
             }
