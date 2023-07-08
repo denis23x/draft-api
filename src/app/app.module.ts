@@ -118,7 +118,7 @@ import { randomUUID } from 'crypto';
                 level: 'error',
                 target: 'pino/file',
                 options: {
-                  destination: join(__dirname, '/error.log'),
+                  destination: join(__dirname, '../logs/error.log'),
                   mkdir: true
                 }
               },
