@@ -88,7 +88,9 @@ import { randomUUID } from 'crypto';
               'request.body.password',
               'request.body.newPassword',
               'request.body.newEmail',
-              'request.body.fingerprint'
+              'request.body.fingerprint',
+              'response.headers',
+              'response.cookie'
             ],
             remove: true
           },
@@ -108,7 +110,7 @@ import { randomUUID } from 'crypto';
             res: 'response',
             err: 'error'
           },
-          autoLogging: configService.get('APP_ENV') !== 'production',
+          autoLogging: configService.get('APP_LOG') === 'debug',
           transport: {
             dedupe: true,
             targets: [
@@ -125,8 +127,7 @@ import { randomUUID } from 'crypto';
                 target: 'pino-pretty',
                 options: {
                   colorize: true,
-                  colorizeObjects: true,
-                  singleLine: false
+                  colorizeObjects: true
                 }
               }
             ]

@@ -2,14 +2,23 @@
 
 import { Injectable, OnModuleInit, OnModuleDestroy, INestApplication } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  constructor() {
-    super({
-      errorFormat: 'minimal',
-      log: ['query', 'info', 'warn', 'error']
-    });
+  constructor(private readonly configService: ConfigService) {
+    const prismaClientOptions: Prisma.PrismaClientOptions = {
+      errorFormat: 'minimal'
+    };
+
+    /** https://www.prisma.io/docs/concepts/components/prisma-client/working-with-prismaclient/logging */
+
+    if (configService.get('APP_LOG') === 'debug') {
+      prismaClientOptions.errorFormat = 'pretty';
+      prismaClientOptions.log = ['query', 'info', 'warn', 'error'];
+    }
+
+    super(prismaClientOptions);
   }
 
   async onModuleInit(): Promise<void> {
