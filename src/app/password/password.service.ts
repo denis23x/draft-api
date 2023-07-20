@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PasswordCheckGetDto, PasswordResetGetDto, PasswordResetUpdateDto } from './dto';
 import { PrismaService } from '../core';
 import { Prisma, User } from '@prisma/client';
-import { compare, hash } from 'bcrypt';
+import { compare, hash } from 'bcryptjs';
 
 @Injectable()
 export class PasswordService {

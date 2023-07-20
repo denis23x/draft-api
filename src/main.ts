@@ -74,21 +74,6 @@ const bootstrap = async () => {
     credentials: true
   });
 
-  /** SECURITY */
-
-  // prettier-ignore
-  app.use(helmet({
-    crossOriginResourcePolicy: {
-      policy: 'cross-origin'
-    },
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        'img-src': ["'self'", 'https: data: blob:']
-      }
-    }
-  }));
-
   /** ASSETS */
 
   app.useStaticAssets('src/assets');
@@ -160,6 +145,21 @@ const bootstrap = async () => {
   };
 
   SwaggerModule.setup('/swagger/docs', app, openAPIObject, swaggerCustomOptions);
+
+  /** SECURITY */
+
+  // prettier-ignore
+  app.use(helmet({
+    crossOriginResourcePolicy: {
+      policy: 'cross-origin'
+    },
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        'img-src': ["'self'", 'https: data: blob:']
+      }
+    }
+  }));
 
   /** LISTEN */
 

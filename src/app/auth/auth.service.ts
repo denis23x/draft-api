@@ -1,7 +1,7 @@
 /** @format */
 
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { compare } from 'bcrypt';
+import { compare } from 'bcryptjs';
 import { Request, Response } from 'express';
 import { FingerprintDto, LoginDto, LogoutDto, TokenDto } from './dto';
 import { Prisma, Session, User } from '@prisma/client';

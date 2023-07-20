@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Prisma, User } from '@prisma/client';
 import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
-import { hash } from 'bcrypt';
+import { hash } from 'bcryptjs';
 import { MailerService } from '@nestjs-modules/mailer';
 import { stat, unlink } from 'fs';
 import { ConfigService } from '@nestjs/config';
