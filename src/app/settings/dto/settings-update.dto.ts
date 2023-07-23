@@ -53,4 +53,31 @@ export class SettingsUpdateDto {
   @IsBoolean()
   @Type(() => Boolean)
   monospace?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Scroll to top',
+    default: true
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  pageScrollToTop?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Infinite scroll',
+    default: true
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  pageScrollInfinite?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Redirects',
+    default: true
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  redirectFromHome?: boolean;
 }

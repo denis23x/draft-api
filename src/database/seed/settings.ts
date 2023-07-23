@@ -23,6 +23,9 @@ export const settingsRaw = async () => {
       themeBackground: 'slanted-gradient',
       language: 'en-US',
       monospace: true,
+      pageScrollToTop: false,
+      pageScrollInfinite: true,
+      redirectFromHome: true,
       buttons: 'left',
       userId: user.id
     });
