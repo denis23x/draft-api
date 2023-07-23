@@ -166,15 +166,6 @@ export class UserService {
             }
           };
         }
-
-        if (userGetOneDto.scope.includes('settings')) {
-          userFindUniqueOrThrowArgs.select = {
-            ...userFindUniqueOrThrowArgs.select,
-            settings: {
-              select: this.prismaService.setSettingsSelect()
-            }
-          };
-        }
       }
     }
 
@@ -221,24 +212,6 @@ export class UserService {
       userUpdateArgs.data = {
         ...userUpdateArgs.data,
         password: await hash(newPassword, 10)
-      };
-    }
-
-    /** Update settings */
-
-    if (userUpdateDtoData.hasOwnProperty('settings')) {
-      userUpdateArgs.select = {
-        ...userUpdateArgs.select,
-        settings: {
-          select: this.prismaService.setSettingsSelect()
-        }
-      };
-
-      userUpdateArgs.data = {
-        ...userUpdateArgs.data,
-        settings: {
-          update: userUpdateDtoData.settings
-        }
       };
     }
 

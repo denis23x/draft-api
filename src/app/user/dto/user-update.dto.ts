@@ -1,6 +1,6 @@
 /** @format */
 
-import { ApiHideProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UserUpdateDto {
@@ -65,8 +65,4 @@ export class UserUpdateDto {
   @MaxLength(32)
   @IsString()
   newPassword?: string;
-
-  @ApiHideProperty()
-  @IsOptional()
-  settings?: any;
 }

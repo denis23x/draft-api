@@ -9,6 +9,7 @@ import { CategoryModule } from './category/category.module';
 import { CoreModule } from './core';
 import { FileModule } from './file/file.module';
 import { PostModule } from './post/post.module';
+import { SettingsModule } from './settings/settings.module';
 import { UserModule } from './user/user.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -144,6 +145,7 @@ import { randomUUID } from 'crypto';
     FileModule,
     PasswordModule,
     PostModule,
+    SettingsModule,
     UserModule,
     UtilitiesModule
   ],
@@ -165,6 +167,7 @@ import { randomUUID } from 'crypto';
     FileModule,
     PasswordModule,
     PostModule,
+    SettingsModule,
     UserModule,
     UtilitiesModule
   ]
