@@ -103,52 +103,20 @@ export class AuthService {
     }
   }
 
-  async logout(request: Request, response: Response, logoutDto: LogoutDto): Promise<any> {
-    const sessionFindUniqueArgs: Prisma.SessionFindUniqueArgs = {
-      select: {
-        userId: true
-      },
-      where: {}
+  async logout(request: Request, response: Response, logoutDto: LogoutDto): Promise<Session> {
+    const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
+      select: this.prismaService.setSessionSelect(),
+      where: {
+        fingerprint_userId: {
+          fingerprint: logoutDto.fingerprint,
+          userId: (request.user as any).id
+        }
+      }
     };
 
-    if (!!logoutDto) {
-      /** Search */
-
-      if (logoutDto.hasOwnProperty('id')) {
-        sessionFindUniqueArgs.where = {
-          id: logoutDto.id
-        };
-
-        const session: Session = await this.prismaService.session.findUnique(sessionFindUniqueArgs);
-
-        if (session.userId === (request.user as any).id) {
-          const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
-            where: {
-              id: logoutDto.id
-            }
-          };
-
-          return this.prismaService.session.delete(sessionDeleteArgs);
-        } else {
-          throw new UnauthorizedException();
-        }
-      } else {
-        const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
-          where: {
-            fingerprint_userId: {
-              fingerprint: logoutDto.fingerprint,
-              userId: (request.user as any).id
-            }
-          }
-        };
-
-        return this.setUnauthorized(response).then(() => {
-          return this.prismaService.session.delete(sessionDeleteArgs);
-        });
-      }
-    }
-
-    throw new UnauthorizedException();
+    return this.setUnauthorized(response).then(() => {
+      return this.prismaService.session.delete(sessionDeleteArgs);
+    });
   }
 
   // prettier-ignore

@@ -25,7 +25,7 @@ export class SessionService {
 
   async delete(request: Request, id: number): Promise<Session> {
     const sessionDeleteArgs: Prisma.SessionDeleteArgs = {
-      select: this.prismaService.setSettingsSelect(),
+      select: this.prismaService.setSessionSelect(),
       where: {
         id
       }

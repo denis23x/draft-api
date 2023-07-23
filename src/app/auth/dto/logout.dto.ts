@@ -1,8 +1,7 @@
 /** @format */
 
-import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class LogoutDto {
   @ApiProperty({
@@ -12,11 +11,4 @@ export class LogoutDto {
   @IsNotEmpty()
   @IsString()
   fingerprint: string;
-
-  @ApiHideProperty()
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  id: number;
 }
