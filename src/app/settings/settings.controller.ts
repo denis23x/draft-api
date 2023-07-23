@@ -13,9 +13,8 @@ import { AuthGuard } from '@nestjs/passport';
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  // prettier-ignore
   @ApiOperation({
-    description: '## Get user settings'
+    description: '## Get settings'
   })
   @ApiResponse({
     status: 200,
@@ -24,13 +23,13 @@ export class SettingsController {
   @ApiBearerAuth('access')
   @Get()
   @UseGuards(AuthGuard('access'))
-  async confirmationGet(@Req() request: Request): Promise<Settings> {
-    return this.settingsService.confirmationGet(request);
+  async getOne(@Req() request: Request): Promise<Settings> {
+    return this.settingsService.getOne(request);
   }
 
   // prettier-ignore
   @ApiOperation({
-    description: '## Update user settings'
+    description: '## Update settings'
   })
   @ApiResponse({
     status: 200,
@@ -39,7 +38,7 @@ export class SettingsController {
   @ApiBearerAuth('access')
   @Put()
   @UseGuards(AuthGuard('access'))
-  async confirmationUpdate(@Req() request: Request, @Body() settingsUpdateDto: SettingsUpdateDto): Promise<Settings> {
-    return this.settingsService.confirmationUpdate(request, settingsUpdateDto);
+  async update(@Req() request: Request, @Body() settingsUpdateDto: SettingsUpdateDto): Promise<Settings> {
+    return this.settingsService.update(request, settingsUpdateDto);
   }
 }

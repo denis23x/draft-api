@@ -10,7 +10,7 @@ import { Prisma, Settings } from '@prisma/client';
 export class SettingsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async confirmationGet(request: Request): Promise<Settings> {
+  async getOne(request: Request): Promise<Settings> {
     const settingsFindUniqueOrThrowArgs: Prisma.SettingsFindUniqueOrThrowArgs = {
       select: this.prismaService.setSettingsSelect(),
       where: {
@@ -21,8 +21,7 @@ export class SettingsService {
     return this.prismaService.settings.findUniqueOrThrow(settingsFindUniqueOrThrowArgs);
   }
 
-  // prettier-ignore
-  async confirmationUpdate(request: Request, settingsUpdateDto: SettingsUpdateDto): Promise<Settings> {
+  async update(request: Request, settingsUpdateDto: SettingsUpdateDto): Promise<Settings> {
     const settingsUpdateArgs: Prisma.SettingsUpdateArgs = {
       select: this.prismaService.setSettingsSelect(),
       where: {

@@ -6,7 +6,7 @@ import { IsIn, IsOptional } from 'class-validator';
 export class UserGetOneDto {
   @ApiHideProperty()
   @IsOptional()
-  @IsIn(['categories', 'posts', 'sessions'], {
+  @IsIn(['categories', 'posts'], {
     each: true
   })
   scope?: string[];

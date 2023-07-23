@@ -154,18 +154,6 @@ export class UserService {
             }
           };
         }
-
-        if (userGetOneDto.scope.includes('sessions')) {
-          userFindUniqueOrThrowArgs.select = {
-            ...userFindUniqueOrThrowArgs.select,
-            sessions: {
-              select: this.prismaService.setSessionSelect(),
-              orderBy: {
-                id: 'desc'
-              }
-            }
-          };
-        }
       }
     }
 
