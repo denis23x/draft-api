@@ -83,11 +83,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       themePrism: true,
       themeBackground: true,
       language: true,
-      monospace: true,
-      buttons: true,
+      markdownMonospace: true,
+      windowButtonPosition: true,
       pageScrollToTop: true,
       pageScrollInfinite: true,
-      redirectFromHome: true,
+      pageRedirectHome: true,
       createdAt: true,
       updatedAt: true
     };

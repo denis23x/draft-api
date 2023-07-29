@@ -38,21 +38,21 @@ export class SettingsUpdateDto {
   language?: string;
 
   @ApiPropertyOptional({
-    description: 'Buttons',
+    description: 'Window caption buttons position',
     default: 'left'
   })
   @IsOptional()
   @IsString()
-  buttons?: string;
+  windowButtonPosition?: string;
 
   @ApiPropertyOptional({
-    description: 'Monospace',
+    description: 'Markdown monospace',
     default: true
   })
   @IsOptional()
   @IsBoolean()
   @Type(() => Boolean)
-  monospace?: boolean;
+  markdownMonospace?: boolean;
 
   @ApiPropertyOptional({
     description: 'Scroll to top',
@@ -73,11 +73,11 @@ export class SettingsUpdateDto {
   pageScrollInfinite?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Redirects',
+    description: 'Redirect home page',
     default: true
   })
   @IsOptional()
   @IsBoolean()
   @Type(() => Boolean)
-  redirectFromHome?: boolean;
+  pageRedirectHome?: boolean;
 }

@@ -22,11 +22,11 @@ export const settingsRaw = async () => {
       themePrism: 'default',
       themeBackground: 'slanted-gradient',
       language: 'en-US',
-      monospace: true,
+      markdownMonospace: true,
       pageScrollToTop: false,
       pageScrollInfinite: true,
-      redirectFromHome: true,
-      buttons: 'left',
+      pageRedirectHome: true,
+      windowButtonPosition: 'left',
       userId: user.id
     });
   }

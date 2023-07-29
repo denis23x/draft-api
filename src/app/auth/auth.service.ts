@@ -145,12 +145,7 @@ export class AuthService {
 
       if (!isExpired && !isFingerprintInvalid) {
         const userFindUniqueArgs: Prisma.UserFindUniqueArgs = {
-          select: {
-            ...this.prismaService.setUserSelect(),
-            settings: {
-              select: this.prismaService.setSettingsSelect()
-            }
-          },
+          select: this.prismaService.setUserSelect(),
           where: {
             id: session.userId
           }
