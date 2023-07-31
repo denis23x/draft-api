@@ -43,7 +43,10 @@ export class PostService {
 
   async getAll(request: Request, postGetAllDto: PostGetAllDto): Promise<Post[]> {
     const postFindManyArgs: Prisma.PostFindManyArgs = {
-      select: this.prismaService.setPostSelect(),
+      select: {
+        ...this.prismaService.setPostSelect(),
+        markdown: false
+      },
       orderBy: {
         id: 'desc'
       },

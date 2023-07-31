@@ -257,9 +257,6 @@ export class AuthService {
   }
 
   async setUnauthorized(response: Response, session?: Session): Promise<Session> {
-    response.clearCookie('authed');
-    response.clearCookie('theme');
-
     // TODO: enable secure and sameSite (need HTTPS)
 
     response.cookie('refresh', String(0), {
