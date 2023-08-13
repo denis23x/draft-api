@@ -1,7 +1,5 @@
 ## REST API
 
-OpenAPI JSON for Postman collection [download](/swagger/docs-json)
-
 Swagger Stats [dashboard](/swagger/stats)
 
 Issues

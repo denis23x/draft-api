@@ -4,22 +4,17 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import {
-  TransformInterceptor,
-  PrismaExceptionFilter,
-  PrismaService,
-  JwtExceptionsFilter
-} from './app/core';
+import { TransformInterceptor, PrismaExceptionFilter, JwtExceptionsFilter } from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
 import { readFileSync } from 'fs';
 import { ConfigService } from '@nestjs/config';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
+import { SecuritySchemeObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import swaggerStats from 'swagger-stats';
-import { SecuritySchemeObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 const bootstrap = async () => {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -30,13 +25,10 @@ const bootstrap = async () => {
   const reflector: Reflector = app.get(Reflector);
   const configService: ConfigService = app.get(ConfigService);
   const httpAdapterHost: HttpAdapterHost = app.get(HttpAdapterHost);
-  const prismaService: PrismaService = app.get(PrismaService);
 
-  /** https://docs.nestjs.com/recipes/prisma#issues-with-enableshutdownhooks */
+  /** https://www.prisma.io/docs/guides/upgrade-guides/upgrading-versions/upgrading-to-prisma-5#removal-of-the-beforeexit-hook-from-the-library-engine */
 
-  prismaService.enableShutdownHooks(app).then(() => {
-    logger.log('Prisma enableShutdownHooks');
-  });
+  app.enableShutdownHooks();
 
   /** SETTINGS */
 
@@ -123,13 +115,20 @@ const bootstrap = async () => {
     uriPath: '/swagger/stats',
     swaggerSpec: openAPIObject,
     authentication: true,
-    onAuthenticate: (request, username, password) => username === configService.get('SWAGGER_STATS_USER') && password === configService.get('SWAGGER_STATS_PASSWORD')
+    onAuthenticate: (request, username: string, password: string) => username === configService.get('SWAGGER_STATS_USER') && password === configService.get('SWAGGER_STATS_PASSWORD')
   }));
 
   /** https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ */
 
   const swaggerCustomOptions: SwaggerCustomOptions = {
+    explorer: true,
     swaggerOptions: {
+      urls: [
+        {
+          url: 'http://localhost:3323/swagger/docs-json',
+          name: 'Draft API'
+        }
+      ],
       filter: true,
       persistAuthorization: true,
       docExpansion: 'none',
