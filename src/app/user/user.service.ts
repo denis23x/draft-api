@@ -208,6 +208,8 @@ export class UserService {
         const avatar: string = userCurrent.avatar?.split('/').pop();
         const avatarPath: string = './upload/avatars/' + avatar;
 
+        // TODO: add log
+
         stat(avatarPath, (error: NodeJS.ErrnoException | null) => {
           if (!!error) {
             console.log(error);

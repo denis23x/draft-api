@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { PrismaService } from '../core';
 import { Post, Prisma } from '@prisma/client';
 import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostUpdateDto } from './dto';
+import { stat, unlink } from 'fs';
 
 @Injectable()
 export class PostService {
@@ -174,7 +175,41 @@ export class PostService {
       data: postUpdateDto
     };
 
-    return this.prismaService.post.update(postUpdateArgs);
+    /** Get current state for next expressions */
+
+    const postFindUniqueArgs: Prisma.PostFindUniqueArgs = {
+      select: {
+        image: true
+      },
+      where: {
+        id
+      }
+    };
+
+    const postCurrent: Post = await this.prismaService.post.findUnique(postFindUniqueArgs);
+
+    return this.prismaService.post.update(postUpdateArgs).then((post: Post) => {
+      if (postUpdateDto.hasOwnProperty('image')) {
+        const image: string = postCurrent.image?.split('/').pop();
+        const imagePath: string = './upload/images/' + image;
+
+        // TODO: add log
+
+        stat(imagePath, (error: NodeJS.ErrnoException | null) => {
+          if (!!error) {
+            console.log(error);
+          } else {
+            unlink(imagePath, (error: NodeJS.ErrnoException | null) => {
+              if (!!error) {
+                console.log(error);
+              }
+            });
+          }
+        });
+      }
+
+      return post;
+    });
   }
 
   async delete(request: Request, id: number): Promise<Post> {
