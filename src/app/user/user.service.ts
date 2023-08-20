@@ -82,6 +82,26 @@ export class UserService {
         };
       }
 
+      /** Order */
+
+      if (userGetAllDto.hasOwnProperty('orderBy')) {
+        userFindManyArgs.orderBy = {
+          ...userFindManyArgs.orderBy,
+          id: userGetAllDto.orderBy === 'newest' ? 'desc' : 'asc'
+        };
+
+        /** For full text search make UserOrderByWithRelationAndSearchRelevanceInput[] */
+
+        userFindManyArgs.orderBy = Object.entries(userFindManyArgs.orderBy).map((entry: any) => {
+          const key: string = entry[0];
+          const value: any = entry[1];
+
+          return {
+            [key]: value
+          };
+        });
+      }
+
       /** Scope */
 
       if (userGetAllDto.hasOwnProperty('scope')) {

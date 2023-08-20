@@ -62,6 +62,27 @@ export class CategoryService {
         };
       }
 
+      /** Order */
+
+      if (categoryGetAllDto.hasOwnProperty('orderBy')) {
+        categoryFindManyArgs.orderBy = {
+          ...categoryFindManyArgs.orderBy,
+          id: categoryGetAllDto.orderBy === 'newest' ? 'desc' : 'asc'
+        };
+
+        /** For full text search make CategoryOrderByWithRelationAndSearchRelevanceInput[] */
+
+        // prettier-ignore
+        categoryFindManyArgs.orderBy = Object.entries(categoryFindManyArgs.orderBy).map((entry: any) => {
+          const key: string = entry[0];
+          const value: any = entry[1];
+
+          return {
+            [key]: value
+          };
+        });
+      }
+
       /** Scope */
 
       if (categoryGetAllDto.hasOwnProperty('scope')) {

@@ -57,6 +57,13 @@ export class UserGetAllDto {
 
   @ApiHideProperty()
   @IsOptional()
+  @IsIn(['newest', 'oldest'], {
+    each: true
+  })
+  orderBy?: string;
+
+  @ApiHideProperty()
+  @IsOptional()
   @IsIn(['categories', 'posts'], {
     each: true
   })

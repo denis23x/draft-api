@@ -68,13 +68,15 @@ export class PostService {
           }
         };
 
-        // postFindManyArgs.orderBy = {
-        //   _relevance: {
-        //     fields: ['name', 'description'],
-        //     search: postGetAllDto.name,
-        //     sort: 'desc'
-        //   }
-        // };
+        /** Default relevant order */
+
+        postFindManyArgs.orderBy = {
+          _relevance: {
+            fields: ['name', 'description'],
+            search: postGetAllDto.query,
+            sort: 'asc'
+          }
+        };
       }
 
       /** Filter */
@@ -91,6 +93,26 @@ export class PostService {
           ...postFindManyArgs.where,
           categoryId: postGetAllDto.categoryId
         };
+      }
+
+      /** Order */
+
+      if (postGetAllDto.hasOwnProperty('orderBy')) {
+        postFindManyArgs.orderBy = {
+          ...postFindManyArgs.orderBy,
+          id: postGetAllDto.orderBy === 'newest' ? 'desc' : 'asc'
+        };
+
+        /** For full text search make PostOrderByWithRelationAndSearchRelevanceInput[] */
+
+        postFindManyArgs.orderBy = Object.entries(postFindManyArgs.orderBy).map((entry: any) => {
+          const key: string = entry[0];
+          const value: any = entry[1];
+
+          return {
+            [key]: value
+          };
+        });
       }
 
       /** Scope */
