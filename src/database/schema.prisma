@@ -1,6 +1,7 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "debian-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -62,6 +63,8 @@ model User {
   posts          Post[]
   sessions       Session[]
   settings       Settings?
+
+  @@fulltext([name])
 }
 
 model Category {
@@ -75,6 +78,7 @@ model Category {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   posts       Post[]
 
+  @@fulltext([name])
   @@unique([name, userId])
   @@index([userId])
 }
@@ -93,6 +97,7 @@ model Post {
   category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   user        User      @relation(fields: [userId], references: [id])
 
+  @@fulltext([name, description])
   @@unique([name, userId, categoryId])
   @@index([categoryId])
   @@index([userId])

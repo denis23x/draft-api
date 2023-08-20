@@ -1,1 +1,1 @@
-GRANT CREATE, ALTER, DROP, REFERENCES ON *.* TO 'username'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'username'@'%';
