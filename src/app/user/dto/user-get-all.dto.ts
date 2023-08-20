@@ -24,12 +24,16 @@ export class UserGetAllDto {
   @IsString()
   name?: string;
 
-  @ApiHideProperty()
+  @ApiPropertyOptional({
+    description: 'Full text search',
+    minLength: 4,
+    maxLength: 16
+  })
   @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Type(() => Number)
-  exact?: number;
+  @MinLength(4)
+  @MaxLength(24)
+  @IsString()
+  query?: string;
 
   @ApiPropertyOptional({
     description: 'Page',

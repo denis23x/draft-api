@@ -14,7 +14,7 @@ import { Type } from 'class-transformer';
 
 export class CategoryGetAllDto {
   @ApiPropertyOptional({
-    description: 'Name',
+    description: 'Full text search',
     minLength: 4,
     maxLength: 16
   })
@@ -22,7 +22,7 @@ export class CategoryGetAllDto {
   @MinLength(4)
   @MaxLength(16)
   @IsString()
-  name?: string;
+  query?: string;
 
   @ApiHideProperty()
   @IsOptional()

@@ -56,15 +56,28 @@ export class PostService {
     };
 
     if (!!postGetAllDto) {
-      /** Search */
+      /** Fulltext search */
 
-      if (postGetAllDto.hasOwnProperty('name')) {
+      if (postGetAllDto.hasOwnProperty('query')) {
         postFindManyArgs.where = {
           name: {
-            contains: postGetAllDto.name
+            search: postGetAllDto.query + '*'
+          },
+          description: {
+            search: postGetAllDto.query + '*'
           }
         };
+
+        // postFindManyArgs.orderBy = {
+        //   _relevance: {
+        //     fields: ['name', 'description'],
+        //     search: postGetAllDto.name,
+        //     sort: 'desc'
+        //   }
+        // };
       }
+
+      /** Filter */
 
       if (postGetAllDto.hasOwnProperty('userId')) {
         postFindManyArgs.where = {
@@ -194,6 +207,8 @@ export class PostService {
         const imagePath: string = './upload/images/' + image;
 
         // TODO: add log
+        // Review logic because post can be updated with same image
+        // Review the same in user update
 
         stat(imagePath, (error: NodeJS.ErrnoException | null) => {
           if (!!error) {

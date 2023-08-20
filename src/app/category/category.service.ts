@@ -43,15 +43,17 @@ export class CategoryService {
     };
 
     if (!!categoryGetAllDto) {
-      /** Search */
+      /** Fulltext search */
 
-      if (categoryGetAllDto.hasOwnProperty('name')) {
+      if (categoryGetAllDto.hasOwnProperty('query')) {
         categoryFindManyArgs.where = {
           name: {
-            contains: categoryGetAllDto.name
+            search: categoryGetAllDto.query + '*'
           }
         };
       }
+
+      /** Filter */
 
       if (categoryGetAllDto.hasOwnProperty('userId')) {
         categoryFindManyArgs.where = {

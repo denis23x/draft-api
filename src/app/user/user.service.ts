@@ -64,18 +64,22 @@ export class UserService {
     if (!!userGetAllDto) {
       /** Search */
 
+      // TODO: remake?
+
       if (userGetAllDto.hasOwnProperty('name')) {
-        if (userGetAllDto.hasOwnProperty('exact')) {
-          userFindManyArgs.where = {
-            name: userGetAllDto.name
-          };
-        } else {
-          userFindManyArgs.where = {
-            name: {
-              contains: userGetAllDto.name
-            }
-          };
-        }
+        userFindManyArgs.where = {
+          name: userGetAllDto.name
+        };
+      }
+
+      /** Fulltext search */
+
+      if (userGetAllDto.hasOwnProperty('query')) {
+        userFindManyArgs.where = {
+          name: {
+            search: userGetAllDto.query + '*'
+          }
+        };
       }
 
       /** Scope */
