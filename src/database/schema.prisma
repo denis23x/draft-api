@@ -9,6 +9,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Feedback {
+  id          Int       @id @default(autoincrement()) @db.Int
+  userId      Int       @db.Int
+  name        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @db.DateTime(6)
+  deletedAt   DateTime? @db.DateTime(6)
+  user        User      @relation(fields: [userId], references: [id], onDelete: NoAction)
+
+  @@index([userId])
+}
+
 model Settings {
   id                   Int      @id @default(autoincrement()) @db.Int
   userId               Int      @unique @db.Int
@@ -62,6 +75,7 @@ model User {
   categories     Category[]
   posts          Post[]
   sessions       Session[]
+  feedbacks      Feedback[]
   settings       Settings?
 
   @@fulltext([name])

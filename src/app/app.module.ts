@@ -22,6 +22,7 @@ import { join } from 'path';
 import { LoggerModule } from 'nestjs-pino';
 import { SerializerFn } from 'pino';
 import { randomUUID } from 'crypto';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Global()
 @Module({
@@ -143,6 +144,7 @@ import { randomUUID } from 'crypto';
     CategoryModule,
     CoreModule,
     EmailModule,
+    FeedbackModule,
     FileModule,
     PasswordModule,
     PostModule,
@@ -166,6 +168,7 @@ import { randomUUID } from 'crypto';
     CategoryModule,
     CoreModule,
     EmailModule,
+    FeedbackModule,
     FileModule,
     PasswordModule,
     PostModule,

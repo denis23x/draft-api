@@ -4,6 +4,8 @@ down:
 	docker compose down
 migrate:
 	docker exec -it app-api bash -c 'npx prisma migrate dev'
+generate:
+	docker exec -it app-api bash -c 'npx prisma generate'
 seed:
 	docker exec -it app-api bash -c 'npx prisma db seed'
 build:

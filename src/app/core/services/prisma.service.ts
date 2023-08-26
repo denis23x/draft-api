@@ -29,6 +29,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
   }
 
+  setFeedbackSelect(): Prisma.FeedbackSelect {
+    return {
+      id: true,
+      name: true,
+      description: true,
+      userId: false,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: false
+    };
+  }
+
   setCategorySelect(): Prisma.CategorySelect {
     return {
       id: true,
