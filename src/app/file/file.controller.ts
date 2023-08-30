@@ -2,12 +2,15 @@
 
 import {
   Controller,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
+  ParseFilePipe,
   Post,
   Query,
   Req,
   Res,
-  UploadedFiles,
+  UploadedFile,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
@@ -21,10 +24,22 @@ import {
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
-import { FileDto, FileCreateDto, FileProxyGetOneDto, FileMulterField } from './dto';
-import { SharpPipe } from '../core';
+import { FileDto, FileProxyGetOneDto } from './dto';
+import { ParseFileOptions } from '@nestjs/common/pipes/file/parse-file-options.interface';
+
+export const parseFileOptions: ParseFileOptions = {
+  validators: [
+    new FileTypeValidator({
+      fileType: '.(png|jpeg|jpg)'
+    }),
+    new MaxFileSizeValidator({
+      maxSize: 5000000
+    })
+  ],
+  fileIsRequired: true
+};
 
 @ApiTags('Files')
 @Controller('files')
@@ -39,14 +54,11 @@ export class FileController {
   @ApiBody({
     schema: {
       type: 'object',
+      required: ['image'],
       properties: {
-        avatars: {
+        image: {
           type: 'string',
-          format: 'binary',
-        },
-        images: {
-          type: 'string',
-          format: 'binary',
+          format: 'binary'
         }
       },
     },
@@ -56,11 +68,11 @@ export class FileController {
     type: FileDto
   })
   @ApiBearerAuth('access')
-  @Post()
-  @UseInterceptors(FileFieldsInterceptor(FileMulterField))
+  @Post('image')
+  @UseInterceptors(FileInterceptor('image'))
   @UseGuards(AuthGuard('access'))
-  async create(@Req() request: Request, @UploadedFiles(SharpPipe) fileCreateDto: FileCreateDto): Promise<Express.Multer.File> {
-    return this.uploadService.create(request, fileCreateDto);
+  async create(@Req() request: Request, @UploadedFile(new ParseFilePipe(parseFileOptions)) file: Express.Multer.File): Promise<Express.Multer.File> {
+    return this.uploadService.create(request, file);
   }
 
   // prettier-ignore
@@ -71,7 +83,7 @@ export class FileController {
     status: 200
   })
   @ApiBearerAuth('access')
-  @Get('proxy')
+  @Get('image/proxy')
   @UseGuards(AuthGuard('access'))
   async proxyGet(@Req() request: Request, @Res() response: Response, @Query() fileProxyGetOneDto: FileProxyGetOneDto): Promise<any> {
     return this.uploadService.proxyGet(request, response, fileProxyGetOneDto);

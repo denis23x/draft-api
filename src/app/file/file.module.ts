@@ -39,21 +39,15 @@ import { parse, ParsedPath } from 'path';
         },
         storage: diskStorage({
           destination: (request: Request, file: Express.Multer.File, callback: any): void => {
-            const buildPath = (path: string): void => {
-              if (!existsSync(path)) {
-                mkdirSync(path);
-              }
-            };
+            const tempPath: string = './upload/images/temp';
 
-            const uploadPath: string = './upload';
+            if (!existsSync(tempPath)) {
+              mkdirSync(tempPath, {
+                recursive: true
+              });
+            }
 
-            buildPath(uploadPath);
-
-            const uploadPathField: string = [uploadPath, file.fieldname].join('/');
-
-            buildPath(uploadPathField);
-
-            callback(null, uploadPathField);
+            callback(null, tempPath);
           },
           filename: (request: Request, file: Express.Multer.File, callback: any): void => {
             const parsedPath: ParsedPath = parse(file.originalname);
