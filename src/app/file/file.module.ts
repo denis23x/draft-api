@@ -9,9 +9,9 @@ import { diskStorage } from 'multer';
 import { Request } from 'express';
 import { existsSync, mkdirSync } from 'fs';
 import { MulterModuleOptions } from '@nestjs/platform-express/multer/interfaces/files-upload-module.interface';
-import * as mime from 'mime-types';
 import * as crypto from 'crypto';
 import { ConfigModule } from '@nestjs/config';
+import { parse, ParsedPath } from 'path';
 
 @Module({
   imports: [
@@ -20,10 +20,11 @@ import { ConfigModule } from '@nestjs/config';
     MulterModule.registerAsync({
       useFactory: async (): Promise<MulterModuleOptions> => ({
         limits: {
-          fileSize: 1048576 * 1 // 1MB
+          fileSize: 5000000, // 5MB
+          files: 1
         },
         fileFilter: (request: Request, file: Express.Multer.File, callback: any): void => {
-          const mimeList: string[] = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
+          const mimeList: string[] = ['image/jpeg', 'image/jpg', 'image/png'];
 
           if (mimeList.includes(file.mimetype)) {
             callback(null, true);
@@ -55,7 +56,9 @@ import { ConfigModule } from '@nestjs/config';
             callback(null, uploadPathField);
           },
           filename: (request: Request, file: Express.Multer.File, callback: any): void => {
-            callback(null, crypto.randomUUID() + '.' + mime.extension(file.mimetype));
+            const parsedPath: ParsedPath = parse(file.originalname);
+
+            callback(null, crypto.randomUUID() + parsedPath.ext);
           }
         })
       })

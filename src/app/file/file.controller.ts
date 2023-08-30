@@ -24,6 +24,7 @@ import {
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { FileDto, FileCreateDto, FileProxyGetOneDto, FileMulterField } from './dto';
+import { SharpPipe } from '../core';
 
 @ApiTags('Files')
 @Controller('files')
@@ -58,7 +59,7 @@ export class FileController {
   @Post()
   @UseInterceptors(FileFieldsInterceptor(FileMulterField))
   @UseGuards(AuthGuard('access'))
-  async create(@Req() request: Request, @UploadedFiles() fileCreateDto: FileCreateDto): Promise<Express.Multer.File> {
+  async create(@Req() request: Request, @UploadedFiles(SharpPipe) fileCreateDto: FileCreateDto): Promise<Express.Multer.File> {
     return this.uploadService.create(request, fileCreateDto);
   }
 

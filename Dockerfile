@@ -11,7 +11,11 @@ RUN npm i
 
 COPY --chown=node:node . .
 
-RUN npm run prisma:validate
-RUN npm run prisma:generate
+RUN npx prisma validate
+RUN npx prisma generate
+
+# https://sharp.pixelplumbing.com/install#apple-m1
+
+RUN npm rebuild --arch=arm64 --platform=linux  sharp
 
 USER node
