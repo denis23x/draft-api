@@ -1,17 +1,16 @@
 /** @format */
 
-import { BadRequestException, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { FileService } from './file.service';
 import { FileController } from './file.controller';
 import { HttpModule } from '@nestjs/axios';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Request } from 'express';
-import { existsSync, mkdirSync } from 'fs';
 import { MulterModuleOptions } from '@nestjs/platform-express/multer/interfaces/files-upload-module.interface';
 import * as crypto from 'crypto';
 import { ConfigModule } from '@nestjs/config';
-import { parse, ParsedPath } from 'path';
+import { parse } from 'path';
 
 @Module({
   imports: [
@@ -19,40 +18,12 @@ import { parse, ParsedPath } from 'path';
     HttpModule,
     MulterModule.registerAsync({
       useFactory: async (): Promise<MulterModuleOptions> => ({
-        limits: {
-          fileSize: 5000000, // 5MB
-          files: 1
-        },
-        fileFilter: (request: Request, file: Express.Multer.File, callback: any): void => {
-          const mimeList: string[] = ['image/jpeg', 'image/jpg', 'image/png'];
-
-          if (mimeList.includes(file.mimetype)) {
-            callback(null, true);
-          } else {
-            const errorBody: any = {
-              statusCode: 400,
-              message: 'File type is not supported'
-            };
-
-            callback(new BadRequestException(errorBody), false);
-          }
-        },
         storage: diskStorage({
           destination: (request: Request, file: Express.Multer.File, callback: any): void => {
-            const tempPath: string = './upload/images/temp';
-
-            if (!existsSync(tempPath)) {
-              mkdirSync(tempPath, {
-                recursive: true
-              });
-            }
-
-            callback(null, tempPath);
+            callback(null, './upload/images/temp');
           },
           filename: (request: Request, file: Express.Multer.File, callback: any): void => {
-            const parsedPath: ParsedPath = parse(file.originalname);
-
-            callback(null, crypto.randomUUID() + parsedPath.ext);
+            callback(null, crypto.randomUUID() + parse(file.originalname).ext);
           }
         })
       })

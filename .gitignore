@@ -1,7 +1,14 @@
+# upload
+
+upload/**
+!upload/**/.gitkeep
+
+#/upload/**
+#!**/.gitkeep
+
 # compiled output
 /dist
 /node_modules
-/upload
 
 # Logs
 logs
