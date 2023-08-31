@@ -2,12 +2,11 @@
 
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { PrismaService } from '../core';
+import { PrismaService, ImageService } from '../core';
 import { Prisma, User } from '@prisma/client';
 import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
 import { hash } from 'bcryptjs';
 import { MailerService } from '@nestjs-modules/mailer';
-import { stat, unlink } from 'fs';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -15,7 +14,8 @@ export class UserService {
   constructor(
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
-    private readonly mailerService: MailerService
+    private readonly mailerService: MailerService,
+    private readonly imageService: ImageService
   ) {}
 
   async create(request: Request, userCreateDto: UserCreateDto): Promise<User> {
@@ -185,7 +185,7 @@ export class UserService {
   }
 
   async update(request: Request, id: number, userUpdateDto: UserUpdateDto): Promise<User> {
-    const { newPassword, newEmail, ...userUpdateDtoData } = userUpdateDto;
+    const { newPassword, newEmail, avatar, ...userUpdateDtoData } = userUpdateDto;
 
     const userUpdateArgs: Prisma.UserUpdateArgs = {
       select: this.prismaService.setUserSelect(),
@@ -227,26 +227,16 @@ export class UserService {
       };
     }
 
+    /** Update avatar image */
+
+    if (!!avatar) {
+      userUpdateArgs.data = {
+        ...userUpdateArgs.data,
+        avatar: await this.imageService.getWebp(avatar)
+      };
+    }
+
     return this.prismaService.user.update(userUpdateArgs).then((user: User) => {
-      if (userUpdateDtoData.hasOwnProperty('avatar')) {
-        const avatar: string = userCurrent.avatar?.split('/').pop();
-        const avatarPath: string = './upload/avatars/' + avatar;
-
-        // TODO: add log
-
-        stat(avatarPath, (error: NodeJS.ErrnoException | null) => {
-          if (!!error) {
-            console.log(error);
-          } else {
-            unlink(avatarPath, (error: NodeJS.ErrnoException | null) => {
-              if (!!error) {
-                console.log(error);
-              }
-            });
-          }
-        });
-      }
-
       if (!!newPassword) {
         this.mailerService.sendMail({
           to: user.email,
@@ -269,6 +259,11 @@ export class UserService {
             host: this.configService.get('APP_SITE_ORIGIN')
           }
         });
+      }
+
+      if (!!avatar) {
+        // TODO: complete it
+        this.imageService.test(avatar);
       }
 
       return user;

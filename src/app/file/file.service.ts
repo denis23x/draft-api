@@ -15,11 +15,15 @@ export class FileService {
     private readonly httpService: HttpService
   ) {}
 
-  // prettier-ignore
-  async create(request: Request, file: Express.Multer.File): Promise<Express.Multer.File> {
+  async create(request: Request, file: Express.Multer.File): Promise<Partial<Express.Multer.File>> {
+    const { filename, mimetype, path } = file;
+
+    const absolutePath: string = path.replace('upload', this.configService.get('APP_ORIGIN'));
+
     return {
-      ...file,
-      path: file.path.replace('upload', this.configService.get('APP_ORIGIN'))
+      mimetype,
+      filename,
+      path: absolutePath
     };
   }
 

@@ -2,9 +2,7 @@
 
 import {
   Controller,
-  FileTypeValidator,
   Get,
-  MaxFileSizeValidator,
   ParseFilePipe,
   Post,
   Query,
@@ -30,14 +28,6 @@ import { FileDto, FileProxyGetOneDto } from './dto';
 import { ParseFileOptions } from '@nestjs/common/pipes/file/parse-file-options.interface';
 
 export const parseFileOptions: ParseFileOptions = {
-  validators: [
-    new FileTypeValidator({
-      fileType: '.(png|jpeg|jpg)'
-    }),
-    new MaxFileSizeValidator({
-      maxSize: 5000000
-    })
-  ],
   fileIsRequired: true
 };
 
@@ -71,7 +61,7 @@ export class FileController {
   @Post('image')
   @UseInterceptors(FileInterceptor('image'))
   @UseGuards(AuthGuard('access'))
-  async create(@Req() request: Request, @UploadedFile(new ParseFilePipe(parseFileOptions)) file: Express.Multer.File): Promise<Express.Multer.File> {
+  async create(@Req() request: Request, @UploadedFile(new ParseFilePipe(parseFileOptions)) file: Express.Multer.File): Promise<Partial<Express.Multer.File>> {
     return this.uploadService.create(request, file);
   }
 

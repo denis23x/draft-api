@@ -1,6 +1,6 @@
 /** @format */
 
-import { Module } from '@nestjs/common';
+import { BadRequestException, Module } from '@nestjs/common';
 import { FileService } from './file.service';
 import { FileController } from './file.controller';
 import { HttpModule } from '@nestjs/axios';
@@ -18,6 +18,24 @@ import { parse } from 'path';
     HttpModule,
     MulterModule.registerAsync({
       useFactory: async (): Promise<MulterModuleOptions> => ({
+        limits: {
+          fileSize: 5000000, // 5MB
+          files: 1
+        },
+        fileFilter: (request: Request, file: Express.Multer.File, callback: any): void => {
+          const mimeList: string[] = ['image/jpeg', 'image/jpg', 'image/png'];
+
+          if (mimeList.includes(file.mimetype)) {
+            callback(null, true);
+          } else {
+            const errorBody: any = {
+              statusCode: 400,
+              message: 'File type is not supported'
+            };
+
+            callback(new BadRequestException(errorBody), false);
+          }
+        },
         storage: diskStorage({
           destination: (request: Request, file: Express.Multer.File, callback: any): void => {
             callback(null, './upload/images/temp');
