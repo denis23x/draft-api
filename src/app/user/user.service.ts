@@ -39,7 +39,7 @@ export class UserService {
     return this.prismaService.user.create(userCreateArgs).then((user: User) => {
       this.mailerService.sendMail({
         to: user.email,
-        subject: 'Thank you for registering with us!',
+        subject: 'Thank you for joining us!',
         template: 'registration',
         context: {
           user: user,
@@ -232,7 +232,7 @@ export class UserService {
     if (!!avatar) {
       userUpdateArgs.data = {
         ...userUpdateArgs.data,
-        avatar: await this.imageService.getWebp(avatar)
+        avatar: await this.imageService.getWebpImage(avatar, 'user-avatars')
       };
     }
 
@@ -262,8 +262,7 @@ export class UserService {
       }
 
       if (!!avatar) {
-        // TODO: complete it
-        this.imageService.test(avatar);
+        this.imageService.getWebpImageRemove(userCurrent.avatar, 'user-avatars');
       }
 
       return user;

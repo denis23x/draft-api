@@ -2,17 +2,19 @@
 
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { PrismaService } from '../core';
+import { ImageService, PrismaService } from '../core';
 import { Post, Prisma } from '@prisma/client';
 import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostUpdateDto } from './dto';
-import { stat, unlink } from 'fs';
 
 @Injectable()
 export class PostService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly imageService: ImageService
+  ) {}
 
   async create(request: Request, postCreateDto: PostCreateDto): Promise<Post> {
-    const { categoryId, ...rest } = postCreateDto;
+    const { categoryId, image, ...postCreateDtoData } = postCreateDto;
 
     const postCreateArgs: Prisma.PostCreateArgs = {
       select: {
@@ -25,7 +27,7 @@ export class PostService {
         }
       },
       data: {
-        ...rest,
+        ...postCreateDtoData,
         user: {
           connect: {
             id: (request.user as any).id
@@ -38,6 +40,13 @@ export class PostService {
         }
       }
     };
+
+    if (!!image) {
+      postCreateArgs.data = {
+        ...postCreateArgs.data,
+        image: await this.imageService.getWebpImage(image, 'post-images')
+      };
+    }
 
     return this.prismaService.post.create(postCreateArgs);
   }
@@ -194,6 +203,8 @@ export class PostService {
   }
 
   async update(request: Request, id: number, postUpdateDto: PostUpdateDto): Promise<Post> {
+    const { image, ...postUpdateDtoData } = postUpdateDto;
+
     const postUpdateArgs: Prisma.PostUpdateArgs = {
       select: {
         ...this.prismaService.setPostSelect(),
@@ -207,7 +218,7 @@ export class PostService {
       where: {
         id
       },
-      data: postUpdateDto
+      data: postUpdateDtoData
     };
 
     /** Get current state for next expressions */
@@ -223,26 +234,16 @@ export class PostService {
 
     const postCurrent: Post = await this.prismaService.post.findUnique(postFindUniqueArgs);
 
+    if (!!image) {
+      postUpdateArgs.data = {
+        ...postUpdateArgs.data,
+        image: await this.imageService.getWebpImage(image, 'post-images')
+      };
+    }
+
     return this.prismaService.post.update(postUpdateArgs).then((post: Post) => {
-      if (postUpdateDto.hasOwnProperty('image')) {
-        const image: string = postCurrent.image?.split('/').pop();
-        const imagePath: string = './upload/images/' + image;
-
-        // TODO: add log
-        // Review logic because post can be updated with same image
-        // Review the same in user update
-
-        stat(imagePath, (error: NodeJS.ErrnoException | null) => {
-          if (!!error) {
-            console.log(error);
-          } else {
-            unlink(imagePath, (error: NodeJS.ErrnoException | null) => {
-              if (!!error) {
-                console.log(error);
-              }
-            });
-          }
-        });
+      if (!!image) {
+        this.imageService.getWebpImageRemove(postCurrent.image, 'post-images');
       }
 
       return post;

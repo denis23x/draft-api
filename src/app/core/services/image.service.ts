@@ -1,24 +1,24 @@
 /** @format */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { join, parse } from 'path';
-import { readFile } from 'node:fs/promises';
-import { stat, unlink } from 'fs';
+import { join, parse, ParsedPath } from 'path';
+import { readFile, unlink } from 'node:fs/promises';
 import sharp, { ResizeOptions, WebpOptions } from 'sharp';
 
 @Injectable()
 export class ImageService {
+  private readonly logger: Logger = new Logger(ImageService.name);
+  private readonly pathImages: string = join(__dirname, '../../../../upload/images');
+
   constructor(private readonly configService: ConfigService) {}
 
-  // TODO: add log
-  // TODO: remove temp
-  // TODO: remove previous
-
   // prettier-ignore
-  async getWebp(fileName: string): Promise<string> {
-    const fileTemp: string = join(__dirname, '../../../../upload/images/temp', fileName);
-    const fileWebp: string = join(__dirname, '../../../../upload/images/user-avatars', fileName.replace(parse(fileName).ext, '.webp'));
+  async getWebpImage(fileName: string, filePath: string): Promise<string> {
+    const fileNameParsed: ParsedPath = parse(fileName);
+
+    const fileTemp: string = join(this.pathImages, fileName.replace(/.*images/g, ''));
+    const fileWebp: string = join(this.pathImages, filePath, fileNameParsed.base.replace(fileNameParsed.ext, '.webp'));
 
     const buffer: Buffer = await readFile(fileTemp);
 
@@ -33,29 +33,22 @@ export class ImageService {
       effort: 4
     };
 
-    await sharp(buffer).resize(resizeOptions).webp(webpOptions).toFile(fileWebp);
+    /** Creating Webp version and remove temp file */
 
-    const webpUrl: URL = new URL(this.configService.get('APP_ORIGIN'));
+    await sharp(buffer)
+      .resize(resizeOptions)
+      .webp(webpOptions)
+      .toFile(fileWebp)
+      .then(() => unlink(fileTemp));
 
-    webpUrl.pathname = join('images/user-avatars', fileName.replace(parse(fileName).ext, '.webp'));
-
-    return webpUrl.href;
+    return fileWebp.replace(/.*upload/g, this.configService.get('APP_ORIGIN'));
   }
 
-  async test(filename: string): Promise<void> {
-    const avatar: string = filename?.split('/').pop();
-    const avatarPath: string = './upload/avatars/' + avatar;
+  async getWebpImageRemove(fileName: string, filePath: string): Promise<void> {
+    const fileNameParsed: ParsedPath = parse(fileName);
 
-    stat(avatarPath, (error: NodeJS.ErrnoException | null) => {
-      if (!!error) {
-        console.log(error);
-      } else {
-        unlink(avatarPath, (error: NodeJS.ErrnoException | null) => {
-          if (!!error) {
-            console.log(error);
-          }
-        });
-      }
-    });
+    const fileWebp: string = join(this.pathImages, filePath, fileNameParsed.base);
+
+    await unlink(fileWebp).catch((error: any) => this.logger.error(error));
   }
 }
