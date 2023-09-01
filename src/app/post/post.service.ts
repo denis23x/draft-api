@@ -258,6 +258,12 @@ export class PostService {
       }
     };
 
-    return this.prismaService.post.delete(postDeleteArgs);
+    return this.prismaService.post.delete(postDeleteArgs).then((post: Post) => {
+      if (!!post.image) {
+        this.imageService.getWebpImageRemove(post.image, 'post-images');
+      }
+
+      return post;
+    });
   }
 }

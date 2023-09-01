@@ -22,8 +22,8 @@ export const userRaw = async () => {
 
   for (let i = 0; i < 19; i++) {
     const email = faker.internet.email().toLowerCase();
-    const avatarPath = process.env.APP_ORIGIN + '/images/';
-    const avatarFile = faker.number.int({ min: 0, max: 199 }) + '.jpg';
+    const avatarPath = process.env.APP_ORIGIN + '/images/seed/';
+    const avatarFile = faker.number.int({ min: 1, max: 128 }) + '.webp';
 
     raw.push({
       name: faker.internet.userName(),

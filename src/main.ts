@@ -90,7 +90,7 @@ const bootstrap = async () => {
 
   /** SWAGGER */
 
-  const swaggerDescription: string = readFileSync('src/assets/md/swagger-ui.md', 'utf8');
+  const swaggerDescription: string = readFileSync('src/assets/markdown/swagger-readme.md', 'utf8');
   const swaggerBearer: SecuritySchemeObject = {
     type: 'http',
     scheme: 'bearer',

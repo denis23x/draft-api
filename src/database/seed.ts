@@ -16,9 +16,16 @@ const main = async () => {
   const deletePosts = prisma.post.deleteMany();
   const deleteCategories = prisma.category.deleteMany();
   const deleteSettings = prisma.settings.deleteMany();
+  const deleteFeedbacks = prisma.feedback.deleteMany();
   const deleteUsers = prisma.user.deleteMany();
 
-  await prisma.$transaction([deletePosts, deleteCategories, deleteSettings, deleteUsers]);
+  await prisma.$transaction([
+    deletePosts,
+    deleteCategories,
+    deleteSettings,
+    deleteFeedbacks,
+    deleteUsers
+  ]);
 
   /**
    * INSERT DATABASE

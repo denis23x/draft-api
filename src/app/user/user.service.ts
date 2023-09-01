@@ -277,6 +277,12 @@ export class UserService {
       }
     };
 
-    return this.prismaService.user.delete(userDeleteArgs);
+    return this.prismaService.user.delete(userDeleteArgs).then((user: User) => {
+      if (!!user.avatar) {
+        this.imageService.getWebpImageRemove(user.avatar, 'user-avatars');
+      }
+
+      return user;
+    });
   }
 }
