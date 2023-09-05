@@ -6,6 +6,7 @@ upload/**
 # compiled output
 /dist
 /node_modules
+/src/database/client
 
 # Logs
 logs
@@ -41,3 +42,4 @@ lerna-debug.log*
 
 # .env Files
 .env
+.env.yaml
