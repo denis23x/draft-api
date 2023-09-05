@@ -1,7 +1,7 @@
 /** @format */
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Category, Post, Prisma } from '@prisma/client';
+import { Category, Post, Prisma } from '../../../database/client';
 import { PrismaService } from '../../core';
 import { Request } from 'express';
 import { from, Observable, forkJoin, map } from 'rxjs';

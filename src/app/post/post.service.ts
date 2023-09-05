@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { ImageService, PrismaService } from '../core';
-import { Post, Prisma } from '@prisma/client';
+import { Post, Prisma } from '../../database/client';
 import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostUpdateDto } from './dto';
 
 @Injectable()

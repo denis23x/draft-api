@@ -1,7 +1,7 @@
 /** @format */
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User } from '../../../database/client';
 import { PrismaService } from '../../core';
 import { Request } from 'express';
 import { from, map, Observable } from 'rxjs';

@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
-import { Feedback, Prisma } from '@prisma/client';
+import { Feedback, Prisma } from '../../database/client';
 import { FeedbackCreateDto } from './dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';

@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
-import { Category, Prisma } from '@prisma/client';
+import { Category, Prisma } from '../../database/client';
 import {
   CategoryCreateDto,
   CategoryDeleteDto,

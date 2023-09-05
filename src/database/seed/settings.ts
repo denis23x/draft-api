@@ -1,6 +1,6 @@
 /** @format */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../client';
 
 const prisma = new PrismaClient();
 

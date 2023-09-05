@@ -1,6 +1,6 @@
 /** @format */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from './client';
 
 import { userRaw } from './seed/user';
 import { categoryRaw } from './seed/category';

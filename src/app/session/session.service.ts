@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from '../core';
-import { Prisma, Session } from '@prisma/client';
+import { Prisma, Session } from '../../database/client';
 
 @Injectable()
 export class SessionService {

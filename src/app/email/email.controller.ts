@@ -6,7 +6,7 @@ import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EmailConfirmationUpdateDto } from './dto';
 import { UserDto } from '../user/dto';
-import { User } from '@prisma/client';
+import { User } from '../../database/client';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Email')

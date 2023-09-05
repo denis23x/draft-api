@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { EmailConfirmationUpdateDto } from './dto';
 import { PrismaService } from '../core';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User } from '../../database/client';
 
 @Injectable()
 export class EmailService {
