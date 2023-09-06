@@ -224,7 +224,7 @@ export class AuthService {
     // TODO: enable secure and sameSite (need HTTPS)
 
     response.cookie('refresh', session.refresh, {
-      domain: this.configService.get('APP_COOKIE_DOMAIN'),
+      domain: this.configService.get('COOKIE_DOMAIN'),
       path: '/api/auth',
       signed: true,
       httpOnly: true,
@@ -260,7 +260,7 @@ export class AuthService {
     // TODO: enable secure and sameSite (need HTTPS)
 
     response.cookie('refresh', String(0), {
-      domain: this.configService.get('APP_COOKIE_DOMAIN'),
+      domain: this.configService.get('COOKIE_DOMAIN'),
       path: '/api/auth',
       signed: true,
       httpOnly: true,

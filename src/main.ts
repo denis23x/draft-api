@@ -15,6 +15,10 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import swaggerStats from 'swagger-stats';
+import { join } from 'path';
+import * as process from 'process';
+
+console.log(process.env);
 
 const bootstrap = async () => {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -85,12 +89,13 @@ const bootstrap = async () => {
 
   /** MISC */
 
-  app.use(cookieParser(configService.get('APP_COOKIE_SECRET')));
+  app.use(cookieParser(configService.get('COOKIE_SECRET')));
   app.use(compression());
 
   /** SWAGGER */
 
-  const swaggerDescription: string = readFileSync('src/assets/markdown/swagger-readme.md', 'utf8');
+  // prettier-ignore
+  const swaggerDescription: string = readFileSync(join(__dirname, 'assets/markdown/swagger-readme.md'), 'utf8');
   const swaggerBearer: SecuritySchemeObject = {
     type: 'http',
     scheme: 'bearer',
@@ -115,7 +120,9 @@ const bootstrap = async () => {
     uriPath: '/swagger/stats',
     swaggerSpec: openAPIObject,
     authentication: true,
-    onAuthenticate: (request, username: string, password: string) => username === configService.get('SWAGGER_STATS_USER') && password === configService.get('SWAGGER_STATS_PASSWORD')
+    onAuthenticate: (request, username: string, password: string) => {
+      return username === configService.get('SWAGGER_STATS_USER') && password === configService.get('SWAGGER_STATS_PASSWORD');
+    }
   }));
 
   /** https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ */
@@ -125,7 +132,7 @@ const bootstrap = async () => {
     swaggerOptions: {
       urls: [
         {
-          url: 'http://localhost:3323/swagger/docs-json',
+          url: configService.get('APP_ORIGIN') + '/swagger/docs-json',
           name: 'Draft API'
         }
       ],
@@ -162,7 +169,7 @@ const bootstrap = async () => {
 
   /** LISTEN */
 
-  app.listen(Number(configService.get('APP_PORT'))).then(() => {
+  app.listen(Number(process.env.PORT || configService.get('APP_PORT'))).then(() => {
     logger.log('Server is listening on http://localhost:3323/swagger/docs');
   });
 };

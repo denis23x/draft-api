@@ -30,7 +30,8 @@ import { FeedbackModule } from './feedback/feedback.module';
     ConfigModule.forRoot({
       envFilePath: '.env',
       cache: true,
-      expandVariables: true
+      expandVariables: true,
+      ignoreEnvFile: true
     }),
     MailerModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({

@@ -1,0 +1,71 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '--platform', 'linux/amd64',
+      '-t', 'gcr.io/$PROJECT_ID/draft-api-gcp',
+      '--cache-from', 'gcr.io/$PROJECT_ID/draft-api-gcp',
+      '.'
+    ]
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 'gcr.io/$PROJECT_ID/draft-api-gcp'
+    ]
+
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'run', 'deploy', 'instance-1',
+      '--image', 'gcr.io/$PROJECT_ID/draft-api-gcp',
+      '--region', 'asia-east1',
+      '--allow-unauthenticated',
+      '--add-cloudsql-instances', 'amiable-alcove-389317:us-central1:instance-db',
+
+      '--set-env-vars=INSTANCE_UNIX_SOCKET=/cloudsql/amiable-alcove-389317:us-central1:instance-db',
+      '--set-env-vars=INSTANCE_CONNECTION_NAME=amiable-alcove-389317:us-central1:instance-db',
+      '--set-env-vars=DB_NAME=dbname',
+      '--set-env-vars=DB_USER=test',
+      '--set-env-vars=DB_PASS=123qwe',
+
+      # Secret Manager
+
+      '--set-env-vars=COOKIE_SECRET=123',
+      '--set-env-vars=COOKIE_DOMAIN=123',
+
+      '--set-env-vars=FACEBOOK_AUTH_ID=123',
+      '--set-env-vars=FACEBOOK_AUTH_SECRET=123',
+
+      '--set-env-vars=GITHUB_AUTH_ID=123',
+      '--set-env-vars=GITHUB_AUTH_SECRET=123',
+
+      '--set-env-vars=GOOGLE_AUTH_ID=123',
+      '--set-env-vars=GOOGLE_AUTH_SECRET=123',
+
+#      '--set-env-vars="JWT_SECRET=GCP_JWT_SECRET"',
+#      '--set-env-vars="JWT_ISSUER=GCP_JWT_ISSUER"',
+#      '--set-env-vars="JWT_AUDIENCE=GCP_JWT_AUDIENCE"',
+#      '--set-env-vars="JWT_ACCESS_TTL=1800"',
+#      '--set-env-vars="JWT_REFRESH_TTL=5184000000"',
+#
+#      '--set-env-vars="SWAGGER_STATS_USER=admin"',
+#      '--set-env-vars="SWAGGER_STATS_PASSWORD=admin"',
+#
+#      '--set-env-vars="MAILER_HOST=smtp.ethereal.email"',
+#      '--set-env-vars="MAILER_PORT=587"',
+#      '--set-env-vars="MAILER_USER=kennith.kiehn@ethereal.email"',
+#      '--set-env-vars="MAILER_PASSWORD=NUw4BaaGKYuRttP8vB"',
+
+        '--set-env-vars=MYSQL_DATABASE_URL=mysql://test:123qwe@34.16.35.216:3306/dbname?socket=/cloudsql/amiable-alcove-389317:us-central1:instance-db',
+    ]
+
+#images:
+#  - 'gcr.io/$PROJECT_ID/draft-api-gcp:latest'
+
+# https://cloud.google.com/sql/docs/mysql/connect-run
+# https://cloud.google.com/sql/docs/mysql/connect-build
+
+# https://cloud.google.com/run/docs/configuring/services/environment-variables
+# https://stackoverflow.com/questions/61944660/env-step-parameter-in-cloudbuild-yaml-file-not-settings-environment-variable
