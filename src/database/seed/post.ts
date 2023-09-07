@@ -1,29 +1,30 @@
 /** @format */
 
-import { PrismaClient } from '../client';
+import { PrismaClient, Category } from '../client';
 import { faker } from '@faker-js/faker';
 
-const prisma = new PrismaClient();
+export const postRaw = async (): Promise<any> => {
+  const prisma: PrismaClient<any> = new PrismaClient();
 
-export const postRaw = async () => {
   /**
    * POST ENTITY
    * Create RAW post data
    */
 
-  const categoriesDB = await prisma.category.findMany({
+  const categoriesDB: Category[] = await prisma.category.findMany({
     include: {
       user: true
     }
   });
 
-  const raw = [];
+  const raw: any[] = [];
 
-  for (let i = 0; i < categoriesDB.length * 10; i++) {
-    const category = categoriesDB[faker.number.int({ min: 0, max: categoriesDB.length - 1 })];
+  for (let i: number = 0; i < categoriesDB.length * 10; i++) {
+    // prettier-ignore
+    const category: Category = categoriesDB[faker.number.int({ min: 0, max: categoriesDB.length - 1 })];
 
-    const imagePath = process.env.APP_ORIGIN + '/images/seed/';
-    const imageFile = faker.number.int({ min: 1, max: 128 }) + '.webp';
+    const imagePath: string = process.env.APP_ORIGIN + '/images/seed/';
+    const imageFile: string = faker.number.int({ min: 1, max: 128 }) + '.webp';
 
     raw.push({
       name: faker.music.songName(),

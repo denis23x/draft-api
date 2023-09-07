@@ -3,13 +3,13 @@
 import { hash } from 'bcryptjs';
 import { faker } from '@faker-js/faker';
 
-export const userRaw = async () => {
+export const userRaw = async (): Promise<any> => {
   /**
    * USER ENTITY
    * Create RAW user data
    */
 
-  const raw = [
+  const raw: any[] = [
     {
       name: 'moderator',
       email: 'moder@moder.com',
@@ -20,10 +20,10 @@ export const userRaw = async () => {
     }
   ];
 
-  for (let i = 0; i < 19; i++) {
-    const email = faker.internet.email().toLowerCase();
-    const avatarPath = process.env.APP_ORIGIN + '/images/seed/';
-    const avatarFile = faker.number.int({ min: 1, max: 128 }) + '.webp';
+  for (let i: number = 0; i < 19; i++) {
+    const email: string = faker.internet.email().toLowerCase();
+    const avatarPath: string = process.env.APP_ORIGIN + '/images/seed/';
+    const avatarFile: string = faker.number.int({ min: 1, max: 128 }) + '.webp';
 
     raw.push({
       name: faker.internet.userName(),

@@ -1,21 +1,21 @@
 /** @format */
 
-import { PrismaClient } from '../client';
+import { PrismaClient, User } from '../client';
 
-const prisma = new PrismaClient();
+export const settingsRaw = async (): Promise<any> => {
+  const prisma: PrismaClient<any> = new PrismaClient();
 
-export const settingsRaw = async () => {
   /**
    * SETTINGS ENTITY
    * Create RAW settings data
    */
 
-  const usersDB = await prisma.user.findMany();
+  const usersDB: User[] = await prisma.user.findMany();
 
-  const raw = [];
+  const raw: any[] = [];
 
-  for (let i = 0; i < usersDB.length; i++) {
-    const user = usersDB[i];
+  for (let i: number = 0; i < usersDB.length; i++) {
+    const user: User = usersDB[i];
 
     raw.push({
       theme: 'light',
