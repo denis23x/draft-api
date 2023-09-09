@@ -28,10 +28,17 @@ ENV APP_SITE_CORS="http://localhost:4000,http://localhost:3323"
 ENV APP_VERSION=1.0
 ENV APP_PREFIX="api"
 ENV APP_PORT=3323
-ENV APP_ENV="local"
+ENV APP_ENV="cloud"
 ENV APP_ORIGIN="https://instance-1-xn7bqlfyzq-de.a.run.app"
 ENV APP_LOG="debug"
 ENV APP_MAIL="damage.23x@gmail.com"
+
+# https://console.cloud.google.com
+
+ENV GCLOUD_PROJECT="amiable-alcove-389317"
+
+ENV GCS_KEYFILE=".gcp.json"
+ENV GCS_BUCKET="draft-api-bucket"
 
 CMD ["npx", "ts-node", "seed.ts"]
 

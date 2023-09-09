@@ -1,9 +1,9 @@
-# upload
+# Upload
 upload/**
 !upload/**/.gitkeep
 !upload/seed
 
-# compiled output
+# Compiled Output
 /dist
 /node_modules
 /src/database/client
@@ -43,3 +43,6 @@ lerna-debug.log*
 # .env Files
 .env
 .env.yaml
+
+# Secret Files
+.gcp.json

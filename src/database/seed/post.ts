@@ -17,20 +17,31 @@ export const postRaw = async (): Promise<any> => {
     }
   });
 
+  // prettier-ignore
+  const imagePathCloud: string[] = [process.env.GCS_ORIGIN, process.env.GCS_BUCKET, 'upload', 'images', 'seed'];
+  const imagePathLocal: string[] = [process.env.APP_ORIGIN, 'images', 'seed'];
+
+  const imagePathMap: any = {
+    cloud: imagePathCloud,
+    local: imagePathLocal
+  };
+
+  const imagePath: string = imagePathMap[process.env.APP_ENV].join('/');
+  const imageFile = (): string => {
+    return [imagePath, faker.number.int({ min: 1, max: 128 }) + '.webp'].join('/');
+  };
+
   const raw: any[] = [];
 
   for (let i: number = 0; i < categoriesDB.length * 10; i++) {
-    // prettier-ignore
-    const category: Category = categoriesDB[faker.number.int({ min: 0, max: categoriesDB.length - 1 })];
-
-    const imagePath: string = process.env.APP_ORIGIN + '/images/seed/';
-    const imageFile: string = faker.number.int({ min: 1, max: 128 }) + '.webp';
+    const categoryIndex: number = faker.number.int({ min: 0, max: categoriesDB.length - 1 });
+    const category: Category = categoriesDB[categoryIndex];
 
     raw.push({
       name: faker.music.songName(),
       description: faker.lorem.sentence(),
       markdown: faker.lorem.paragraphs(10),
-      image: faker.datatype.boolean() ? imagePath + imageFile : null,
+      image: faker.datatype.boolean() ? imageFile() : null,
       userId: category.userId,
       categoryId: category.id
     });
