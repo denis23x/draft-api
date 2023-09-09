@@ -5,13 +5,11 @@ WORKDIR /usr/src/app
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node .npmrc ./
 
+RUN npx prisma generate
 RUN npm ci
 RUN npm rebuild --arch=arm64 --platform=linuxmusl sharp
 
 COPY --chown=node:node . .
-
-#RUN npx prisma validate
-RUN npx prisma generate
 
 USER node
 

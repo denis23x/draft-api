@@ -1,3 +1,5 @@
+.PHONY: up down build rm migrate generate validate studio deploy
+
 up:
 	docker-compose up --remove-orphans
 down:
@@ -6,15 +8,7 @@ build:
 	docker build -t draft-api:latest .
 rm:
 	docker rm -f app-api app-mysql
-migrate:
-	docker exec -it app-api sh -c 'npx prisma migrate dev'
-generate:
-	docker exec -it app-api sh -c 'npx prisma generate'
-validate:
-	docker exec -it app-api sh -c 'npx prisma validate'
-seed:
-	docker exec -it app-api sh -c 'npx prisma db seed'
-studio:
-	docker exec -it app-api sh -c 'npx prisma studio'
+exec:
+	docker exec -it app-api sh
 deploy:
 	gcloud builds submit
