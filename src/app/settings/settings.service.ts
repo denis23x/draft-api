@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { SettingsUpdateDto } from './dto';
 import { PrismaService } from '../core';
-import { Prisma, Settings } from '../../database/client';
+import { Prisma, Settings } from '@database/client';
 
 @Injectable()
 export class SettingsService {

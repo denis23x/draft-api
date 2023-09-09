@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService, ImageService } from '../core';
-import { Prisma, User } from '../../database/client';
+import { Prisma, User } from '@database/client';
 import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
 import { hash } from 'bcryptjs';
 import { MailerService } from '@nestjs-modules/mailer';

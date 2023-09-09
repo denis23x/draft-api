@@ -1,7 +1,6 @@
 /** @format */
 
 import { PrismaClient } from './client';
-
 import { userRaw } from './seed/user';
 import { categoryRaw } from './seed/category';
 import { settingsRaw } from './seed/settings';

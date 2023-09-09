@@ -5,7 +5,7 @@ import { SettingsService } from './settings.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SettingsDto, SettingsUpdateDto } from './dto';
-import { Settings } from '../../database/client';
+import { Settings } from '@database/client';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Settings')

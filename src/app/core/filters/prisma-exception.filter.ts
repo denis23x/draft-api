@@ -3,7 +3,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, Logger } from '@nestjs/common';
 import { Response } from 'express';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces/features/arguments-host.interface';
-import { Prisma } from '../../../database/client';
+import { Prisma } from '@database/client';
 import { ConfigService } from '@nestjs/config';
 import { AbstractHttpAdapter, HttpAdapterHost } from '@nestjs/core';
 

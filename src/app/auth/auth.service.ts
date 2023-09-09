@@ -4,7 +4,7 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { compare } from 'bcryptjs';
 import { Request, Response } from 'express';
 import { FingerprintDto, LoginDto, LogoutDto, TokenDto } from './dto';
-import { Prisma, Session, User } from '../../database/client';
+import { Prisma, Session, User } from '@database/client';
 import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';

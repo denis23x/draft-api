@@ -16,7 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { UserGetAllDto, UserGetOneDto, UserUpdateDto, UserDto, UserCreateDto } from './dto';
 import { Request } from 'express';
-import { User } from '../../database/client';
+import { User } from '@database/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserRelationGuard } from '../auth/guards';
 

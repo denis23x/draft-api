@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto, LogoutDto, TokenDto, FingerprintDto } from './dto';
-import { User } from '../../database/client';
+import { User } from '@database/client';
 import { UserDto } from '../user/dto';
 import {
   ApiBearerAuth,

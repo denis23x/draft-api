@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordCheckGetDto, PasswordResetGetDto, PasswordResetUpdateDto } from './dto';
 import { PrismaService } from '../core';
-import { Prisma, User } from '../../database/client';
+import { Prisma, User } from '@database/client';
 import { compare, hash } from 'bcryptjs';
 
 @Injectable()

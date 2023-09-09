@@ -23,7 +23,7 @@ import {
   CategoryUpdateDto
 } from './dto';
 import { Request } from 'express';
-import { Category } from '../../database/client';
+import { Category } from '@database/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CategoryRelationGuard } from '../auth/guards';
 

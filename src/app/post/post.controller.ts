@@ -16,7 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { PostService } from './post.service';
 import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostDto, PostUpdateDto } from './dto';
 import { Request } from 'express';
-import { Post as PostModel } from '../../database/client';
+import { Post as PostModel } from '@database/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PostRelationGuard } from '../auth/guards';
 

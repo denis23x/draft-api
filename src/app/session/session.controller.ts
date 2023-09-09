@@ -5,7 +5,7 @@ import { SessionService } from './session.service';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SessionDto } from './dto';
-import { Session } from '../../database/client';
+import { Session } from '@database/client';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Sessions')
