@@ -47,7 +47,7 @@ export class EmailService {
                   subject: 'Confirm your email address',
                   template: 'email-confirmation',
                   context: {
-                    host: this.configService.get('APP_SITE_ORIGIN'),
+                    host: this.configService.get('APP_ORIGIN_FRONTEND'),
                     token
                   }
                 })

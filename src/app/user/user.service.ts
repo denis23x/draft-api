@@ -43,7 +43,7 @@ export class UserService {
         template: 'registration',
         context: {
           user: user,
-          host: this.configService.get('APP_SITE_ORIGIN')
+          host: this.configService.get('APP_ORIGIN_FRONTEND')
         }
       });
 
@@ -244,7 +244,7 @@ export class UserService {
           template: 'password-changed',
           context: {
             user: user,
-            host: this.configService.get('APP_SITE_ORIGIN')
+            host: this.configService.get('APP_ORIGIN_FRONTEND')
           }
         });
       }
@@ -256,7 +256,7 @@ export class UserService {
           template: 'email-changed',
           context: {
             user: user,
-            host: this.configService.get('APP_SITE_ORIGIN')
+            host: this.configService.get('APP_ORIGIN_FRONTEND')
           }
         });
       }

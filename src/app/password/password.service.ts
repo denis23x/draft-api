@@ -73,7 +73,7 @@ export class PasswordService {
       subject: 'Forgot your password?',
       template: 'password-reset',
       context: {
-        host: this.configService.get('APP_SITE_ORIGIN'),
+        host: this.configService.get('APP_ORIGIN_FRONTEND'),
         token: await this.jwtService.signAsync({}, {
           expiresIn: Number(this.configService.get('JWT_ACCESS_TTL')),
           subject: String(user.id),
@@ -118,7 +118,7 @@ export class PasswordService {
           subject: 'Your password has been changed',
           template: 'password-changed',
           context: {
-            host: this.configService.get('APP_SITE_ORIGIN')
+            host: this.configService.get('APP_ORIGIN_FRONTEND')
           }
         });
 

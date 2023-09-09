@@ -200,7 +200,7 @@ export class AuthService {
       const user: User = await this.prismaService.user.upsert(userUpsertArgs);
 
       const getUrl = (): string => {
-        const url: URL = new URL(this.configService.get('APP_SITE_ORIGIN'));
+        const url: URL = new URL(this.configService.get('APP_ORIGIN_FRONTEND'));
         const urlSearchParams: URLSearchParams = new URLSearchParams([
           ['email', user.email],
           [socialId, user[socialId]]

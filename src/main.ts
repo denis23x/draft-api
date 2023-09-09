@@ -63,7 +63,7 @@ const bootstrap = async () => {
 
   app.enableCors({
     // prettier-ignore
-    origin: [configService.get('APP_SITE_ORIGIN'), ...configService.get('APP_SITE_CORS').split(',')],
+    origin: [configService.get('APP_ORIGIN_FRONTEND'), ...configService.get('APP_ORIGIN_CORS').split(',')],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,

@@ -36,7 +36,7 @@ export class FeedbackService {
           subject: 'Valuable insights await you!',
           template: 'feedback',
           context: {
-            host: this.configService.get('APP_SITE_ORIGIN'),
+            host: this.configService.get('APP_ORIGIN_FRONTEND'),
             feedback
           }
         })
