@@ -14,11 +14,22 @@ steps:
       '--image', '${_IMAGE_NAME}',
       '--region', '${_REGION}',
       '--project', '${PROJECT_ID}',
+      '--max-retries', '1',
       '--set-cloudsql-instances', '${_MYSQL_INSTANCE}',
 
-      # Secret Manager
+      # APP ENV
+
+      '--set-secrets=APP_ORIGIN=APP_ORIGIN:latest',
+      '--set-secrets=APP_ENV=APP_ENV:latest',
+
+      # MySQL
 
       '--set-secrets=MYSQL_DATABASE_URL=MYSQL_DATABASE_URL:latest',
+
+      # BUCKET
+
+      '--set-secrets=GCS_BUCKET=GCS_BUCKET:latest',
+      '--set-env-vars=GCS_ORIGIN=https://storage.googleapis.com',
     ]
 
 substitutions:

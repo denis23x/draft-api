@@ -3,6 +3,17 @@
 import { PrismaClient, Category } from '../client';
 import { faker } from '@faker-js/faker';
 
+/** TS Cloud Issue */
+
+declare const process: {
+  env: {
+    APP_ENV: 'local' | 'cloud';
+    APP_ORIGIN: string;
+    GCS_ORIGIN: string;
+    GCS_BUCKET: string;
+  };
+};
+
 export const postRaw = async (): Promise<any> => {
   const prisma: PrismaClient<any> = new PrismaClient();
 

@@ -4,6 +4,17 @@ import { hash } from 'bcryptjs';
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '../client';
 
+/** TS Cloud Issue */
+
+declare const process: {
+  env: {
+    APP_ENV: 'local' | 'cloud';
+    APP_ORIGIN: string;
+    GCS_ORIGIN: string;
+    GCS_BUCKET: string;
+  };
+};
+
 export const userRaw = async (): Promise<any> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const prisma: PrismaClient<any> = new PrismaClient();
