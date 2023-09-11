@@ -15,8 +15,9 @@ import {
   ApiTags,
   IntersectionType
 } from '@nestjs/swagger';
+import { ResponseDecoratorOptions } from '@nestjs/common/decorators/http/route-params.decorator';
 
-export const responseOptions = {
+export const responseOptions: ResponseDecoratorOptions = {
   passthrough: true
 };
 

@@ -1,11 +1,11 @@
 steps:
-#  # Build the container image
-#  - name: 'gcr.io/cloud-builders/docker'
-#    args: ['build', '--platform', 'linux/amd64', '--tag', '${_IMAGE_NAME}', '--cache-from', '${_IMAGE_NAME}', '.']
-#
-#  # Push the container image to Container Registry
-#  - name: 'gcr.io/cloud-builders/docker'
-#    args: ['push', '${_IMAGE_NAME}']
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '--platform', 'linux/amd64', '--tag', '${_IMAGE_NAME}', '--cache-from', '${_IMAGE_NAME}', '.']
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_IMAGE_NAME}']
 
   # Deploy container image to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -16,35 +16,68 @@ steps:
       '--allow-unauthenticated',
       '--add-cloudsql-instances', '${_MYSQL_INSTANCE}',
 
-      # Secret Manager
+      # APP ENV
 
-      '--set-env-vars=COOKIE_SECRET=secret',
-      '--set-env-vars=COOKIE_DOMAIN=localhost',
+      '--set-secrets=APP_ORIGIN_CORS=APP_ORIGIN_CORS:latest',
+      '--set-secrets=APP_ORIGIN_FRONTEND=APP_ORIGIN_FRONTEND:latest',
+      '--set-secrets=APP_ORIGIN=APP_ORIGIN:latest',
 
-      '--update-secrets=FACEBOOK_AUTH_ID=FACEBOOK_AUTH_ID:latest',
-      '--update-secrets=FACEBOOK_AUTH_SECRET=FACEBOOK_AUTH_SECRET:latest',
+      '--set-secrets=APP_VERSION=APP_VERSION:latest',
+      '--set-secrets=APP_PREFIX=APP_PREFIX:latest',
+      '--set-secrets=APP_ENV=APP_ENV:latest',
+      '--set-secrets=APP_LOG=APP_LOG:latest',
+      '--set-secrets=APP_MAIL=APP_MAIL:latest',
 
-      '--update-secrets=GITHUB_AUTH_ID=GITHUB_AUTH_ID:latest',
-      '--update-secrets=GITHUB_AUTH_SECRET=GITHUB_AUTH_SECRET:latest',
+      '--set-env-vars=APP_CACHE_TTL=10',
+      '--set-env-vars=APP_CACHE_MAX=200',
 
-      '--update-secrets=GOOGLE_AUTH_ID=GOOGLE_AUTH_ID:latest',
-      '--update-secrets=GOOGLE_AUTH_SECRET=GOOGLE_AUTH_SECRET:latest',
+      '--set-env-vars=APP_THROTTLER_TTL=60',
+      '--set-env-vars=APP_THROTTLER_LIMIT=120',
 
-      '--update-secrets=JWT_SECRET=JWT_SECRET:latest',
-      '--update-secrets=JWT_ISSUER=JWT_ISSUER:latest',
-      '--update-secrets=JWT_AUDIENCE=JWT_AUDIENCE:latest',
-      '--update-secrets=JWT_ACCESS_TTL=JWT_ACCESS_TTL:latest',
-      '--update-secrets=JWT_REFRESH_TTL=JWT_REFRESH_TTL:latest',
+      # SOCIAL
 
-      '--update-secrets=SWAGGER_STATS_USER=SWAGGER_STATS_USER:latest',
-      '--update-secrets=SWAGGER_STATS_PASSWORD=SWAGGER_STATS_PASSWORD:latest',
+      '--set-secrets=COOKIE_SECRET=COOKIE_SECRET:latest',
+      '--set-secrets=COOKIE_DOMAIN=COOKIE_DOMAIN:latest',
+
+      '--set-secrets=FACEBOOK_AUTH_ID=FACEBOOK_AUTH_ID:latest',
+      '--set-secrets=FACEBOOK_AUTH_SECRET=FACEBOOK_AUTH_SECRET:latest',
+
+      '--set-secrets=GITHUB_AUTH_ID=GITHUB_AUTH_ID:latest',
+      '--set-secrets=GITHUB_AUTH_SECRET=GITHUB_AUTH_SECRET:latest',
+
+      '--set-secrets=GOOGLE_AUTH_ID=GOOGLE_AUTH_ID:latest',
+      '--set-secrets=GOOGLE_AUTH_SECRET=GOOGLE_AUTH_SECRET:latest',
+
+      # JWT
+
+      '--set-secrets=JWT_SECRET=JWT_SECRET:latest',
+      '--set-secrets=JWT_ISSUER=APP_ORIGIN:latest',
+      '--set-secrets=JWT_AUDIENCE=APP_ORIGIN_FRONTEND:latest',
+      '--set-secrets=JWT_ACCESS_TTL=JWT_ACCESS_TTL:latest',
+      '--set-secrets=JWT_REFRESH_TTL=JWT_REFRESH_TTL:latest',
+
+      # SWAGGER
+
+      '--set-secrets=SWAGGER_STATS_USER=SWAGGER_STATS_USER:latest',
+      '--set-secrets=SWAGGER_STATS_PASSWORD=SWAGGER_STATS_PASSWORD:latest',
+
+      # MAILER
 
       '--set-env-vars=MAILER_HOST=smtp.ethereal.email',
       '--set-env-vars=MAILER_PORT=587',
       '--set-env-vars=MAILER_USER=kennith.kiehn@ethereal.email',
       '--set-env-vars=MAILER_PASSWORD=NUw4BaaGKYuRttP8vB',
 
-      '--update-secrets=MYSQL_DATABASE_URL=MYSQL_DATABASE_URL:latest',
+      # MySQL
+
+      '--set-secrets=MYSQL_DATABASE_URL=MYSQL_DATABASE_URL:latest',
+
+      # BUCKET
+
+      '--set-secrets=GCS_KEYFILE=GCS_KEYFILE:latest',
+      '--set-secrets=GCS_BUCKET=GCS_BUCKET:latest',
+      '--set-env-vars=GCLOUD_PROJECT=${PROJECT_ID}',
+      '--set-env-vars=GCS_ORIGIN=https://storage.googleapis.com',
     ]
 
 substitutions:

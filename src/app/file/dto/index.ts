@@ -1,4 +1,5 @@
 /** @format */
 
 export { FileDto } from './file.dto';
-export { FileProxyGetOneDto } from './file-proxy-get-one.dto';
+export { FileGetOneDto } from './file-get-one.dto';
+export { FileGetOneProxyDto } from './file-get-one-proxy.dto';

@@ -9,15 +9,16 @@ import { diskStorage } from 'multer';
 import { Request } from 'express';
 import { MulterModuleOptions } from '@nestjs/platform-express/multer/interfaces/files-upload-module.interface';
 import * as crypto from 'crypto';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { parse } from 'path';
+import MulterGoogleCloudStorage from 'multer-cloud-storage';
 
 @Module({
   imports: [
     ConfigModule,
     HttpModule,
     MulterModule.registerAsync({
-      useFactory: async (): Promise<MulterModuleOptions> => ({
+      useFactory: async (configService: ConfigService): Promise<MulterModuleOptions> => ({
         limits: {
           fileSize: 5000000, // 5MB
           files: 1
@@ -36,15 +37,26 @@ import { parse } from 'path';
             callback(new BadRequestException(errorBody), false);
           }
         },
-        storage: diskStorage({
-          destination: (request: Request, file: Express.Multer.File, callback: any): void => {
-            callback(null, './upload/images/temp');
-          },
-          filename: (request: Request, file: Express.Multer.File, callback: any): void => {
-            callback(null, crypto.randomUUID() + parse(file.originalname).ext);
-          }
-        })
-      })
+        storage: (() => {
+          const storageOptions: any = {
+            destination: (request: Request, file: Express.Multer.File, callback: any): void => {
+              callback(null, './upload/images/temp');
+            },
+            filename: (request: Request, file: Express.Multer.File, callback: any): void => {
+              callback(null, crypto.randomUUID() + parse(file.originalname).ext);
+            }
+          };
+
+          const storageMap: any = {
+            cloud: new MulterGoogleCloudStorage(storageOptions),
+            local: diskStorage(storageOptions)
+          };
+
+          return storageMap[configService.get('APP_ENV')];
+        })()
+      }),
+      imports: [ConfigModule],
+      inject: [ConfigService]
     })
   ],
   controllers: [FileController],

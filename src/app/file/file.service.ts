@@ -1,11 +1,15 @@
 /** @format */
 
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { PrismaService } from '../core';
 import { Request, Response } from 'express';
-import { FileProxyGetOneDto } from './dto';
+import { FileGetOneDto, FileGetOneProxyDto } from './dto';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { join } from 'path';
+import { createReadStream, ReadStream } from 'fs';
+import { stat } from 'fs/promises';
+import { contentType } from 'mime-types';
 
 @Injectable()
 export class FileService {
@@ -28,10 +32,33 @@ export class FileService {
   }
 
   // prettier-ignore
-  async proxyGet(request: Request, response: Response, fileProxyGetOneDto: FileProxyGetOneDto): Promise<any> {
+  async getOne(request: Request, response: Response, fileGetOneDto: FileGetOneDto): Promise<StreamableFile> {
+    const tempPath: string = '../../../upload/images/temp';
+
+    const fileMime: string | false = contentType(fileGetOneDto.filename);
+    const filePath: string = [tempPath, fileGetOneDto.filename].join('/');
+
+    return stat(join(__dirname, filePath))
+      .then(() => {
+        const readStream: ReadStream = createReadStream(join(__dirname, filePath));
+
+        response.set({
+          'Content-Type': fileMime,
+          'Content-Disposition': 'attachment; filename="' + fileGetOneDto.filename + '"'
+        });
+
+        return new StreamableFile(readStream);
+      })
+      .catch(() => {
+        throw new NotFoundException();
+      });
+  }
+
+  // prettier-ignore
+  async getOneProxy(request: Request, response: Response, fileGetOneProxyDto: FileGetOneProxyDto): Promise<any> {
     return this.httpService
       .axiosRef({
-        url: fileProxyGetOneDto.url,
+        url: fileGetOneProxyDto.url,
         method: 'GET',
         responseType: 'stream'
       })
@@ -39,15 +66,13 @@ export class FileService {
         response.status(axiosResponse.status);
         response.header({
           ...axiosResponse.headers,
-          'access-control-allow-origin': this.configService.get('APP_SITE_ORIGIN')
+          'access-control-allow-origin': this.configService.get('APP_ORIGIN_FRONTEND')
         });
 
         axiosResponse.data.pipe(response);
       })
       .catch((axiosError: any) => {
-        const { status, statusText }: any = axiosError.response;
-
-        throw new HttpException(statusText, status);
+        throw new HttpException(axiosError.response.statusText, axiosError.response.status);
       });
   }
 }

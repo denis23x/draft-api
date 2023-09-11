@@ -8,6 +8,7 @@ import {
   Query,
   Req,
   Res,
+  StreamableFile,
   UploadedFile,
   UseGuards,
   UseInterceptors
@@ -24,8 +25,13 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
-import { FileDto, FileProxyGetOneDto } from './dto';
+import { FileDto, FileGetOneDto, FileGetOneProxyDto } from './dto';
 import { ParseFileOptions } from '@nestjs/common/pipes/file/parse-file-options.interface';
+import { ResponseDecoratorOptions } from '@nestjs/common/decorators/http/route-params.decorator';
+
+export const responseOptions: ResponseDecoratorOptions = {
+  passthrough: true
+};
 
 export const parseFileOptions: ParseFileOptions = {
   fileIsRequired: true
@@ -34,7 +40,7 @@ export const parseFileOptions: ParseFileOptions = {
 @ApiTags('Files')
 @Controller('files')
 export class FileController {
-  constructor(private readonly uploadService: FileService) {}
+  constructor(private readonly fileService: FileService) {}
 
   // prettier-ignore
   @ApiOperation({
@@ -62,7 +68,22 @@ export class FileController {
   @UseInterceptors(FileInterceptor('image'))
   @UseGuards(AuthGuard('access'))
   async create(@Req() request: Request, @UploadedFile(new ParseFilePipe(parseFileOptions)) file: Express.Multer.File): Promise<Partial<Express.Multer.File>> {
-    return this.uploadService.create(request, file);
+    return this.fileService.create(request, file);
+  }
+
+  // prettier-ignore
+  @ApiOperation({
+    description: '## Get file'
+  })
+  @ApiResponse({
+    status: 200,
+    type: StreamableFile
+  })
+  @ApiBearerAuth('access')
+  @Get('image')
+  @UseGuards(AuthGuard('access'))
+  async getOne(@Req() request: Request, @Res(responseOptions) response: Response, @Query() fileGetOneDto: FileGetOneDto): Promise<StreamableFile> {
+    return this.fileService.getOne(request, response, fileGetOneDto);
   }
 
   // prettier-ignore
@@ -70,12 +91,13 @@ export class FileController {
     description: '## Get file from internet'
   })
   @ApiResponse({
-    status: 200
+    status: 200,
+    type: StreamableFile
   })
   @ApiBearerAuth('access')
   @Get('image/proxy')
   @UseGuards(AuthGuard('access'))
-  async proxyGet(@Req() request: Request, @Res() response: Response, @Query() fileProxyGetOneDto: FileProxyGetOneDto): Promise<any> {
-    return this.uploadService.proxyGet(request, response, fileProxyGetOneDto);
+  async getOneProxy(@Req() request: Request, @Res() response: Response, @Query() fileGetOneProxyDto: FileGetOneProxyDto): Promise<any> {
+    return this.fileService.getOneProxy(request, response, fileGetOneProxyDto);
   }
 }
