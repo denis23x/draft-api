@@ -70,14 +70,7 @@ steps:
 
       # MySQL
 
-      '--set-secrets=MYSQL_DATABASE_URL=MYSQL_DATABASE_URL:latest',
-
-      # BUCKET
-
-      '--set-secrets=GCS_KEYFILE=GCS_KEYFILE:latest',
-      '--set-secrets=GCS_BUCKET=GCS_BUCKET:latest',
-      '--set-env-vars=GCLOUD_PROJECT=${PROJECT_ID}',
-      '--set-env-vars=GCS_ORIGIN=https://storage.googleapis.com',
+      '--set-secrets=MYSQL_DATABASE_URL=MYSQL_DATABASE_URL:latest'
     ]
 
 substitutions:

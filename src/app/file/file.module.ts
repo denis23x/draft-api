@@ -11,7 +11,6 @@ import { MulterModuleOptions } from '@nestjs/platform-express/multer/interfaces/
 import * as crypto from 'crypto';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { parse } from 'path';
-import MulterGoogleCloudStorage from 'multer-cloud-storage';
 
 @Module({
   imports: [
@@ -37,23 +36,14 @@ import MulterGoogleCloudStorage from 'multer-cloud-storage';
             callback(new BadRequestException(errorBody), false);
           }
         },
-        storage: (() => {
-          const storageOptions: any = {
-            destination: (request: Request, file: Express.Multer.File, callback: any): void => {
-              callback(null, './upload/images/temp');
-            },
-            filename: (request: Request, file: Express.Multer.File, callback: any): void => {
-              callback(null, crypto.randomUUID() + parse(file.originalname).ext);
-            }
-          };
-
-          const storageMap: any = {
-            cloud: new MulterGoogleCloudStorage(storageOptions),
-            local: diskStorage(storageOptions)
-          };
-
-          return storageMap[configService.get('APP_ENV')];
-        })()
+        storage: diskStorage({
+          destination: (request: Request, file: Express.Multer.File, callback: any): void => {
+            callback(null, './upload/images/temp');
+          },
+          filename: (request: Request, file: Express.Multer.File, callback: any): void => {
+            callback(null, crypto.randomUUID() + parse(file.originalname).ext);
+          }
+        })
       }),
       imports: [ConfigModule],
       inject: [ConfigService]

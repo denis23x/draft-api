@@ -20,15 +20,10 @@ export class FileService {
   ) {}
 
   async create(request: Request, file: Express.Multer.File): Promise<Partial<Express.Multer.File>> {
-    const { filename, mimetype, path } = file;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { destination, path, fieldname, ...fileData } = file;
 
-    const absolutePath: string = path.replace('upload', this.configService.get('APP_ORIGIN'));
-
-    return {
-      mimetype,
-      filename,
-      path: absolutePath
-    };
+    return fileData;
   }
 
   // prettier-ignore

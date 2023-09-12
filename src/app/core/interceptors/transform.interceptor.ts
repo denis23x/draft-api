@@ -7,7 +7,7 @@ import {
   CallHandler,
   StreamableFile
 } from '@nestjs/common';
-import { filter, map, Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Response } from 'express';
 
 @Injectable()
@@ -18,11 +18,16 @@ export class TransformInterceptor implements NestInterceptor {
     const response: Response = executionContext.switchToHttp().getResponse<Response>();
 
     return callHandler.handle().pipe(
-      filter((data: any) => !(data instanceof StreamableFile)),
-      map((data: any) => ({
-        data,
-        statusCode: response.statusCode
-      }))
+      map((data: any): any => {
+        if (data instanceof StreamableFile) {
+          return data;
+        } else {
+          return {
+            data,
+            statusCode: response.statusCode
+          };
+        }
+      })
     );
   }
 }
