@@ -10,6 +10,7 @@ import { join } from 'path';
 import { createReadStream, ReadStream } from 'fs';
 import { stat } from 'fs/promises';
 import { contentType } from 'mime-types';
+import process from 'process';
 
 @Injectable()
 export class FileService {
@@ -28,14 +29,14 @@ export class FileService {
 
   // prettier-ignore
   async getOne(request: Request, response: Response, fileGetOneDto: FileGetOneDto): Promise<StreamableFile> {
-    const tempPath: string = '../../../upload/images/temp';
+    const tempPath: string = join(process.cwd(), 'upload/images/temp');
 
     const fileMime: string | false = contentType(fileGetOneDto.filename);
-    const filePath: string = [tempPath, fileGetOneDto.filename].join('/');
+    const filePath: string = join(tempPath, fileGetOneDto.filename);
 
-    return stat(join(__dirname, filePath))
+    return stat(filePath)
       .then(() => {
-        const readStream: ReadStream = createReadStream(join(__dirname, filePath));
+        const readStream: ReadStream = createReadStream(filePath);
 
         response.set({
           'Content-Type': fileMime,

@@ -10,7 +10,10 @@ import { Request } from 'express';
 import { MulterModuleOptions } from '@nestjs/platform-express/multer/interfaces/files-upload-module.interface';
 import * as crypto from 'crypto';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { parse } from 'path';
+import { join } from 'path';
+import { mkdir } from 'fs/promises';
+import { extension } from 'mime-types';
+import * as process from 'process';
 
 @Module({
   imports: [
@@ -38,10 +41,14 @@ import { parse } from 'path';
         },
         storage: diskStorage({
           destination: (request: Request, file: Express.Multer.File, callback: any): void => {
-            callback(null, './upload/images/temp');
+            const tempPath: string = join(process.cwd(), 'upload/images/temp');
+
+            mkdir(tempPath, {
+              recursive: true
+            }).then(() => callback(null, tempPath));
           },
           filename: (request: Request, file: Express.Multer.File, callback: any): void => {
-            callback(null, crypto.randomUUID() + parse(file.originalname).ext);
+            callback(null, crypto.randomUUID() + '.' + extension(file.mimetype));
           }
         })
       }),
