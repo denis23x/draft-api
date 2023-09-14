@@ -41,7 +41,7 @@ import * as process from 'process';
         },
         storage: diskStorage({
           destination: (request: Request, file: Express.Multer.File, callback: any): void => {
-            const tempPath: string = join(process.cwd(), 'upload/images/temp');
+            const tempPath: string = join(process.cwd(), 'upload/temp');
 
             mkdir(tempPath, {
               recursive: true

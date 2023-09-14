@@ -29,7 +29,7 @@ export class FileService {
 
   // prettier-ignore
   async getOne(request: Request, response: Response, fileGetOneDto: FileGetOneDto): Promise<StreamableFile> {
-    const tempPath: string = join(process.cwd(), 'upload/images/temp');
+    const tempPath: string = join(process.cwd(), 'upload/temp');
 
     const fileMime: string | false = contentType(fileGetOneDto.filename);
     const filePath: string = join(tempPath, fileGetOneDto.filename);

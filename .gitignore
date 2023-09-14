@@ -45,4 +45,4 @@ lerna-debug.log*
 .env.yaml
 
 # Secret Files
-.gcp.json
+.acr.json
