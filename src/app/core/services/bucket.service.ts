@@ -17,7 +17,7 @@ export class BucketService {
 
   constructor(private readonly configService: ConfigService) {}
 
-  async setUpload(filePath: string, fileDestination: string): Promise<string> {
+  async setUpload(filePath: string, fileDestination: string): Promise<string | null> {
     const parsedPath: ParsedPath = parse(filePath);
 
     if (this.configService.get('APP_ENV') === 'cloud') {
@@ -27,28 +27,38 @@ export class BucketService {
     return this.setUploadToDisk(parsedPath, fileDestination);
   }
 
-  async setUploadToDisk(parsedPath: ParsedPath, fileDestination: string): Promise<string> {
+  async setUploadToDisk(parsedPath: ParsedPath, fileDestination: string): Promise<string | null> {
     const diskDestination: string = join(process.cwd(), 'upload', fileDestination, parsedPath.base);
 
-    return rename(join(parsedPath.dir, parsedPath.base), diskDestination).then(() => {
-      return diskDestination.replace(/.*upload/g, this.configService.get('APP_ORIGIN'));
-    });
+    // prettier-ignore
+    return rename(join(parsedPath.dir, parsedPath.base), diskDestination)
+      .then(() => diskDestination.replace(/.*upload/g, this.configService.get('APP_ORIGIN')))
+      .catch((error: any) => {
+        this.logger.error(error);
+
+        return null;
+      });
   }
 
-  async setUploadToBucket(parsedPath: ParsedPath, fileDestination: string): Promise<string> {
+  async setUploadToBucket(parsedPath: ParsedPath, fileDestination: string): Promise<string | null> {
     const bufferPath: string = join(parsedPath.dir, parsedPath.base);
     const buffer: Buffer = await readFile(bufferPath);
 
     const bucket: Bucket = this.storage.bucket(this.storageBucketName);
     const bucketDestination: string = join('upload', fileDestination, parsedPath.base);
 
+    // prettier-ignore
     return bucket
       .file(bucketDestination)
       .save(buffer)
       .then(() => {
-        return unlink(bufferPath).then(() => {
-          return join(this.storageOrigin, this.storageBucketName, bucketDestination);
-        });
+        return unlink(bufferPath)
+          .then(() => join(this.storageOrigin, this.storageBucketName, bucketDestination))
+          .catch((error: any) => {
+            this.logger.error(error);
+
+            return null;
+          });
       });
   }
 

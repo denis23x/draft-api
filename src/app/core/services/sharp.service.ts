@@ -10,6 +10,7 @@ import process from 'process';
 export class SharpService {
   private readonly logger: Logger = new Logger(SharpService.name);
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
   async getSharp(filePath: string): Promise<sharp.Sharp> {

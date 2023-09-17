@@ -20,7 +20,7 @@ import * as process from 'process';
     ConfigModule,
     HttpModule,
     MulterModule.registerAsync({
-      useFactory: async (configService: ConfigService): Promise<MulterModuleOptions> => ({
+      useFactory: async (): Promise<MulterModuleOptions> => ({
         limits: {
           fileSize: 5000000, // 5MB
           files: 1
