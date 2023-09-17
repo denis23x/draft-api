@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { PrismaService, ImageService } from '../core';
+import { BucketService, PrismaService, SharpService } from '../core';
 import { Prisma, User } from '@database/client';
 import { UserCreateDto, UserGetAllDto, UserGetOneDto, UserUpdateDto } from './dto';
 import { hash } from 'bcryptjs';
@@ -15,7 +15,8 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly mailerService: MailerService,
-    private readonly imageService: ImageService
+    private readonly sharpService: SharpService,
+    private readonly bucketService: BucketService
   ) {}
 
   async create(request: Request, userCreateDto: UserCreateDto): Promise<User> {
@@ -232,7 +233,9 @@ export class UserService {
     if (!!avatar) {
       userUpdateArgs.data = {
         ...userUpdateArgs.data,
-        avatar: await this.imageService.getWebpImage(avatar, 'user-avatars')
+        avatar: await this.sharpService
+          .getWebpImage(avatar)
+          .then((filePath: string) => this.bucketService.setUpload(filePath, 'images/user-avatars'))
       };
     }
 
@@ -262,7 +265,7 @@ export class UserService {
       }
 
       if (!!avatar) {
-        this.imageService.getWebpImageRemove(userCurrent.avatar, 'user-avatars');
+        this.bucketService.setDelete(userCurrent.avatar, 'images/user-avatars');
       }
 
       return user;
@@ -279,7 +282,7 @@ export class UserService {
 
     return this.prismaService.user.delete(userDeleteArgs).then((user: User) => {
       if (!!user.avatar) {
-        this.imageService.getWebpImageRemove(user.avatar, 'user-avatars');
+        this.bucketService.setDelete(user.avatar, 'images/user-avatars');
       }
 
       return user;

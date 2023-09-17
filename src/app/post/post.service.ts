@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { ImageService, PrismaService } from '../core';
+import { SharpService, PrismaService, BucketService } from '../core';
 import { Post, Prisma } from '@database/client';
 import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostUpdateDto } from './dto';
 
@@ -10,7 +10,8 @@ import { PostCreateDto, PostGetAllDto, PostGetOneDto, PostUpdateDto } from './dt
 export class PostService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly imageService: ImageService
+    private readonly sharpService: SharpService,
+    private readonly bucketService: BucketService
   ) {}
 
   async create(request: Request, postCreateDto: PostCreateDto): Promise<Post> {
@@ -44,7 +45,9 @@ export class PostService {
     if (!!image) {
       postCreateArgs.data = {
         ...postCreateArgs.data,
-        image: await this.imageService.getWebpImage(image, 'post-images')
+        image: await this.sharpService
+          .getWebpImage(image)
+          .then((filePath: string) => this.bucketService.setUpload(filePath, 'images/post-images'))
       };
     }
 
@@ -237,13 +240,15 @@ export class PostService {
     if (!!image) {
       postUpdateArgs.data = {
         ...postUpdateArgs.data,
-        image: await this.imageService.getWebpImage(image, 'post-images')
+        image: await this.sharpService
+          .getWebpImage(image)
+          .then((filePath: string) => this.bucketService.setUpload(filePath, 'images/post-images'))
       };
     }
 
     return this.prismaService.post.update(postUpdateArgs).then((post: Post) => {
       if (!!image) {
-        this.imageService.getWebpImageRemove(postCurrent.image, 'post-images');
+        this.bucketService.setDelete(postCurrent.image, 'images/post-images');
       }
 
       return post;
@@ -260,7 +265,7 @@ export class PostService {
 
     return this.prismaService.post.delete(postDeleteArgs).then((post: Post) => {
       if (!!post.image) {
-        this.imageService.getWebpImageRemove(post.image, 'post-images');
+        this.bucketService.setDelete(post.image, 'images/post-images');
       }
 
       return post;
