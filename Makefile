@@ -1,4 +1,4 @@
-.PHONY: up down build rm migrate generate validate studio deploy
+.PHONY: up down build rm exec deploy
 
 up:
 	docker-compose up --remove-orphans

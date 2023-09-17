@@ -18,8 +18,6 @@ import swaggerStats from 'swagger-stats';
 import { join } from 'path';
 import * as process from 'process';
 
-console.log(process.env);
-
 const bootstrap = async () => {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true
