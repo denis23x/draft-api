@@ -10,9 +10,6 @@ import process from 'process';
 export class SharpService {
   private readonly logger: Logger = new Logger(SharpService.name);
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor() {}
-
   async getSharp(filePath: string): Promise<sharp.Sharp> {
     const buffer: Buffer = await readFile(filePath);
 
@@ -33,7 +30,7 @@ export class SharpService {
   async getWebpImage(fileName: string): Promise<string> {
     const parsedPath: ParsedPath = parse(fileName);
 
-    const fileTemp: string = join(process.cwd(), 'upload/temp', fileName);
+    const fileTemp: string = join(process.cwd(), 'upload/temp', parsedPath.base);
     const fileWebp: string = fileTemp.replace(parsedPath.ext, '.webp');
 
     await this.getSharp(fileTemp).then((sharp: sharp.Sharp) => {

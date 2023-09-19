@@ -37,7 +37,7 @@ steps:
       # SOCIAL
 
       '--set-secrets=COOKIE_SECRET=COOKIE_SECRET:latest',
-      '--set-secrets=COOKIE_DOMAIN=COOKIE_DOMAIN:latest',
+      '--set-secrets=COOKIE_DOMAIN=APP_ORIGIN_FRONTEND:latest',
 
       '--set-secrets=FACEBOOK_AUTH_ID=FACEBOOK_AUTH_ID:latest',
       '--set-secrets=FACEBOOK_AUTH_SECRET=FACEBOOK_AUTH_SECRET:latest',

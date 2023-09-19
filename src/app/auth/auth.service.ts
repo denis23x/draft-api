@@ -9,6 +9,7 @@ import { PrismaService } from '../core';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import { CookieOptions } from 'express-serve-static-core';
 
 @Injectable()
 export class AuthService {
@@ -220,17 +221,28 @@ export class AuthService {
 
   /** JWT */
 
-  async setRefresh(response: Response, session: Session): Promise<Session> {
-    // TODO: enable secure and sameSite (need HTTPS)
+  getCookieOptions(): CookieOptions {
+    const url: URL = new URL(this.configService.get('COOKIE_DOMAIN'));
 
-    response.cookie('refresh', session.refresh, {
-      domain: this.configService.get('COOKIE_DOMAIN'),
+    const cookieOptions: CookieOptions = {
+      domain: url.host,
       path: '/api/auth',
       signed: true,
-      httpOnly: true,
+      httpOnly: true
+    };
+
+    if (this.configService.get('APP_ENV') === 'cloud') {
+      cookieOptions.secure = true;
+      cookieOptions.sameSite = 'none';
+    }
+
+    return cookieOptions;
+  }
+
+  async setRefresh(response: Response, session: Session): Promise<Session> {
+    response.cookie('refresh', session.refresh, {
+      ...this.getCookieOptions(),
       expires: new Date(Number(session.expires))
-      // secure: true,
-      // sameSite: 'none'
     });
 
     return session;
@@ -257,16 +269,9 @@ export class AuthService {
   }
 
   async setUnauthorized(response: Response, session?: Session): Promise<Session> {
-    // TODO: enable secure and sameSite (need HTTPS)
-
     response.cookie('refresh', String(0), {
-      domain: this.configService.get('COOKIE_DOMAIN'),
-      path: '/api/auth',
-      signed: true,
-      httpOnly: true,
+      ...this.getCookieOptions(),
       expires: new Date()
-      // secure: true,
-      // sameSite: 'none'
     });
 
     return session;
