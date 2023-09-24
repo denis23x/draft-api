@@ -24,7 +24,7 @@ steps:
 
       '--set-secrets=APP_VERSION=APP_VERSION:latest',
       '--set-secrets=APP_PREFIX=APP_PREFIX:latest',
-      '--set-secrets=APP_ENV=APP_ENV:latest',
+      '--set-secrets=APP_STORAGE=APP_STORAGE:latest',
       '--set-secrets=APP_LOG=APP_LOG:latest',
       '--set-secrets=APP_MAIL=APP_MAIL:latest',
 

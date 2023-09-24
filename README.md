@@ -18,6 +18,14 @@ docker exec -it app-api bash
 docker exec -it app-mysql mysql -u root -p
 ```
 
+```bash
+npm install --platform=darwin --arch=arm64
+npm rebuild --arch=arm64 --platform=linuxmusl sharp
+
+// sharp-darwin-arm64v8.node
+// sharp-linuxmusl-arm64v8.node
+```
+
 ---
 
 <p align="center">

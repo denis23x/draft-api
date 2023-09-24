@@ -3,11 +3,11 @@
 import { PrismaClient, Category } from '../client';
 import { faker } from '@faker-js/faker';
 
-/** TS Cloud Issue */
+/** TS Issue */
 
 declare const process: {
   env: {
-    APP_ENV: 'local' | 'cloud';
+    APP_STORAGE: 'disk' | 'bucket';
     APP_ORIGIN: string;
     GCS_ORIGIN: string;
     GCS_BUCKET: string;
@@ -29,17 +29,17 @@ export const postRaw = async (): Promise<any> => {
   });
 
   // prettier-ignore
-  const imagePathCloud: string[] = [process.env.GCS_ORIGIN, process.env.GCS_BUCKET, 'upload', 'images', 'seed'];
-  const imagePathLocal: string[] = [process.env.APP_ORIGIN, 'images', 'seed'];
+  const imagePathBucket: string[] = ['https://firebasestorage.googleapis.com/v0/b/draft-ssr.appspot.com/o/upload%2Fseed%2F'];
+  const imagePathDisk: string[] = [process.env.APP_ORIGIN, 'images', 'seed'];
 
   const imagePathMap: any = {
-    cloud: imagePathCloud,
-    local: imagePathLocal
+    bucket: imagePathBucket,
+    disk: imagePathDisk
   };
 
-  const imagePath: string = imagePathMap[process.env.APP_ENV].join('/');
+  const imagePath: string = imagePathMap[process.env.APP_STORAGE].join('');
   const imageFile = (): string => {
-    return [imagePath, faker.number.int({ min: 1, max: 128 }) + '.webp'].join('/');
+    return [imagePath, faker.number.int({ min: 1, max: 128 }) + '.webp?alt=media'].join('');
   };
 
   const raw: any[] = [];

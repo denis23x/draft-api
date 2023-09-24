@@ -3,7 +3,7 @@
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 import { TransformInterceptor, PrismaExceptionFilter, JwtExceptionsFilter } from './app/core';
 import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import { OpenAPIObject } from '@nestjs/swagger/dist/interfaces';
@@ -16,10 +16,13 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import swaggerStats from 'swagger-stats';
 import { join } from 'path';
-import * as process from 'process';
+import express, { Express } from 'express';
+import { HttpsFunction, onRequest } from 'firebase-functions/v2/https';
+import process from 'process';
 
-const bootstrap = async () => {
-  const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
+const bootstrap = async (expressServer: Express): Promise<NestExpressApplication> => {
+  // prettier-ignore
+  const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(expressServer), {
     bufferLogs: true
   });
 
@@ -105,6 +108,7 @@ const bootstrap = async () => {
     .setDescription(swaggerDescription)
     .setVersion(configService.get('APP_VERSION'))
     .addBearerAuth(swaggerBearer, 'access')
+    .addServer(configService.get('APP_ORIGIN'))
     .build();
 
   const openAPIObject: OpenAPIObject = SwaggerModule.createDocument(app, openAPIConfig);
@@ -165,11 +169,26 @@ const bootstrap = async () => {
     }
   }));
 
-  /** LISTEN */
-
-  app.listen(Number(process.env.PORT || configService.get('APP_PORT'))).then(() => {
-    logger.log('Server is listening on http://localhost:3323/swagger/docs');
-  });
+  return app;
 };
 
-bootstrap().then(() => console.debug('OK'));
+const expressServer: Express = express();
+
+bootstrap(expressServer)
+  .then(app => {
+    if (process.env.APP_STAGE === 'production') {
+      app.init().then(() => {
+        console.log('Nest Cloud Ready');
+      });
+    }
+
+    if (process.env.APP_STAGE === 'development') {
+      app.listen(Number(process.env.APP_PORT)).then(() => {
+        // prettier-ignore
+        console.log('Server is listening on http://localhost:' + process.env.APP_PORT + '/swagger/docs');
+      });
+    }
+  })
+  .catch((error: any) => console.error('Nest broken', error));
+
+export const api: HttpsFunction = onRequest(expressServer);

@@ -4,11 +4,11 @@ import { hash } from 'bcryptjs';
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '../client';
 
-/** TS Cloud Issue */
+/** TS Issue */
 
 declare const process: {
   env: {
-    APP_ENV: 'local' | 'cloud';
+    APP_STORAGE: 'disk' | 'bucket';
     APP_ORIGIN: string;
     GCS_ORIGIN: string;
     GCS_BUCKET: string;
@@ -25,17 +25,17 @@ export const userRaw = async (): Promise<any> => {
    */
 
   // prettier-ignore
-  const avatarPathCloud: string[] = [process.env.GCS_ORIGIN, process.env.GCS_BUCKET, 'upload', 'images', 'seed'];
-  const avatarPathLocal: string[] = [process.env.APP_ORIGIN, 'images', 'seed'];
+  const avatarPathBucket: string[] = ['https://firebasestorage.googleapis.com/v0/b/draft-ssr.appspot.com/o/upload%2Fseed%2F'];
+  const avatarPathDisk: string[] = [process.env.APP_ORIGIN, 'images', 'seed'];
 
   const avatarPathMap: any = {
-    cloud: avatarPathCloud,
-    local: avatarPathLocal
+    bucket: avatarPathBucket,
+    disk: avatarPathDisk
   };
 
-  const avatarPath: string = avatarPathMap[process.env.APP_ENV].join('/');
+  const avatarPath: string = avatarPathMap[process.env.APP_STORAGE].join('');
   const avatarFile = (): string => {
-    return [avatarPath, faker.number.int({ min: 1, max: 128 }) + '.webp'].join('/');
+    return [avatarPath, faker.number.int({ min: 1, max: 128 }) + '.webp?alt=media'].join('');
   };
 
   const raw: any[] = [

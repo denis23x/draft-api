@@ -20,7 +20,7 @@ steps:
       # APP ENV
 
       '--set-secrets=APP_ORIGIN=APP_ORIGIN:latest',
-      '--set-secrets=APP_ENV=APP_ENV:latest',
+      '--set-secrets=APP_STORAGE=APP_STORAGE:latest',
 
       # MySQL
 

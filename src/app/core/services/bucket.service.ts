@@ -20,7 +20,7 @@ export class BucketService {
   async setUpload(filePath: string, fileDestination: string): Promise<string | null> {
     const parsedPath: ParsedPath = parse(filePath);
 
-    if (this.configService.get('APP_ENV') === 'cloud') {
+    if (this.configService.get('APP_STORAGE') === 'bucket') {
       return this.setUploadToBucket(parsedPath, fileDestination);
     }
 
@@ -65,7 +65,7 @@ export class BucketService {
   async setDelete(filePath: string, fileDestination: string): Promise<void> {
     const parsedPath: ParsedPath = parse(filePath);
 
-    if (this.configService.get('APP_ENV') === 'cloud') {
+    if (this.configService.get('APP_STORAGE') === 'bucket') {
       return this.setDeleteFromBucket(parsedPath, fileDestination);
     }
 

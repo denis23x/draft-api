@@ -23,12 +23,13 @@ import { LoggerModule } from 'nestjs-pino';
 import { SerializerFn } from 'pino';
 import { randomUUID } from 'crypto';
 import { FeedbackModule } from './feedback/feedback.module';
+import process from 'process';
 
 @Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: process.env.APP_ENV,
       cache: true,
       expandVariables: true,
       ignoreEnvFile: true
@@ -122,7 +123,7 @@ import { FeedbackModule } from './feedback/feedback.module';
                 level: 'error',
                 target: 'pino/file',
                 options: {
-                  destination: join(__dirname, '../logs/error.log'),
+                  destination: join(__dirname, '../../tmp/error.log'),
                   mkdir: true
                 }
               },

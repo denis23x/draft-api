@@ -231,7 +231,7 @@ export class AuthService {
       httpOnly: true
     };
 
-    if (this.configService.get('APP_ENV') === 'cloud') {
+    if (this.configService.get('APP_STAGE') === 'production') {
       cookieOptions.secure = true;
       cookieOptions.sameSite = 'none';
     }

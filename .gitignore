@@ -41,8 +41,12 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # .env Files
-.env
-.env.yaml
+.env*
 
 # Secret Files
 .acr.json
+
+# Firebase
+.firebase
+*-debug.log
+.runtimeconfig.json
